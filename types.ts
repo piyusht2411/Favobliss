@@ -93,7 +93,7 @@ export interface CartSelectedItem {
   image: string;
   name: string;
   about: string;
-  size: string;
+  size?: string;
 }
 
 export interface PriceRange {
