@@ -20,7 +20,6 @@ model User {
   orders        Order[]
   addresses     Address[]
   comments      Comment[]
-
 }
 
 model Account {
@@ -129,13 +128,12 @@ model Comment {
   @@unique([userId, productId, orderProductId])
 }
 
-
 model OrderProduct {
   id           String   @id @default(auto()) @map("_id") @db.ObjectId
   productId    String   @db.ObjectId
   name         String
   about        String
-  size         String
+  size         String?
   productImage String
   isCancelled  Boolean  @default(false)
   quantity     Int
