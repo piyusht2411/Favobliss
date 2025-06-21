@@ -1,4 +1,3 @@
-// app/api/auth/[...nextauth]/route.ts
 import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/lib/db";
@@ -11,6 +10,14 @@ export const {
   signOut,
 } = NextAuth({
   adapter: PrismaAdapter(db),
+  events: {
+    linkAccount: async ({ user, account }) => {
+      await db.user.update({
+        where: { id: user.id },
+        data: { emailVerified: new Date() },
+      });
+    },
+  },
   callbacks: {
     //@ts-ignore
     async session({ session, token }: { session: any; token: any }) {

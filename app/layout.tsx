@@ -8,6 +8,7 @@ import { Toaster } from "sonner";
 import { SessionProvider } from "next-auth/react";
 import { FlowbiteProvider } from "@/providers/flowbite";
 import Script from "next/script";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const inter = Urbanist({ subsets: ["latin"] });
 

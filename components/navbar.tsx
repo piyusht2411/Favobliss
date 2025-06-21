@@ -11,6 +11,8 @@ import { MobileNavbar } from "./mobile-nav";
 import Header from "./store/header";
 import useMediaQuery from "@/hooks/use-mediaquery";
 import HeaderMobile from "./store/HeaderMobile";
+import { SkeletonHeader } from "./SkeletonHeader";
+import { SkeletonHeaderMobile } from "./SkeletonHeaderMobile";
 
 // const font = Pacifico({
 //   weight: ["400"],
@@ -18,13 +20,18 @@ import HeaderMobile from "./store/HeaderMobile";
 // });
 
 export const Navbar = async () => {
-  const storeId = process.env.NEXT_PUBLIC_STORE_ID;
+  const storeId =
+    process.env.NEXT_PUBLIC_STORE_ID || "684315296fa373b59468f387";
   if (!storeId) {
-    console.error("Store ID is not defined");
+    console.error("Store ID is not defined", {
+      timestamp: new Date().toISOString(),
+      env: process.env.NODE_ENV,
+    });
     return (
-      <header className="shadow-neutral-100 shadow-lg border-b">
-        <div>Error: Store ID is missing</div>
-      </header>
+      <>
+        <SkeletonHeader />
+        <SkeletonHeaderMobile />
+      </>
     );
   }
   const data = await getCategories(storeId);
