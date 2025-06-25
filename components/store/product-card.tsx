@@ -150,7 +150,7 @@ export const ProductCard = ({ data }: ProductCardProps) => {
           {mrpDisplay && mrpDisplay !== priceDisplay && (
             <p className="text-sm text-zinc-500 line-through">{mrpDisplay}</p>
           )}
-          {mrpDisplay && mrpDisplay !== priceDisplay && (
+          {/* {mrpDisplay && mrpDisplay !== priceDisplay && (
             <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
               {Math.round(
                 (((selectedVariant.mrp ?? 0) - (selectedVariant.price ?? 0)) /
@@ -159,7 +159,7 @@ export const ProductCard = ({ data }: ProductCardProps) => {
               )}
               % OFF
             </span>
-          )}
+          )} */}
         </div>
 
         {/* Variant Options */}
