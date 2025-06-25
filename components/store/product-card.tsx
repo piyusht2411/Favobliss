@@ -168,9 +168,9 @@ export const ProductCard = ({ data }: ProductCardProps) => {
             {/* Color Variants */}
             {uniqueColors.length > 0 && (
               <div className="flex flex-col gap-1">
-                <span className="text-xs text-zinc-600 font-medium">
+                {/* <span className="text-xs text-zinc-600 font-medium">
                   Colors:
-                </span>
+                </span> */}
                 <div className="flex gap-2 flex-wrap">
                   {uniqueColors.map((color, index) => {
                     if (!color) return null;
@@ -200,7 +200,7 @@ export const ProductCard = ({ data }: ProductCardProps) => {
             )}
 
             {/* Size Variants */}
-            {uniqueSizes.length > 0 && (
+            {/* {uniqueSizes.length > 0 && (
               <div className="flex flex-col gap-1">
                 <span className="text-xs text-zinc-600 font-medium">
                   Sizes:
@@ -232,7 +232,7 @@ export const ProductCard = ({ data }: ProductCardProps) => {
                   })}
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         )}
 

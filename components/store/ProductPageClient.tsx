@@ -32,7 +32,7 @@ export const ProductPageContent = ({
             <div>
               <Gallery images={currentVariant.images} />
             </div>
-            <div className="mt-10 sm:mt-16 lg:mt-0 md:px-24 lg:px-0 flex flex-col gap-y-5 md:max-h-screen md:overflow-y-scroll">
+            <div className="mt-10 sm:mt-16 lg:mt-0 md:px-24 lg:px-0 flex flex-col gap-y-5">
               <ProductDetails
                 data={product}
                 defaultVariant={product.variants[0]}

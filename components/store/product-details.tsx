@@ -313,13 +313,13 @@ export const ProductDetails = ({
             {availableColors.length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold text-black text-base">
+                  {/* <h4 className="font-semibold text-black text-base">
                     Color:{" "}
                     {selectedColor
                       ? availableColors.find((c) => c.id === selectedColor)
                           ?.color?.name ?? "Unknown"
                       : "Select Color"}
-                  </h4>
+                  </h4> */}
                   <span className="text-sm text-gray-500">
                     {availableColors.length} available
                   </span>
@@ -400,13 +400,13 @@ export const ProductDetails = ({
             {availableSizes.length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold text-black text-base">
+                  {/* <h4 className="font-semibold text-black text-base">
                     Size:{" "}
                     {selectedSize
                       ? availableSizes.find((s) => s.id === selectedSize)?.size
                           ?.value
                       : "Select Size"}
-                  </h4>
+                  </h4> */}
                 </div>
                 <div className="flex flex-wrap gap-3">
                   {availableSizes.map(({ id, size }) => {
@@ -470,7 +470,7 @@ export const ProductDetails = ({
       </div>
 
       {/* Sticky Bottom Bar */}
-      <div
+      {/* <div
         className={cn(
           "fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out",
           showStickyBar
@@ -480,7 +480,6 @@ export const ProductDetails = ({
       >
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-4">
-            {/* Product info */}
             <div className="hidden md:flex items-center gap-3 min-w-0 flex-1">
               <div className="flex-shrink-0">
                 {selectedVariant.images?.[0]?.url && (
@@ -508,13 +507,12 @@ export const ProductDetails = ({
               </div>
             </div>
 
-            {/* Action buttons */}
             <div className="flex-shrink-0 w-full md:w-auto">
               <ActionButtons className="w-full md:w-80" isSticky={true} />
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </>
   );
 };
