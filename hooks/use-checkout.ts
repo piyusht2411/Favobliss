@@ -3,60 +3,75 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 interface UseCheckOutProps {
-    checkOutItems : CartSelectedItem[],
-    selectItem : ( data : CartSelectedItem ) => void;
-    updateItem : ( id : string, quantity : number ) => void;
-    removeSelectedItems : (id : string) => void;
+  checkOutItems: CartSelectedItem[];
+  selectItem: (data: CartSelectedItem) => void;
+  updateItem: (variantId: string, quantity: number) => void;
+  removeSelectedItems: (variantId: string) => void;
+  setCheckOutItems: (items: CartSelectedItem[]) => void; // Added for CartPage sync
+  clearCheckOutItems: () => void;
 }
 
 export const useCheckout = create(
-    persist<UseCheckOutProps>((set, get)=>({
-        checkOutItems : [],
-        selectItem : (data : CartSelectedItem) => {
-            const currentItems = get().checkOutItems;
+  persist<UseCheckOutProps>(
+    (set, get) => ({
+      checkOutItems: [],
+      selectItem: (data: CartSelectedItem) => {
+        const currentItems = get().checkOutItems;
+        // Check if the item is already selected by variantId
+        const isAlreadyExist = currentItems.find(
+          (item) => item.variantId === data.variantId
+        );
 
-            // Checking if the item is already selected
-            const isAlreadyExist = currentItems.find((item) => item.id == data.id)
+        // If item exists, remove it (toggle off)
+        if (isAlreadyExist) {
+          set({
+            checkOutItems: [
+              ...currentItems.filter(
+                (item) => item.variantId !== data.variantId
+              ),
+            ],
+          });
+        }
+        // Otherwise, add the item
+        else {
+          set({
+            checkOutItems: [...currentItems, data],
+          });
+        }
+      },
+      updateItem: (variantId: string, quantity: number) => {
+        const currentItems = get().checkOutItems;
+        const isExist = currentItems.find(
+          (item) => item.variantId === variantId
+        );
 
-            // If item already exists then remove it 
-            if (isAlreadyExist) {
-                set({
-                    checkOutItems : [
-                        ...currentItems.filter((item)=> item.id !== data.id)
-                    ]
-                });
+        if (isExist) {
+          const updatedItems = currentItems.map((item) => {
+            if (item.variantId === variantId) {
+              return {
+                ...item,
+                quantity,
+              };
             }
-            // Otherwise add the item
-            else {
-                set ({
-                    checkOutItems : [...currentItems, data]
-                });
-            }
-        },
-        updateItem : ( id: string, quantity : number ) => {
-            const currentItems = get().checkOutItems;
-            const isExist = currentItems.find((item) => item.id == id);
-            
-            if ( isExist ) {
-                const updatedItems = currentItems.map((item) => {
-                    if ( item.id === id ) return {
-                        ...item,
-                        quantity
-                    }
-                    else return item;
-                });
-
-                set({ checkOutItems : updatedItems });
-            }
-
-        },
-        removeSelectedItems : (id : string) => set({
-            checkOutItems : [
-                ...get().checkOutItems.filter((item) => item.id !== id)
-            ]
-        })
-    }), {
-        name : "store-checkout-items",
-        storage : createJSONStorage(()=>localStorage)
-    })
-)
+            return item;
+          });
+          set({ checkOutItems: updatedItems });
+        }
+      },
+      removeSelectedItems: (variantId: string) =>
+        set({
+          checkOutItems: [
+            ...get().checkOutItems.filter(
+              (item) => item.variantId !== variantId
+            ),
+          ],
+        }),
+      setCheckOutItems: (items) => set({ checkOutItems: items }),
+      clearCheckOutItems: () => set({ checkOutItems: [] }),
+    }),
+    {
+      name: "store-checkout-items",
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);

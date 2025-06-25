@@ -21,7 +21,12 @@ export const ProductDescription = ({ data }: ProductDescriptionProps) => {
   const { addItem } = useCart();
 
   const onHandleCart = async () => {
-    addItem({ ...data, checkOutQuantity: 1 });
+    const selectedVariant =
+      data.variants && data.variants.length > 0 ? data.variants[0] : undefined;
+    if (!selectedVariant) {
+      return;
+    }
+    addItem({ ...data, checkOutQuantity: 1, selectedVariant });
   };
 
   return (

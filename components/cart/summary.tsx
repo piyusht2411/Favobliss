@@ -20,15 +20,15 @@ export const Summary = () => {
   const searchParams = useSearchParams();
   const session = useSession();
   const { address } = useCheckoutAddress();
-  const { removeAll, removeItem } = useCart();
+  const { removeAll } = useCart();
 
-  const { checkOutItems } = useCheckout();
+  const { checkOutItems, clearCheckOutItems } = useCheckout();
   const { onOpen } = usePaymentSuccessErrorModal();
   const [loading, setLoading] = useState(false);
 
   const getTotalAmount = () => {
     const amount = checkOutItems.reduce((total, item) => {
-      return total + item.price * item.quantity;
+      return total + (item.price || 0) * item.quantity;
     }, 0);
     return amount;
   };
@@ -47,6 +47,7 @@ export const Summary = () => {
       updateOrder(orderId!).then(() => {
         onOpen("success");
         removeAll();
+        clearCheckOutItems();
         router.push("/orders");
       });
     }
@@ -75,7 +76,21 @@ export const Summary = () => {
 
       setLoading(true);
       const order = await axios.post(`/api/v1/order`, {
-        products: checkOutItems,
+        products: checkOutItems.map((item) => ({
+          id: item.id,
+          variantId: item.variantId,
+          quantity: item.quantity,
+          price: item.price,
+          size: item.size || "",
+          color: item.color || "",
+          image: item.image,
+          name: item.name,
+          about: JSON.stringify({
+            variantId: item.variantId,
+            color: item.color,
+            price: item.price,
+          }), // Encode variant details in about
+        })),
         address,
       });
 
@@ -85,7 +100,7 @@ export const Summary = () => {
         `${process.env.NEXT_PUBLIC_API_URL}/checkout`,
         {
           products: checkOutItems.map((item) => ({
-            id: item.id,
+            id: item.variantId, // Use variantId
             quantity: item.quantity,
           })),
           orderId: orderId,
@@ -106,7 +121,6 @@ export const Summary = () => {
       let addressJsonString;
       try {
         addressJsonString = JSON.stringify(addressForNotes);
-        // Validate the JSON string by parsing it back
         JSON.parse(addressJsonString);
       } catch (error) {
         console.error("Failed to stringify address:", error);

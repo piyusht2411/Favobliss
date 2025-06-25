@@ -6,46 +6,61 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { formatter } from "@/lib/utils";
-import { useCart } from "@/hooks/use-cart";
-import { useCheckout } from "@/hooks/use-checkout";
 import { useEffect, useState } from "react";
 import { QuantityModal } from "../modals/quantity-modal";
+import { useCart } from "@/hooks/use-cart";
+import { useCheckout } from "@/hooks/use-checkout";
 
 interface CartItemProps {
-  data: Product;
+  data: Product & { checkOutQuantity: number; selectedVariant: any };
 }
 
 export const CartItem = ({ data }: CartItemProps) => {
-  const { items, removeItem } = useCart();
+  const { items, removeItem, updateQuantity } = useCart();
   const { checkOutItems, selectItem, removeSelectedItems } = useCheckout();
 
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const [quantity, setQuantity] = useState(
-    items.find((item) => item.id === data.id)?.checkOutQuantity || 1
+    items.find((item) => item.selectedVariant.id === data.selectedVariant.id)
+      ?.checkOutQuantity || 1
   );
 
   const handleSelectItem = () => {
     const formattedData: CartSelectedItem = {
       id: data.id,
-      price: data.price,
+      variantId: data.selectedVariant.id,
+      price: data.selectedVariant.price,
       quantity,
-      image: data.productImages[0].url,
+      image: data.selectedVariant.images[0]?.url || "",
       about: data.about,
       name: data.name,
-      size: data.size?.value,
+      size: data.selectedVariant.size?.value,
+      color: data.selectedVariant.color?.name,
+      selectedVariant: data.selectedVariant,
     };
     selectItem(formattedData);
   };
 
   const onRemoveItem = () => {
-    removeSelectedItems(data.id);
-    removeItem(data.id);
+    removeSelectedItems(data.selectedVariant.id);
+    removeItem(data.selectedVariant.id);
   };
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (quantity !== data.checkOutQuantity) {
+      updateQuantity(data.selectedVariant.id, quantity);
+    }
+  }, [
+    quantity,
+    data.selectedVariant.id,
+    data.checkOutQuantity,
+    updateQuantity,
+  ]);
 
   if (!mounted) {
     return null;
@@ -58,20 +73,28 @@ export const CartItem = ({ data }: CartItemProps) => {
         quantity={quantity}
         setOpen={setOpen}
         setQuantity={setQuantity}
-        stock={data.stock}
-        productId={data.id}
+        stock={data.selectedVariant.stock}
+        productId={data.selectedVariant.id}
       />
       <li className="flex py-4 px-2 md:px-4 rounded-md border">
         <div className="relative h-32 w-24 rounded-md overflow-hidden sm:h-48 sm:w-36">
-          <Image
-            src={data.productImages[0].url}
-            fill
-            alt="Product Item"
-            className="object-cover"
-          />
+          {data.selectedVariant.images[0]?.url ? (
+            <Image
+              src={data.selectedVariant.images[0].url}
+              alt={data.name}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="bg-gray-200 w-full h-full" />
+          )}
           <div className="absolute left-2 top-2">
             <Checkbox
-              checked={!!checkOutItems.find((item) => item.id === data.id)}
+              checked={
+                !!checkOutItems.find(
+                  (item) => item.variantId === data.selectedVariant.id
+                )
+              }
               onClick={handleSelectItem}
             />
           </div>
@@ -96,10 +119,19 @@ export const CartItem = ({ data }: CartItemProps) => {
                 {data.about}
               </p>
               <div className="md:my-3 md:space-y-2">
-                {data.size?.value && (
-                  <p className="font-semibold">Size - {data.size?.value}</p>
+                {data.selectedVariant.size?.value && (
+                  <p className="font-semibold">
+                    Size - {data.selectedVariant.size.value}
+                  </p>
                 )}
-                <p className="font-extrabold">{formatter.format(data.price)}</p>
+                {data.selectedVariant.color?.name && (
+                  <p className="font-semibold">
+                    Color - {data.selectedVariant.color.name}
+                  </p>
+                )}
+                <p className="font-extrabold">
+                  {formatter.format(data.selectedVariant.price)}
+                </p>
               </div>
               <div
                 className="font-semibold text-zinc-700 cursor-default md:cursor-pointer"

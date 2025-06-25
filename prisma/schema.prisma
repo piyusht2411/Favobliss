@@ -134,6 +134,7 @@ model OrderProduct {
   name         String
   about        String
   size         String?
+  color        String?
   productImage String
   isCancelled  Boolean  @default(false)
   quantity     Int

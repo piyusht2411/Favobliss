@@ -1,4 +1,3 @@
-import { getCategories } from "@/actions/get-categories";
 import { getHotDeals, getProducts } from "@/actions/get-products";
 import HeroSlider from "@/components/store/billboard";
 import { HotDealBanner } from "@/components/store/hotDealBanner";
@@ -6,10 +5,8 @@ import { LatestLaunches } from "@/components/store/latestLaunches";
 import { ProductList } from "@/components/store/product-list";
 import { Container } from "@/components/ui/container";
 import { CategorySlider } from "@/components/home/category-slider";
-import { Bank } from "@/components/home/bank";
 import HotDealSlider from "@/components/store/hotDealSlider";
 import GalleryImage from "@/components/store/GalleryImage";
-import { CategoryList } from "@/components/store/category-list";
 
 export const revalidate = 0;
 
@@ -24,7 +21,6 @@ const LandingPage = async () => {
     <>
       <HeroSlider />
       <CategorySlider />
-      {/* <Bank /> */}
       <GalleryImage />
       <Container>
         <div className="space-y-10 pb-20 mt-20">

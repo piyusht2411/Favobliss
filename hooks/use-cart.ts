@@ -1,31 +1,33 @@
-import { Product } from "@/types";
+import { Product, Variant } from "@/types";
 import { toast } from "sonner";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
+interface CartItem extends Product {
+  checkOutQuantity: number;
+  selectedVariant: Variant;
+}
+
 interface UseCart {
-  items: (Product & {
-    checkOutQuantity: number;
-  })[];
-  addItem: (
-    data: Product & {
-      checkOutQuantity: number;
-    }
-  ) => void;
-  updateQuantity: (id: string, quantity: number) => void;
-  removeItem: (id: string) => void;
+  items: CartItem[];
+  addItem: (data: CartItem) => void;
+  updateQuantity: (variantId: string, quantity: number) => void;
+  removeItem: (variantId: string) => void;
   removeAll: () => void;
-  getItemCount: () => number; // Add getter for item count
-  getTotalAmount: () => number; // Add getter for total amount
+  getItemCount: () => number;
+  getTotalAmount: () => number;
 }
 
 export const useCart = create(
   persist<UseCart>(
     (set, get) => ({
       items: [],
-      addItem: (data: Product & { checkOutQuantity: number }) => {
+      addItem: (data: CartItem) => {
         const currentItems = get().items;
-        const existingItem = currentItems.find((item) => item.id === data.id);
+        // Check for duplicates based on variant ID
+        const existingItem = currentItems.find(
+          (item) => item.selectedVariant.id === data.selectedVariant.id
+        );
         if (existingItem) {
           toast.info("Item already in cart");
         } else {
@@ -33,27 +35,33 @@ export const useCart = create(
           toast.success("Item added to cart");
         }
       },
-      updateQuantity: (id: string, quantity: number) => {
+      updateQuantity: (variantId: string, quantity: number) => {
         const currentItems = get().items;
-        const existingItem = currentItems.find((item) => item.id === id);
+        const existingItem = currentItems.find(
+          (item) => item.selectedVariant.id === variantId
+        );
         if (!existingItem) {
           toast.info("Item does not exist in cart");
         } else {
           const updatedItems = currentItems.map((item) => {
-            if (item.id === id)
+            if (item.selectedVariant.id === variantId) {
               return {
                 ...item,
                 checkOutQuantity: quantity,
               };
-            else return item;
+            }
+            return item;
           });
-
           set({ items: updatedItems });
         }
       },
-      removeItem: (id: string) => {
+      removeItem: (variantId: string) => {
         set({
-          items: [...get().items.filter((item) => item.id !== id)],
+          items: [
+            ...get().items.filter(
+              (item) => item.selectedVariant.id !== variantId
+            ),
+          ],
         });
         toast.success("Item removed from cart");
       },
@@ -66,7 +74,8 @@ export const useCart = create(
       },
       getTotalAmount: () => {
         return get().items.reduce(
-          (total, item) => total + item.price * item.checkOutQuantity,
+          (total, item) =>
+            total + item.selectedVariant.price * item.checkOutQuantity,
           0
         );
       },

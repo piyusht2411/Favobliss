@@ -26,7 +26,11 @@ export const WishlistItemCard = ({ data, setItem }: WishlistItemCardProps) => {
 
   const moveToCart: MouseEventHandler<HTMLButtonElement> = (event) => {
     event.stopPropagation();
-    addItem({ ...data, checkOutQuantity: 1 });
+    addItem({
+      ...data,
+      checkOutQuantity: 1,
+      selectedVariant: data.variants[0],
+    });
     setItem(data.id);
   };
 

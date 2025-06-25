@@ -57,6 +57,10 @@ export interface Product {
   enabledFeatures: string[];
   slug: string;
   productSpecifications: ProductSpecification[];
+  variants: Variant[];
+  brand: string;
+  expressDelivery: boolean;
+  warranty: string;
 }
 
 export interface ProductSpecification {
@@ -80,6 +84,24 @@ export interface Size {
   value: string;
 }
 
+export interface VariantImage {
+  id: string;
+  url: string;
+}
+
+export interface Variant {
+  id: string;
+  price: number;
+  stock: number;
+  sku?: string;
+  sizeId?: string;
+  colorId?: string;
+  size?: { id: string; value: string };
+  color?: { id: string; name: string; value: string };
+  images: VariantImage[];
+  mrp?: number;
+}
+
 export interface Color {
   id: string;
   name: string;
@@ -94,6 +116,9 @@ export interface CartSelectedItem {
   name: string;
   about: string;
   size?: string;
+  color?: string;
+  selectedVariant?: Variant;
+  variantId: string;
 }
 
 export interface PriceRange {

@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     }
 
     if (!products || !address) {
-      return new NextResponse("Invalid Credentials", { status: 401 });
+      return new NextResponse("Invalid Credentials", { status: 400 });
     }
 
     const shippingAddress = await db.shippingAddress.create({
@@ -41,17 +41,20 @@ export async function POST(request: Request) {
       },
     });
 
-    const formattedProducts = products.map((product) => {
-      return {
-        orderId: order.id,
-        productId: product.id,
-        productImage: product.image,
-        quantity: product.quantity,
-        name: product.name,
+    const formattedProducts = products.map((product) => ({
+      orderId: order.id,
+      productId: product.id,
+      productImage: product.image,
+      quantity: product.quantity,
+      name: product.name,
+      about: JSON.stringify({
+        variantId: product.variantId,
+        color: product.color || "",
+        price: product.price,
         about: product.about,
-        size: product?.size || "",
-      };
-    });
+      }),
+      size: product.size || "",
+    }));
 
     const orderProducts = await db.orderProduct.createMany({
       data: formattedProducts,
@@ -68,10 +71,10 @@ export async function GET(_request: Request) {
   try {
     const session = await auth();
     if (!session || !session.user || !session.user.id) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return NextResponse.json([]); // Return empty array instead of 401
     }
 
-    const resposne = await db.order.findMany({
+    const response = await db.order.findMany({
       where: {
         userId: session.user.id,
       },
@@ -87,9 +90,42 @@ export async function GET(_request: Request) {
       },
     });
 
-    return NextResponse.json(resposne);
+    return NextResponse.json(response);
   } catch (error) {
     console.error("ORDER GET API", error);
+    return new NextResponse("Internal server error", { status: 500 });
+  }
+}
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: { orderId: string } }
+) {
+  try {
+    const { isPaid }: { isPaid: boolean } = await request.json();
+    const session = await auth();
+
+    if (!session || !session.user || !session.user.id) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    if (!isPaid) {
+      return new NextResponse("Invalid Credentials", { status: 400 });
+    }
+
+    await db.order.update({
+      where: {
+        id: params.orderId,
+        userId: session.user.id,
+      },
+      data: {
+        isPaid: isPaid,
+      },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("ORDER PATCH API", error);
     return new NextResponse("Internal server error", { status: 500 });
   }
 }
