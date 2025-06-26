@@ -40,7 +40,7 @@ export const Gallery = ({ images }: GalleryProps) => {
     if (images.length > 0 && isLoading) {
       const timeout = setTimeout(() => {
         setIsLoading(false);
-      }, 5000); // 5 seconds fallback
+      }, 5000);
       return () => clearTimeout(timeout);
     }
   }, [images, isLoading]);
@@ -59,12 +59,12 @@ export const Gallery = ({ images }: GalleryProps) => {
 
   if (!images.length) {
     return (
-      <div className="w-full aspect-[3/4] relative">
+      <div className="w-full aspect-[3/4] relative bg-gray-50">
         <Image
           src="/placeholder-image.jpg"
           alt="Placeholder Image"
           fill
-          className="object-cover aspect-[3/4]"
+          className="object-contain aspect-[3/4]"
           onLoad={() => console.log("Placeholder image loaded")}
         />
       </div>
@@ -91,12 +91,12 @@ export const Gallery = ({ images }: GalleryProps) => {
           >
             {images.map((image) => (
               <SwiperSlide key={image.id}>
-                <div className="relative aspect-[3/4] w-full h-full">
+                <div className="relative aspect-[3/4] w-full h-full bg-gray-50">
                   <Image
                     src={image.url}
                     alt="Variant Image"
                     fill
-                    className="object-cover aspect-[3/4]"
+                    className="object-contain aspect-[3/4]"
                     onLoad={() => handleImageLoad(image.id)}
                     onError={() => handleImageError(image.id)}
                   />
@@ -133,13 +133,13 @@ export const Gallery = ({ images }: GalleryProps) => {
             <TabsContent
               key={image.id}
               value={image.id}
-              className="aspect-[3/4] relative overflow-hidden"
+              className="aspect-[3/4] relative overflow-hidden bg-gray-50"
             >
               <Image
                 src={image.url}
                 alt="Variant Image"
                 fill
-                className="object-cover aspect-[3/4]"
+                className="object-contain aspect-[3/4]"
                 onLoad={() => handleImageLoad(image.id)}
                 onError={() => handleImageError(image.id)}
               />

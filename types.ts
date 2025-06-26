@@ -29,6 +29,7 @@ export interface Category {
   classification: CategoryClassification;
   billboardId: Billboard;
   bannerImage: string;
+  slug: string;
 }
 
 export enum ProductType {

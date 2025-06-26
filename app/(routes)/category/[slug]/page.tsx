@@ -11,6 +11,7 @@ import { PaginationComponent } from "./_components/pagination";
 import { Metadata, ResolvingMetadata } from "next";
 import { PriceRange } from "@/types";
 import Image from "next/image";
+import Breadcrumb from "@/components/store/Breadcrumbs";
 
 interface CategoryPageProps {
   params: {
@@ -116,7 +117,6 @@ const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
   const sizes = await getSizes();
   const colors = await getColors();
 
-  // Map category classification to valid sizes
   const sizeMap: { [key: string]: string[] } = {
     TOPWEAR: ["S", "M", "L", "XL", "XXL"],
     BOTTOMWEAR: ["S", "M", "L", "XL", "XXL"],
@@ -140,8 +140,16 @@ const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
     { id: "5000", name: "Above Rs. 5000", value: "5000" },
   ];
 
+  const breadcrumbItems = [
+    {
+      label: category.name,
+      href: `/category/${category.slug}?page=1`,
+    },
+  ];
+
   return (
     <div className="bg-white">
+      <Breadcrumb items={breadcrumbItems} />
       <div className="relative w-full h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden">
         <Image
           src={category.bannerImage}

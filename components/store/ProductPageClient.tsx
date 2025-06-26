@@ -8,6 +8,7 @@ import { ProductList } from "@/components/store/product-list";
 import { Container } from "@/components/ui/container";
 import { ProductReviews } from "@/components/store/product-reviews";
 import { ProductTabs } from "@/components/store/prodcutTabs";
+import Breadcrumb from "./Breadcrumbs";
 
 interface ProductPageContentProps {
   product: Product;
@@ -24,8 +25,20 @@ export const ProductPageContent = ({
     setCurrentVariant(variant);
   };
 
+  const breadcrumbItems = [
+    {
+      label: product.category.name,
+      href: `/category/${product?.category?.slug}?page=1`,
+    },
+    {
+      label: product.name,
+      href: `/product/${product?.slug}`,
+    },
+  ];
+
   return (
     <div className="bg-white text-black mb-16">
+      <Breadcrumb items={breadcrumbItems} />
       <Container>
         <div className="px-4 py-10 sm:px-6 lg:px-5">
           <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
