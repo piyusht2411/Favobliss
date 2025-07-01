@@ -17,7 +17,13 @@ interface CartItemProps {
 
 export const CartItem = ({ data }: CartItemProps) => {
   const { items, removeItem, updateQuantity } = useCart();
-  const { checkOutItems, selectItem, removeSelectedItems } = useCheckout();
+  const {
+    checkOutItems,
+    selectItem,
+    removeSelectedItems,
+    addItem,
+    updateItem,
+  } = useCheckout();
 
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
@@ -25,6 +31,34 @@ export const CartItem = ({ data }: CartItemProps) => {
     items.find((item) => item.selectedVariant.id === data.selectedVariant.id)
       ?.checkOutQuantity || 1
   );
+
+  // Check if item is selected
+  const isChecked = !!checkOutItems.find(
+    (item) => item.variantId === data.selectedVariant.id
+  );
+
+  // Add item to checkout when component mounts
+  useEffect(() => {
+    setMounted(true);
+
+    const formattedData: CartSelectedItem = {
+      id: data.id,
+      variantId: data.selectedVariant.id,
+      price: data.selectedVariant.price,
+      quantity: data.checkOutQuantity || 1,
+      image: data.selectedVariant.images[0]?.url || "",
+      about: data.about,
+      name: data.name,
+      size: data.selectedVariant.size?.value,
+      color: data.selectedVariant.color?.name,
+      selectedVariant: data.selectedVariant,
+    };
+
+    // Add item to checkout if not already present
+    if (!isChecked) {
+      addItem(formattedData);
+    }
+  }, []);
 
   const handleSelectItem = () => {
     const formattedData: CartSelectedItem = {
@@ -39,7 +73,12 @@ export const CartItem = ({ data }: CartItemProps) => {
       color: data.selectedVariant.color?.name,
       selectedVariant: data.selectedVariant,
     };
-    selectItem(formattedData);
+
+    if (isChecked) {
+      removeSelectedItems(data.selectedVariant.id);
+    } else {
+      selectItem(formattedData);
+    }
   };
 
   const onRemoveItem = () => {
@@ -47,19 +86,24 @@ export const CartItem = ({ data }: CartItemProps) => {
     removeItem(data.selectedVariant.id);
   };
 
+  // Update quantity in both cart and checkout
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (quantity !== data.checkOutQuantity) {
+    if (mounted && quantity !== data.checkOutQuantity) {
       updateQuantity(data.selectedVariant.id, quantity);
+
+      // If item is checked, update checkout quantity too
+      if (isChecked) {
+        updateItem(data.selectedVariant.id, quantity);
+      }
     }
   }, [
     quantity,
     data.selectedVariant.id,
     data.checkOutQuantity,
     updateQuantity,
+    updateItem,
+    isChecked,
+    mounted,
   ]);
 
   if (!mounted) {
@@ -89,14 +133,7 @@ export const CartItem = ({ data }: CartItemProps) => {
             <div className="bg-gray-200 w-full h-full" />
           )}
           <div className="absolute left-2 top-2">
-            <Checkbox
-              checked={
-                !!checkOutItems.find(
-                  (item) => item.variantId === data.selectedVariant.id
-                )
-              }
-              onClick={handleSelectItem}
-            />
+            <Checkbox checked={isChecked} onCheckedChange={handleSelectItem} />
           </div>
         </div>
         <div className="relative ml-4 flex flex-1 flex-col justify-between sm:ml-6">

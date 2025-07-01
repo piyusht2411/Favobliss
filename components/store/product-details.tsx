@@ -247,41 +247,50 @@ export const ProductDetails = ({
           <p className="text-[#088466] mt-2">
             4.1 ⭐ <span className="underline">(9 ratings & 4 Reviews)</span>
           </p>
-          <button className="my-4 w-[159.88px] h-[32px] bg-[#CFFFF3] rounded-[82px] font-bold font-inter text-[11.25px]">
+          {/* <button className="my-4 w-[159.88px] h-[32px] bg-[#CFFFF3] rounded-[82px] font-bold font-inter text-[11.25px]">
             <p className="text-[#088466]">Rs 3750 Bank Discount</p>
-          </button>
+          </button> */}
 
-          <div className="p-4 rounded-md max-w-md">
+          <div className="py-2 rounded-md max-w-md">
             <div className="flex items-center justify-between flex-wrap gap-3 md:gap-0">
-              <div>
+              {/* <div>
                 <p className="text-3xl font-semibold">
                   {formatter.format(selectedVariant.price)}
                 </p>
-                <p className="text-sm text-gray-500">(Incl. all Taxes)</p>
-              </div>
-              <div className="flex items-center gap-8 md:gap-14">
-                <div className="border border-black px-3 py-1 rounded">OR</div>
-                <div>
-                  <p className="text-xl font-semibold">
-                    ₹{(selectedVariant.price / 12).toFixed(0)}/mo<sup>*</sup>
-                  </p>
-                  <a href="#" className="text-green-600 text-sm underline">
-                    EMI Options
-                  </a>
-                </div>
-              </div>
+                <p className="text-sm text-gray-500">(Incl. of all taxes)</p>
+              </div> */}
+              {/* <div className="flex items-center gap-8 md:gap-14">
+      <div className="border border-black px-3 py-1 rounded">OR</div>
+      <div>
+        <p className="text-xl font-semibold">
+          ₹{(selectedVariant.price / 12).toFixed(0)}/mo<sup>*</sup>
+        </p>
+        <a href="#" className="text-green-600 text-sm underline">
+          EMI Options
+        </a>
+      </div>
+    </div> */}
             </div>
 
             {/* Updated MRP and discount section */}
-            <div className="mt-3 text-sm">
+            <div className="mt-3 flex items-center gap-2 text-sm">
               {selectedVariant.mrp && (
                 <>
-                  <span className="line-through text-gray-500 mr-2">
-                    MRP: ₹{selectedVariant.mrp}
+                  <span className="text-3xl font-semibold">
+                    ₹{selectedVariant.price}
                   </span>
-                  <span className="text-green-600 font-medium">
-                    (Save ₹{selectedVariant.mrp - selectedVariant.price},{" "}
-                    {discountPercentage}% off)
+                  <span className="text-gray-500 text-base mr-2">
+                    MRP{" "}
+                    <span className="line-through">
+                      {" "}
+                      ₹{selectedVariant.mrp}
+                    </span>
+                  </span>
+                  <span className="bg-orange-400 text-white text-sm font-bold rounded-full px-2 py-1">
+                    {discountPercentage}% off
+                  </span>
+                  <span className="text-base text-gray-500">
+                    (Incl. of all taxes)
                   </span>
                 </>
               )}
@@ -297,19 +306,19 @@ export const ProductDetails = ({
           </div>
 
           {selectedVariant.stock <= 0 && (
-            <Alert variant="destructive" className="mt-4">
+            <Alert variant="destructive" className="mt-2">
               <AlertDescription>Out of stock</AlertDescription>
             </Alert>
           )}
           {selectedVariant.stock > 0 && selectedVariant.stock <= 5 && (
-            <Alert variant="default" className="mt-4">
+            <Alert variant="default" className="mt-2">
               <AlertDescription>
                 Only {selectedVariant.stock} left in stock!
               </AlertDescription>
             </Alert>
           )}
 
-          <div className="flex flex-col gap-y-6 mt-6">
+          <div className="flex flex-col gap-y-6 mt-4">
             {availableColors.length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-3">

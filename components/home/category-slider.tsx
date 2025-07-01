@@ -110,8 +110,8 @@ export function CategorySlider() {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="hidden md:flex -left-12  border-2 border-gray-200 hover:bg-orange-50 hover:border-orange-300" />
-        <CarouselNext className="hidden md:flex -right-12  border-2 border-gray-200 hover:bg-orange-50 hover:border-orange-300" />
+        {/* <CarouselPrevious className="hidden md:flex -left-12  border-2 border-gray-200 hover:bg-orange-50 hover:border-orange-300" />
+        <CarouselNext className="hidden md:flex -right-12  border-2 border-gray-200 hover:bg-orange-50 hover:border-orange-300" /> */}
       </Carousel>
     </div>
   );

@@ -9,6 +9,7 @@ interface UseCheckOutProps {
   removeSelectedItems: (variantId: string) => void;
   setCheckOutItems: (items: CartSelectedItem[]) => void; // Added for CartPage sync
   clearCheckOutItems: () => void;
+  addItem: (data: CartSelectedItem) => void;
 }
 
 export const useCheckout = create(
@@ -34,6 +35,18 @@ export const useCheckout = create(
         }
         // Otherwise, add the item
         else {
+          set({
+            checkOutItems: [...currentItems, data],
+          });
+        }
+      },
+      addItem: (data: CartSelectedItem) => {
+        const currentItems = get().checkOutItems;
+        const isAlreadyExist = currentItems.find(
+          (item) => item.variantId === data.variantId
+        );
+
+        if (!isAlreadyExist) {
           set({
             checkOutItems: [...currentItems, data],
           });

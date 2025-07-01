@@ -7,9 +7,29 @@ import { Container } from "@/components/ui/container";
 import { CartItem } from "@/components/cart/cart-item";
 import { Summary } from "@/components/cart/summary";
 import { Hero } from "@/components/cart/hero";
+import { useEffect } from "react";
+import { useCheckout } from "@/hooks/use-checkout";
 
 const CartPage = () => {
   const { items } = useCart();
+   const { addItem } = useCheckout();
+
+  useEffect(() => {
+    items.forEach((item) => {
+      addItem({
+        id: item.id,
+        variantId: item.selectedVariant.id,
+        price: item.selectedVariant.price,
+        quantity: item.checkOutQuantity,
+        image: item.selectedVariant.images[0]?.url || "",
+        about: item.about,
+        name: item.name,
+        size: item.selectedVariant.size?.value,
+        color: item.selectedVariant.color?.name,
+        selectedVariant: item.selectedVariant,
+      });
+    });
+  }, [items, addItem]);
 
   return (
     <div
