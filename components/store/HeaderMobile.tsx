@@ -103,7 +103,7 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
     } finally {
       setIsSearching(false);
     }
-  }, 300);
+  }, 800);
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {

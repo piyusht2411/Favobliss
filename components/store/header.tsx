@@ -115,7 +115,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
     } finally {
       setIsSearching(false);
     }
-  }, 300);
+  }, 800);
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
