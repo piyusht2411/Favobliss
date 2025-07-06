@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Search,
   MapPin,
@@ -15,6 +15,8 @@ import { MenuCategory, MenuItem } from "@/types";
 import { useSession } from "next-auth/react";
 import { Account } from "@/components/account";
 import { useCart } from "@/hooks/use-cart";
+import { useRouter } from "next/navigation";
+import { useDebounce } from "@/hooks/use-debounce";
 
 const searchCategories = [
   "All",
@@ -46,6 +48,95 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
   const { data: session, status } = useSession();
   const { getItemCount } = useCart();
   const itemCount = getItemCount();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<{
+    categories: any[];
+    products: any[];
+    subCategories?: any[];
+    pagination: {
+      page: number;
+      limit: number;
+      totalCategories: number;
+      totalProducts: number;
+    };
+  } | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchDropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  // Debounced search function
+  const debouncedSearch = useDebounce(async (query: string) => {
+    if (!query) {
+      if (isMounted.current) {
+        setSearchResults(null);
+        setIsSearching(false);
+      }
+      return;
+    }
+
+    if (isMounted.current) {
+      setIsSearching(true);
+    }
+    try {
+      const response = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_API_URL
+        }/search-item?query=${encodeURIComponent(query)}&page=1&limit=10`,
+        { cache: "no-store" }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch search results");
+      }
+      const data = await response.json();
+      setSearchResults(null);
+      setSearchResults(data);
+    } catch (error) {
+      console.error("[SEARCH_FETCH]", error);
+      setSearchResults(null);
+    } finally {
+      setIsSearching(false);
+    }
+  }, 300);
+
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    debouncedSearch(query);
+  };
+
+  // Handle search result click
+  const handleResultClick = (href: string) => {
+    setSearchQuery("");
+    setSearchResults(null);
+    router.push(href);
+  };
+
+  // Click outside handler
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchDropdownRef.current &&
+        !searchDropdownRef.current.contains(event.target as Node) &&
+        !isSearchDropdownOpen
+      ) {
+        setSearchResults(null);
+        setSearchQuery("");
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isSearchDropdownOpen]);
 
   if (!isMobile) {
     return null;
@@ -209,7 +300,64 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
       </div>
 
       {/* Search Bar with Dropdown */}
-      <div className="mt-4 relative">
+      {/* <div className="mt-4 relative">
+        <div className="relative flex bg-white overflow-hidden rounded-[6px]">
+          <div className="relative">
+            <button
+              onClick={() => setIsSearchDropdownOpen(!isSearchDropdownOpen)}
+              className="flex items-center gap-1 bg-[rgb(238,140,29)] text-white px-3 py-2 text-xs font-medium hover:bg-[rgb(238,140,29)] transition-colors min-w-max rounded-l-[6px] h-full"
+            >
+              <span className="truncate max-w-[80px]">{selectedCategory}</span>
+              <ChevronDown
+                size={14}
+                className={`transform transition-transform flex-shrink-0 ${
+                  isSearchDropdownOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+          </div>
+
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              placeholder="Search for Product Brands..."
+              className="w-full py-2 px-4 text-black focus:outline-none text-sm h-10"
+            />
+            <button className="absolute right-2 top-1/2 transform -translate-y-1/2">
+              <Search size={18} className="text-gray-500" />
+            </button>
+          </div>
+        </div>
+
+        {isSearchDropdownOpen && (
+          <div className="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-48 overflow-y-auto mt-1">
+            <div className="py-1">
+              {searchCategories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => {
+                    setSelectedCategory(category);
+                    setIsSearchDropdownOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {isSearchDropdownOpen && (
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setIsSearchDropdownOpen(false)}
+          />
+        )}
+      </div> */}
+
+      {/* Search Bar with Dropdown */}
+      <div className="mt-4 relative" ref={searchDropdownRef}>
         <div className="relative flex bg-white overflow-hidden rounded-[6px]">
           {/* Category Dropdown Button */}
           <div className="relative">
@@ -233,6 +381,8 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
               type="text"
               placeholder="Search for Product Brands..."
               className="w-full py-2 px-4 text-black focus:outline-none text-sm h-10"
+              value={searchQuery}
+              onChange={handleSearchChange}
             />
             <button className="absolute right-2 top-1/2 transform -translate-y-1/2">
               <Search size={18} className="text-gray-500" />
@@ -240,7 +390,7 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
           </div>
         </div>
 
-        {/* Dropdown Menu */}
+        {/* Category Dropdown Menu */}
         {isSearchDropdownOpen && (
           <div className="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-48 overflow-y-auto mt-1">
             <div className="py-1">
@@ -260,6 +410,105 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
           </div>
         )}
 
+        {/* Search Results Dropdown */}
+        {(isSearching ||
+          (searchResults &&
+            (searchResults.categories.length > 0 ||
+              (searchResults?.subCategories ?? []).length > 0 ||
+              searchResults.products.length > 0))) && (
+          <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-96 overflow-y-auto mt-1">
+            <div className="py-2">
+              {isSearching ? (
+                <div className="px-4 py-2 text-sm text-gray-700">
+                  Searching...
+                </div>
+              ) : (
+                <>
+                  {(searchResults?.categories ?? []).length > 0 && (
+                    <div className="border-b border-gray-200 pb-2">
+                      <h3 className="px-4 py-2 text-sm font-semibold text-gray-900">
+                        Categories
+                      </h3>
+                      {searchResults?.categories.map((category) => (
+                        <button
+                          key={category.id}
+                          onClick={() =>
+                            handleResultClick(
+                              `/category/${category.slug}?page=1`
+                            )
+                          }
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                        >
+                          {category.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {(searchResults?.subCategories ?? []).length > 0 && (
+                    <div className="border-b border-gray-200 pb-2">
+                      <h3 className="px-4 py-2 text-sm font-semibold text-gray-900">
+                        Subcategories
+                      </h3>
+                      {(searchResults?.subCategories ?? []).map(
+                        (subCategory) => (
+                          <button
+                            key={subCategory.id}
+                            onClick={() =>
+                              handleResultClick(
+                                `/category/${subCategory.slug}?page=1`
+                              )
+                            }
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                          >
+                            {subCategory.name}
+                          </button>
+                        )
+                      )}
+                    </div>
+                  )}
+
+                  {(searchResults?.products ?? []).length > 0 ? (
+                    <div className="pt-2">
+                      <h3 className="px-4 py-2 text-sm font-semibold text-gray-900">
+                        Products
+                      </h3>
+                      {(searchResults?.products ?? []).map((product) => (
+                        <button
+                          key={product.id}
+                          onClick={() =>
+                            handleResultClick(`/product/${product.slug}`)
+                          }
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors flex items-center gap-2"
+                        >
+                          {product.variants[0]?.images[0] && (
+                            <img
+                              src={product.variants[0].images[0].url}
+                              alt={product.name}
+                              className="w-10 h-10 object-cover rounded"
+                            />
+                          )}
+                          <span>{product.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    // Add no results found message when all arrays are empty
+                    !isSearching &&
+                    searchResults &&
+                    searchResults.categories.length === 0 &&
+                    (searchResults?.subCategories ?? []).length === 0 && (
+                      <div className="px-4 py-2 text-sm text-gray-700">
+                        No results found
+                      </div>
+                    )
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Click outside to close dropdown */}
         {isSearchDropdownOpen && (
           <div
@@ -269,7 +518,6 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
         )}
       </div>
 
-      {/* Sidebar Menu */}
       <div
         className={`fixed inset-y-0 left-0 w-64 bg-black text-white transform ${
           isMenuOpen ? "translate-x-0" : "-translate-x-full"

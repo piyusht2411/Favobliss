@@ -64,7 +64,7 @@ export const Gallery = ({ images }: GalleryProps) => {
           src="/placeholder-image.jpg"
           alt="Placeholder Image"
           fill
-          className="object-contain aspect-[3/4]"
+          className="object-cover aspect-[3/4]"
           onLoad={() => console.log("Placeholder image loaded")}
         />
       </div>
