@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Product, Variant } from "@/types";
+import { Product, Variant, Location } from "@/types";
 import { Gallery } from "@/components/gallery";
 import { ProductDetails } from "@/components/store/product-details";
 import { ProductList } from "@/components/store/product-list";
@@ -13,11 +13,13 @@ import Breadcrumb from "./Breadcrumbs";
 interface ProductPageContentProps {
   product: Product;
   suggestProducts: Product[];
+  locations: Location[]; // Add locations
 }
 
 export const ProductPageContent = ({
   product,
   suggestProducts,
+  locations, // Receive locations
 }: ProductPageContentProps) => {
   const [currentVariant, setCurrentVariant] = useState(product.variants[0]);
 
@@ -50,6 +52,7 @@ export const ProductPageContent = ({
                 data={product}
                 defaultVariant={product.variants[0]}
                 onVariantChange={handleVariantChange}
+                locations={locations} // Pass locations
               />
               {/* <ProductReviews productId={product.id} /> */}
             </div>
@@ -58,7 +61,11 @@ export const ProductPageContent = ({
         <hr className="md:m-10 md:my-2 mx-10" />
         <div className="flex flex-col gap-y-5 md:gap-y-8 px-4 sm:px-6 lg:px-8">
           <ProductTabs product={product} productId={product.id} />
-          <ProductList title="Similar Products" data={suggestProducts} />
+          <ProductList
+            title="Similar Products"
+            data={suggestProducts}
+            locations={locations}
+          />
         </div>
       </Container>
     </div>

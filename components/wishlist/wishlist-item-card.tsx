@@ -30,6 +30,7 @@ export const WishlistItemCard = ({ data, setItem }: WishlistItemCardProps) => {
       ...data,
       checkOutQuantity: 1,
       selectedVariant: data.variants[0],
+      pincode: "247001",
     });
     setItem(data.id);
   };

@@ -52,6 +52,7 @@ export async function POST(request: Request) {
         color: product.color || "",
         price: product.price,
         about: product.about,
+        locationId: product.locationId, // Add locationId
       }),
       size: product.size || "",
     }));
@@ -71,7 +72,7 @@ export async function GET(_request: Request) {
   try {
     const session = await auth();
     if (!session || !session.user || !session.user.id) {
-      return NextResponse.json([]); // Return empty array instead of 401
+      return NextResponse.json([]);
     }
 
     const response = await db.order.findMany({

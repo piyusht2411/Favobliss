@@ -6,12 +6,20 @@ import { persist, createJSONStorage } from "zustand/middleware";
 interface CartItem extends Product {
   checkOutQuantity: number;
   selectedVariant: Variant;
+  price: number; // Add location-based price
+  // locationId?: string | null; // Add locationId
+  pincode: string;
 }
 
 interface UseCart {
   items: CartItem[];
   addItem: (data: CartItem) => void;
   updateQuantity: (variantId: string, quantity: number) => void;
+  updateItemPrice: (
+    variantId: string,
+    newPrice: number,
+    newPincode: string
+  ) => void;
   removeItem: (variantId: string) => void;
   removeAll: () => void;
   getItemCount: () => number;
@@ -24,7 +32,6 @@ export const useCart = create(
       items: [],
       addItem: (data: CartItem) => {
         const currentItems = get().items;
-        // Check for duplicates based on variant ID
         const existingItem = currentItems.find(
           (item) => item.selectedVariant.id === data.selectedVariant.id
         );
@@ -55,6 +62,19 @@ export const useCart = create(
           set({ items: updatedItems });
         }
       },
+      updateItemPrice: (
+        variantId: string,
+        newPrice: number,
+        newPincode: string
+      ) => {
+        set((state) => ({
+          items: state.items.map((item) =>
+            item.selectedVariant.id === variantId
+              ? { ...item, price: newPrice, pincode: newPincode }
+              : item
+          ),
+        }));
+      },
       removeItem: (variantId: string) => {
         set({
           items: [
@@ -74,8 +94,7 @@ export const useCart = create(
       },
       getTotalAmount: () => {
         return get().items.reduce(
-          (total, item) =>
-            total + item.selectedVariant.price * item.checkOutQuantity,
+          (total, item) => total + item.price * item.checkOutQuantity,
           0
         );
       },

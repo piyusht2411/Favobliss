@@ -14,7 +14,12 @@ import { useCheckoutAddress } from "@/hooks/use-checkout-address";
 import { usePaymentSuccessErrorModal } from "@/hooks/use-payment-success-error-modal";
 import { useCart } from "@/hooks/use-cart";
 
-export const Summary = () => {
+interface Props {
+  isAddressCorrect?: boolean;
+}
+
+export const Summary = (props: Props) => {
+  const { isAddressCorrect } = props;
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -25,6 +30,8 @@ export const Summary = () => {
   const { checkOutItems, clearCheckOutItems } = useCheckout();
   const { onOpen } = usePaymentSuccessErrorModal();
   const [loading, setLoading] = useState(false);
+
+  console.log(checkOutItems);
 
   const getTotalAmount = () => {
     const amount = checkOutItems.reduce((total, item) => {
@@ -55,7 +62,7 @@ export const Summary = () => {
     if (searchParams.get("cancelled")) {
       onOpen("error");
     }
-  }, [searchParams]);
+  }, [searchParams, onOpen, removeAll, clearCheckOutItems, router]);
 
   const onCheckOut = async () => {
     try {
@@ -89,7 +96,8 @@ export const Summary = () => {
             variantId: item.variantId,
             color: item.color,
             price: item.price,
-          }), // Encode variant details in about
+            locationId: item.locationId,
+          }),
         })),
         address,
       });
@@ -100,8 +108,10 @@ export const Summary = () => {
         `${process.env.NEXT_PUBLIC_API_URL}/checkout`,
         {
           products: checkOutItems.map((item) => ({
-            id: item.variantId, // Use variantId
+            id: item.variantId,
             quantity: item.quantity,
+            price: item.price, // Add location-based price
+            locationId: item.locationId, // Add locationId
           })),
           orderId: orderId,
         }
@@ -198,7 +208,7 @@ export const Summary = () => {
       </div>
       <Button
         size="lg"
-        disabled={loading}
+        disabled={loading || !isAddressCorrect}
         className="font-semibold mt-6 w-full"
         onClick={onCheckOut}
       >

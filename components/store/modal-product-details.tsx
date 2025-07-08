@@ -32,6 +32,7 @@ export const ModalProductDetails = ({
         ...data,
         checkOutQuantity: 1,
         selectedVariant,
+        pincode: "247001",
       });
     }
   };

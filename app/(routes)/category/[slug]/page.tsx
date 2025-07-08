@@ -2,6 +2,7 @@ import { getCategoryBySlug } from "@/actions/get-category";
 import { getColors } from "@/actions/get-colors";
 import { getProducts } from "@/actions/get-products";
 import { getSizes } from "@/actions/get-sizes";
+import { getLocations } from "@/actions/get-locations"; // New import
 import { Container } from "@/components/ui/container";
 import { Filter } from "./_components/filter";
 import { NoResults } from "@/components/store/no-results";
@@ -9,12 +10,13 @@ import { ProductCard } from "@/components/store/product-card";
 import { MobileFilters } from "./_components/mobile-filters";
 import { PaginationComponent } from "./_components/pagination";
 import { Metadata, ResolvingMetadata } from "next";
-import { PriceRange } from "@/types";
+import { PriceRange, Location } from "@/types";
 import Image from "next/image";
 import Breadcrumb from "@/components/store/Breadcrumbs";
 
 interface CategoryPageProps {
   params: {
+    storeId: string; // Added storeId
     slug: string;
   };
   searchParams: {
@@ -116,6 +118,7 @@ const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
 
   const sizes = await getSizes();
   const colors = await getColors();
+  const locations = await getLocations(params.storeId);
 
   const sizeMap: { [key: string]: string[] } = {
     TOPWEAR: ["S", "M", "L", "XL", "XXL"],
@@ -180,7 +183,11 @@ const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 lg:gap-10">
                   {products.map((product) => (
-                    <ProductCard key={product.id} data={product} />
+                    <ProductCard
+                      key={product.id}
+                      data={product}
+                      locations={locations}
+                    />
                   ))}
                 </div>
               )}

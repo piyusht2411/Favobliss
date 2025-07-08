@@ -4,6 +4,14 @@ export interface Billboard {
   imageUrl: string;
 }
 
+export interface Location {
+  id: string;
+  pincode: string;
+  city: string;
+  state: string;
+  country: string;
+}
+
 export enum CategoryType {
   MEN,
   WOMEN,
@@ -62,6 +70,7 @@ export interface Product {
   brand: string;
   expressDelivery: boolean;
   warranty: string;
+  isNewArrival: boolean;
 }
 
 export interface ProductSpecification {
@@ -101,6 +110,7 @@ export interface Variant {
   color?: { id: string; name: string; value: string };
   images: VariantImage[];
   mrp?: number;
+  variantPrices?: { locationId: string; price: number; mrp: number }[];
 }
 
 export interface Color {
@@ -120,6 +130,7 @@ export interface CartSelectedItem {
   color?: string;
   selectedVariant?: Variant;
   variantId: string;
+  locationId?: string | null;
 }
 
 export interface PriceRange {

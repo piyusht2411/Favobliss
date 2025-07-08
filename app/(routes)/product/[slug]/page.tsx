@@ -1,11 +1,12 @@
 import { getProductBySlug } from "@/actions/get-product";
 import { getProducts } from "@/actions/get-products";
+import { getLocations } from "@/actions/get-locations"; // New import
 import { redirect } from "next/navigation";
 import { Metadata, ResolvingMetadata } from "next";
 import { ProductPageContent } from "@/components/store/ProductPageClient";
 
 interface ProductPageProps {
-  params: { slug: string };
+  params: { storeId: string; slug: string }; // Include storeId
 }
 
 export async function generateMetadata(
@@ -68,8 +69,14 @@ const ProductPage = async ({ params }: ProductPageProps) => {
     })
   ).filter((item) => item.id !== product.id);
 
+  const locations = await getLocations(params.storeId); // Fetch locations
+
   return (
-    <ProductPageContent product={product} suggestProducts={suggestProducts} />
+    <ProductPageContent
+      product={product}
+      suggestProducts={suggestProducts}
+      locations={locations} // Pass locations
+    />
   );
 };
 

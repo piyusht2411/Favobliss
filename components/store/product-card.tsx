@@ -1,23 +1,84 @@
 "use client";
-import { Product } from "@/types";
+
+import { Product, Location } from "@/types";
 import Image from "next/image";
 import { IconButton } from "@/components/ui/icon-button";
 import { ExpandIcon, ShoppingCart } from "lucide-react";
 import { formatter } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { MouseEventHandler, useState } from "react";
+import { MouseEventHandler, useState, useEffect } from "react";
 import { usePreviewModal } from "@/hooks/use-preview-modal";
 import { useCart } from "@/hooks/use-cart";
 
 interface ProductCardProps {
   data: Product;
+  locations: Location[]; // Add locations
 }
 
-export const ProductCard = ({ data }: ProductCardProps) => {
+export const ProductCard = ({ data, locations }: ProductCardProps) => {
   const router = useRouter();
   const { onOpen } = usePreviewModal();
   const { addItem } = useCart();
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
+  const [locationPrice, setLocationPrice] = useState<{
+    price: number;
+    mrp: number;
+  }>({
+    price: data.variants[0]?.price || 0,
+    mrp: data.variants[0]?.mrp || data.variants[0]?.price || 0,
+  });
+  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
+    null
+  );
+
+  // Calculate location-based price
+  useEffect(() => {
+    const defaultPincode = "110040"; // New Delhi
+    let locationData: { pincode: string } | null = null;
+    try {
+      const storedData = localStorage.getItem("locationData");
+      if (storedData) {
+        locationData = JSON.parse(storedData);
+      }
+    } catch (error) {
+      console.error("Error parsing locationData from localStorage:", error);
+    }
+
+    const inputPincode = locationData?.pincode || defaultPincode;
+    const location = locations.find((loc) => loc.pincode === inputPincode);
+    const selectedVariant =
+      data.variants[selectedVariantIndex] || data.variants[0];
+
+    if (location && selectedVariant?.variantPrices) {
+      const variantPrice = selectedVariant.variantPrices.find(
+        (vp) => vp.locationId === location.id
+      );
+      if (variantPrice) {
+        setSelectedLocationId(location.id);
+        setLocationPrice({ price: variantPrice.price, mrp: variantPrice.mrp });
+        return;
+      }
+    }
+
+    // Fallback to New Delhi or default variant price
+    const defaultLocation = locations.find(
+      (loc) => loc.pincode === defaultPincode
+    );
+    const defaultVariantPrice = defaultLocation
+      ? selectedVariant?.variantPrices?.find(
+          (vp) => vp.locationId === defaultLocation.id
+        )
+      : null;
+    setSelectedLocationId(defaultLocation?.id || null);
+    setLocationPrice({
+      price: defaultVariantPrice?.price || selectedVariant?.price || 0,
+      mrp:
+        defaultVariantPrice?.mrp ||
+        selectedVariant?.mrp ||
+        selectedVariant?.price ||
+        0,
+    });
+  }, [selectedVariantIndex, locations, data.variants]);
 
   const onClick = () => {
     router.push(`/product/${data?.slug}`);
@@ -34,9 +95,10 @@ export const ProductCard = ({ data }: ProductCardProps) => {
       const selectedVariant = data.variants[selectedVariantIndex];
       addItem({
         ...data,
+        price: locationPrice.price, // Use location-based price
         selectedVariant: {
           id: selectedVariant.id,
-          price: selectedVariant.price,
+          price: locationPrice.price, // Use location-based price
           stock: selectedVariant.stock,
           sku: selectedVariant.sku,
           size: selectedVariant.size,
@@ -44,6 +106,8 @@ export const ProductCard = ({ data }: ProductCardProps) => {
           images: selectedVariant.images,
         },
         checkOutQuantity: 1,
+        // locationId: selectedLocationId, // Include locationId
+        pincode: "247001",
       });
     }
   };
@@ -55,11 +119,9 @@ export const ProductCard = ({ data }: ProductCardProps) => {
   const selectedVariant =
     data.variants[selectedVariantIndex] || data.variants[0];
   const imageUrl = selectedVariant?.images[0]?.url || "/placeholder-image.jpg";
-  const priceDisplay = selectedVariant
-    ? formatter.format(selectedVariant.price)
-    : "Price unavailable";
-  const mrpDisplay = selectedVariant?.mrp
-    ? formatter.format(selectedVariant.mrp)
+  const priceDisplay = formatter.format(locationPrice.price); // Use location-based price
+  const mrpDisplay = locationPrice.mrp
+    ? formatter.format(locationPrice.mrp)
     : null;
 
   // Get unique colors for variant display
@@ -76,9 +138,7 @@ export const ProductCard = ({ data }: ProductCardProps) => {
 
   // Get unique sizes for variant display
   const uniqueSizes = data.variants.reduce((acc, variant) => {
-    if (
-      !acc.find((size) => size && variant.size && size.id === variant.size.id)
-    ) {
+    if (!acc.find((size) => size && variant.size && size.id === size.id)) {
       acc.push(variant.size);
     }
     return acc;
@@ -100,13 +160,13 @@ export const ProductCard = ({ data }: ProductCardProps) => {
           />
 
           {/* Stock status badge */}
-          {selectedVariant &&
+          {/* {selectedVariant &&
             selectedVariant.stock <= 5 &&
             selectedVariant.stock > 0 && (
               <div className="absolute top-2 left-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-medium">
                 Only {selectedVariant.stock} left
               </div>
-            )}
+            )} */}
 
           {selectedVariant && selectedVariant.stock === 0 && (
             <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
@@ -115,7 +175,7 @@ export const ProductCard = ({ data }: ProductCardProps) => {
           )}
         </div>
 
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute w-full px-6 bottom-5">
+        {/* <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute w-full px-6 bottom-5">
           <div className="gap-x-6 justify-center hidden md:flex">
             <IconButton
               onClick={onPreview}
@@ -127,7 +187,7 @@ export const ProductCard = ({ data }: ProductCardProps) => {
               disabled={!selectedVariant || selectedVariant.stock <= 0}
             />
           </div>
-        </div>
+        </div> */}
       </div>
 
       <div className="w-full flex flex-col space-y-3 p-4">
@@ -150,16 +210,6 @@ export const ProductCard = ({ data }: ProductCardProps) => {
           {mrpDisplay && mrpDisplay !== priceDisplay && (
             <p className="text-sm text-zinc-500 line-through">{mrpDisplay}</p>
           )}
-          {/* {mrpDisplay && mrpDisplay !== priceDisplay && (
-            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
-              {Math.round(
-                (((selectedVariant.mrp ?? 0) - (selectedVariant.price ?? 0)) /
-                  (selectedVariant.mrp ?? 1)) *
-                  100
-              )}
-              % OFF
-            </span>
-          )} */}
         </div>
 
         {/* Variant Options */}
@@ -168,9 +218,6 @@ export const ProductCard = ({ data }: ProductCardProps) => {
             {/* Color Variants */}
             {uniqueColors.length > 0 && (
               <div className="flex flex-col gap-1">
-                {/* <span className="text-xs text-zinc-600 font-medium">
-                  Colors:
-                </span> */}
                 <div className="flex gap-2 flex-wrap">
                   {uniqueColors.map((color, index) => {
                     if (!color) return null;
@@ -198,46 +245,11 @@ export const ProductCard = ({ data }: ProductCardProps) => {
                 </div>
               </div>
             )}
-
-            {/* Size Variants */}
-            {/* {uniqueSizes.length > 0 && (
-              <div className="flex flex-col gap-1">
-                <span className="text-xs text-zinc-600 font-medium">
-                  Sizes:
-                </span>
-                <div className="flex gap-1 flex-wrap">
-                  {uniqueSizes.map((size) => {
-                    if (!size) return null;
-                    const variantIndex = data.variants.findIndex(
-                      (v) =>
-                        v.size && v.size.id && size && v.size.id === size.id
-                    );
-                    const isSelected = selectedVariantIndex === variantIndex;
-                    return (
-                      <button
-                        key={size.id}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onVariantChange(variantIndex);
-                        }}
-                        className={`px-2 py-1 text-xs rounded border transition-all duration-200 ${
-                          isSelected
-                            ? "border-zinc-800 bg-zinc-800 text-white"
-                            : "border-zinc-300 text-zinc-600 hover:border-zinc-400"
-                        }`}
-                      >
-                        {size.value}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )} */}
           </div>
         )}
 
         {/* Quick Add to Cart for Mobile */}
-        <div className="md:hidden">
+        {/* <div className="md:hidden">
           <button
             onClick={onHandleCart}
             disabled={!selectedVariant || selectedVariant.stock <= 0}
@@ -247,7 +259,7 @@ export const ProductCard = ({ data }: ProductCardProps) => {
               ? "Out of Stock"
               : "Add to Cart"}
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );

@@ -11,6 +11,8 @@ import { Account } from "@/components/account";
 import { useCart } from "@/hooks/use-cart";
 import { formatter } from "@/lib/utils";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useSession } from "next-auth/react";
+import { useAddress } from "@/hooks/use-address";
 
 const searchCategories = [
   "All",
@@ -53,6 +55,12 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
   } | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const searchDropdownRef = useRef<HTMLDivElement>(null);
+  const [defaultLocation, setDefaultLocation] = useState({
+    city: "Delhi",
+    pincode: "110040",
+  });
+  const { data: session } = useSession();
+  const { data: addresses, isLoading: isAddressLoading } = useAddress();
 
   const itemCount = getItemCount() || 0;
   const totalAmount = getTotalAmount() || 0;
@@ -63,7 +71,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
       if (
         searchDropdownRef.current &&
         !searchDropdownRef.current.contains(event.target as Node) &&
-        !isSearchDropdownOpen // Ensure category dropdown click doesn't interfere
+        !isSearchDropdownOpen
       ) {
         setSearchResults(null);
         setSearchQuery("");
@@ -76,14 +84,126 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
     };
   }, [isSearchDropdownOpen]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       isMounted.current = false;
     };
   }, []);
 
-  // Debounced search function
+  useEffect(() => {
+    const updateLocation = () => {
+      // if (session?.user && addresses?.length && !isAddressLoading) {
+      //   const firstAddress = addresses[0];
+      //   const locationData = {
+      //     city: firstAddress.district || "Unknown",
+      //     pincode: firstAddress.zipCode,
+      //     state: firstAddress.state,
+      //     country: "India",
+      //   };
+      //   localStorage.setItem("locationData", JSON.stringify(locationData));
+      //   window.dispatchEvent(new Event("locationDataUpdated"));
+      //   setDefaultLocation({
+      //     city: locationData.city,
+      //     pincode: locationData.pincode,
+      //   });
+      //   return;
+      // }
+
+      // if (session?.user && addresses?.length && !isAddressLoading) {
+      //   const firstAddress = addresses[0];
+      //   const locationData = {
+      //     city: firstAddress.district || "Unknown",
+      //     pincode: firstAddress.zipCode,
+      //     state: firstAddress.state,
+      //     country: "India",
+      //   };
+
+      //   // Only update if different from current
+      //   const currentLocation = JSON.parse(
+      //     localStorage.getItem("locationData") || "{}"
+      //   );
+      //   if (currentLocation.pincode !== locationData.pincode) {
+      //     localStorage.setItem("locationData", JSON.stringify(locationData));
+      //     window.dispatchEvent(new Event("locationDataUpdated"));
+      //   }
+      //   setDefaultLocation({
+      //     city: locationData.city,
+      //     pincode: locationData.pincode,
+      //   });
+      //   return;
+      // }
+
+      const locationData = localStorage.getItem("locationData");
+
+      if (locationData) {
+        try {
+          const parsedData = JSON.parse(locationData);
+          if (parsedData.city && parsedData.pincode) {
+            setDefaultLocation({
+              city: parsedData.city,
+              pincode: parsedData.pincode,
+            });
+            return;
+          }
+        } catch (error) {
+          console.error("Error parsing locationData:", error);
+        }
+      }
+
+      if (session?.user && addresses?.length && !isAddressLoading) {
+        const firstAddress = addresses[0];
+        // Convert to string and trim
+        const addressPincode = String(firstAddress.zipCode).trim();
+
+        if (addressPincode) {
+          const locationData = {
+            city: firstAddress.district || "Unknown",
+            pincode: addressPincode, // Store as string
+            state: firstAddress.state,
+            country: "India",
+          };
+
+          const currentLocation = JSON.parse(
+            localStorage.getItem("locationData") || "{}"
+          );
+
+          // Only update if pincode changed
+          if (currentLocation.pincode !== addressPincode) {
+            console.log("Updating location from address:", locationData);
+            localStorage.setItem("locationData", JSON.stringify(locationData));
+            window.dispatchEvent(new Event("locationDataUpdated"));
+          }
+
+          setDefaultLocation({
+            city: locationData.city,
+            pincode: locationData.pincode,
+          });
+          return;
+        }
+      }
+
+      const fallbackLocation = {
+        city: "Delhi",
+        pincode: "110040",
+        state: "Delhi",
+        country: "India",
+      };
+      localStorage.setItem("locationData", JSON.stringify(fallbackLocation));
+      window.dispatchEvent(new Event("locationDataUpdated"));
+      setDefaultLocation({
+        city: fallbackLocation.city,
+        pincode: fallbackLocation.pincode,
+      });
+    };
+
+    updateLocation();
+    window.addEventListener("locationDataUpdated", updateLocation);
+
+    return () => {
+      window.removeEventListener("locationDataUpdated", updateLocation);
+    };
+  }, [session, addresses, isAddressLoading]);
+
   const debouncedSearch = useDebounce(async (query: string) => {
     if (!query) {
       if (isMounted.current) {
@@ -117,14 +237,12 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
     }
   }, 800);
 
-  // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setSearchQuery(query);
     debouncedSearch(query);
   };
 
-  // Handle search result click
   const handleResultClick = (href: string) => {
     setSearchQuery("");
     setSearchResults(null);
@@ -317,7 +435,6 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
     <div className="bg-black">
       <div className="max-w-[1400px] m-auto pb-5">
         <header className="bg-black text-white py-4 px-6 flex items-center justify-between shadow-md">
-          {/* Logo */}
           <div className="flex items-center space-x-4">
             <Link href="/">
               <img
@@ -330,170 +447,6 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
               />
             </Link>
           </div>
-
-          {/* <div className="flex-1 mx-6 max-w-2xl relative">
-            <div className="relative flex bg-white rounded-md overflow-hidden">
-              <div className="relative">
-                <button
-                  onClick={() => setIsSearchDropdownOpen(!isSearchDropdownOpen)}
-                  className="flex items-center gap-1 bg-[rgb(238,140,29)] text-white px-4 py-2.5 text-sm font-medium hover:bg-[rgb(238,140,29)] transition-colors min-w-max"
-                >
-                  <span>{selectedCategory}</span>
-                  <ChevronDown
-                    size={16}
-                    className={`transform transition-transform ${
-                      isSearchDropdownOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-              </div>
-
-              <div className="flex-1 relative">
-                <input
-                  type="text"
-                  placeholder="Search for Product Brand..."
-                  className="w-full py-2.5 px-4 text-black focus:outline-none text-sm"
-                />
-                <button className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 rounded transition-colors">
-                  <Search size={24} className="text-black" />
-                </button>
-              </div>
-            </div>
-
-            {isSearchDropdownOpen && (
-              <div className="absolute top-full left-0 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-60 overflow-y-auto mt-1">
-                <div className="py-1">
-                  {searchCategories.map((category) => (
-                    <button
-                      key={category}
-                      onClick={() => {
-                        setSelectedCategory(category);
-                        setIsSearchDropdownOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-                    >
-                      {category}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div> */}
-
-          {/* <div className="flex-1 mx-6 max-w-2xl relative">
-            <div className="relative flex bg-white rounded-md overflow-hidden">
-              <div className="relative">
-                <button
-                  onClick={() => setIsSearchDropdownOpen(!isSearchDropdownOpen)}
-                  className="flex items-center gap-1 bg-[rgb(238,140,29)] text-white px-4 py-2.5 text-sm font-medium hover:bg-[rgb(238,140,29)] transition-colors min-w-max"
-                >
-                  <span>{selectedCategory}</span>
-                  <ChevronDown
-                    size={16}
-                    className={`transform transition-transform ${
-                      isSearchDropdownOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-              </div>
-
-              <div className="flex-1 relative">
-                <input
-                  type="text"
-                  placeholder="Search for Product Brand..."
-                  className="w-full py-2.5 px-4 text-black focus:outline-none text-sm"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                />
-                <button className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 rounded transition-colors">
-                  <Search size={24} className="text-black" />
-                </button>
-              </div>
-            </div>
-
-            {isSearchDropdownOpen && (
-              <div className="absolute top-full left-0 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-60 overflow-y-auto mt-1">
-                <div className="py-1">
-                  {searchCategories.map((category) => (
-                    <button
-                      key={category}
-                      onClick={() => {
-                        setSelectedCategory(category);
-                        setIsSearchDropdownOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-                    >
-                      {category}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {(isSearching ||
-              (searchResults &&
-                (searchResults.categories.length > 0 ||
-                  searchResults.products.length > 0))) && (
-              <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-96 overflow-y-auto mt-1">
-                <div className="py-2">
-                  {isSearching ? (
-                    <div className="px-4 py-2 text-sm text-gray-700">
-                      Searching...
-                    </div>
-                  ) : (
-                    <>
-                      {searchResults?.categories.length > 0 && (
-                        <div className="border-b border-gray-200 pb-2">
-                          <h3 className="px-4 py-2 text-sm font-semibold text-gray-900">
-                            Subcategories
-                          </h3>
-                          {searchResults.categories.map((subCategory) => (
-                            <button
-                              key={subCategory.id}
-                              onClick={() =>
-                                handleResultClick(
-                                  `/category/${subCategory.slug}?page=1`
-                                )
-                              }
-                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-                            >
-                              {subCategory.name}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-
-                      {searchResults?.products.length > 0 && (
-                        <div className="pt-2">
-                          <h3 className="px-4 py-2 text-sm font-semibold text-gray-900">
-                            Products
-                          </h3>
-                          {searchResults.products.map((product) => (
-                            <button
-                              key={product.id}
-                              onClick={() =>
-                                handleResultClick(`/product/${product.slug}`)
-                              }
-                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors flex items-center gap-2"
-                            >
-                              {product.variants[0]?.images[0] && (
-                                <img
-                                  src={product.variants[0].images[0].url}
-                                  alt={product.name}
-                                  className="w-10 h-10 object-cover rounded"
-                                />
-                              )}
-                              <span>{product.name}</span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
-          </div> */}
 
           <div
             className="flex-1 mx-6 max-w-2xl relative"
@@ -630,7 +583,6 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
                           ))}
                         </div>
                       ) : (
-                        // Add no results found message when all arrays are empty
                         !isSearching &&
                         searchResults &&
                         searchResults.categories.length === 0 &&
@@ -648,14 +600,13 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
           </div>
 
           <div className="flex items-center space-x-6">
-            <Account
-            // session={status === "authenticated"}
-            // name={session?.user?.name || "Guest"}
-            />
+            <Account />
 
             <div className="hidden md:flex items-center space-x-1 text-sm">
               <MapPin size={24} />
-              <span>Mumbai, 400049</span>
+              <span>
+                {defaultLocation?.city}, {defaultLocation?.pincode}
+              </span>
             </div>
 
             <Link

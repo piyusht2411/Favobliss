@@ -9,27 +9,28 @@ import { Summary } from "@/components/cart/summary";
 import { Hero } from "@/components/cart/hero";
 import { useEffect } from "react";
 import { useCheckout } from "@/hooks/use-checkout";
+import { PincodeValidator } from "@/components/store/PincodeValidator";
 
 const CartPage = () => {
   const { items } = useCart();
-   const { addItem } = useCheckout();
+  const { setCheckOutItems } = useCheckout();
 
   useEffect(() => {
-    items.forEach((item) => {
-      addItem({
-        id: item.id,
-        variantId: item.selectedVariant.id,
-        price: item.selectedVariant.price,
-        quantity: item.checkOutQuantity,
-        image: item.selectedVariant.images[0]?.url || "",
-        about: item.about,
-        name: item.name,
-        size: item.selectedVariant.size?.value,
-        color: item.selectedVariant.color?.name,
-        selectedVariant: item.selectedVariant,
-      });
-    });
-  }, [items, addItem]);
+    const checkoutItems = items.map((item) => ({
+      id: item.id,
+      variantId: item.selectedVariant.id,
+      price: item.price, // Location-based price
+      quantity: item.checkOutQuantity,
+      image: item.selectedVariant.images[0]?.url || "",
+      about: item.about,
+      name: item.name,
+      size: item.selectedVariant.size?.value,
+      color: item.selectedVariant.color?.name,
+      selectedVariant: item.selectedVariant,
+      // locationId: item.locationId, // Include locationId
+    }));
+    setCheckOutItems(checkoutItems);
+  }, [items, setCheckOutItems]);
 
   return (
     <div
@@ -39,14 +40,12 @@ const CartPage = () => {
       {items.length !== 0 && (
         <Container>
           <div className="px-4 sm:px-6 lg:px-8 xl:px-24 h-full">
+            <PincodeValidator />
             <div className="my-12 lg:grid lg:grid-cols-12 lg:items-start gap-x-12">
               <div className="lg:col-span-7">
                 <ul className="space-y-4">
                   {items.map((item) => (
-                    <CartItem
-                      key={item.selectedVariant.id} // Use variant ID as key
-                      data={item}
-                    />
+                    <CartItem key={item.selectedVariant.id} data={item} />
                   ))}
                 </ul>
               </div>

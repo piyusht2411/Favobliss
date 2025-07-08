@@ -12,18 +12,18 @@ import { useCart } from "@/hooks/use-cart";
 import { useCheckout } from "@/hooks/use-checkout";
 
 interface CartItemProps {
-  data: Product & { checkOutQuantity: number; selectedVariant: any };
+  data: Product & {
+    checkOutQuantity: number;
+    selectedVariant: any;
+    price: number;
+    locationId?: string | null;
+  };
 }
 
 export const CartItem = ({ data }: CartItemProps) => {
   const { items, removeItem, updateQuantity } = useCart();
-  const {
-    checkOutItems,
-    selectItem,
-    removeSelectedItems,
-    addItem,
-    updateItem,
-  } = useCheckout();
+  const { checkOutItems, selectItem, removeSelectedItems, updateItem } =
+    useCheckout();
 
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
@@ -32,39 +32,19 @@ export const CartItem = ({ data }: CartItemProps) => {
       ?.checkOutQuantity || 1
   );
 
-  // Check if item is selected
   const isChecked = !!checkOutItems.find(
     (item) => item.variantId === data.selectedVariant.id
   );
 
-  // Add item to checkout when component mounts
   useEffect(() => {
     setMounted(true);
-
-    const formattedData: CartSelectedItem = {
-      id: data.id,
-      variantId: data.selectedVariant.id,
-      price: data.selectedVariant.price,
-      quantity: data.checkOutQuantity || 1,
-      image: data.selectedVariant.images[0]?.url || "",
-      about: data.about,
-      name: data.name,
-      size: data.selectedVariant.size?.value,
-      color: data.selectedVariant.color?.name,
-      selectedVariant: data.selectedVariant,
-    };
-
-    // Add item to checkout if not already present
-    if (!isChecked) {
-      addItem(formattedData);
-    }
   }, []);
 
   const handleSelectItem = () => {
     const formattedData: CartSelectedItem = {
       id: data.id,
       variantId: data.selectedVariant.id,
-      price: data.selectedVariant.price,
+      price: data.price,
       quantity,
       image: data.selectedVariant.images[0]?.url || "",
       about: data.about,
@@ -72,6 +52,7 @@ export const CartItem = ({ data }: CartItemProps) => {
       size: data.selectedVariant.size?.value,
       color: data.selectedVariant.color?.name,
       selectedVariant: data.selectedVariant,
+      locationId: data.locationId,
     };
 
     if (isChecked) {
@@ -86,12 +67,10 @@ export const CartItem = ({ data }: CartItemProps) => {
     removeItem(data.selectedVariant.id);
   };
 
-  // Update quantity in both cart and checkout
   useEffect(() => {
     if (mounted && quantity !== data.checkOutQuantity) {
       updateQuantity(data.selectedVariant.id, quantity);
 
-      // If item is checked, update checkout quantity too
       if (isChecked) {
         updateItem(data.selectedVariant.id, quantity);
       }
@@ -166,9 +145,7 @@ export const CartItem = ({ data }: CartItemProps) => {
                     Color - {data.selectedVariant.color.name}
                   </p>
                 )}
-                <p className="font-extrabold">
-                  {formatter.format(data.selectedVariant.price)}
-                </p>
+                <p className="font-extrabold">{formatter.format(data.price)}</p>
               </div>
               <div
                 className="font-semibold text-zinc-700 cursor-default md:cursor-pointer"
