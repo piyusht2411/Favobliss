@@ -292,10 +292,7 @@ export const ProductTabs = ({ product, productId }: ProductTabsProps) => {
       </div>
 
       {/* Review */}
-      <div className="py-4" ref={reviewRef}>
-        <h2 className="font-semibold text-black text-lg md:text-xl mb-4">
-          Review
-        </h2>
+      {/* <div className="py-4" ref={reviewRef}>
         <div
           className={`transition-all duration-500 ease-in-out ${
             isReviewLong && !showMore.review
@@ -313,16 +310,14 @@ export const ProductTabs = ({ product, productId }: ProductTabsProps) => {
                 : "none",
           }}
         >
-          <p className="text-black text-base sm:px-6 lg:px-8 py-2">
-            No Reviews
-          </p>
+          <ProductReviews productId={product.id} />
         </div>
         <ShowMoreButton
           section="review"
           isExpanded={showMore.review}
           isLong={isReviewLong}
         />
-      </div>
+      </div> */}
     </div>
   );
 };

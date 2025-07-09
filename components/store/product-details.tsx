@@ -22,15 +22,21 @@ interface ProductDetailsProps {
   data: Product;
   defaultVariant: Variant;
   onVariantChange?: (variant: Variant) => void;
-  locations: Location[]; // Add locations
+  locations: Location[];
+  totalReviews: number;
+  avgRating: number | null;
 }
 
-export const ProductDetails = ({
-  data,
-  defaultVariant,
-  onVariantChange,
-  locations,
-}: ProductDetailsProps) => {
+export const ProductDetails = (props: ProductDetailsProps) => {
+  const {
+    data,
+    defaultVariant,
+    onVariantChange,
+    locations,
+    totalReviews,
+    avgRating,
+  } = props;
+
   const [selectedVariant, setSelectedVariant] = useState(defaultVariant);
   const [selectedSize, setSelectedSize] = useState<string | undefined>(
     defaultVariant.sizeId
@@ -650,9 +656,11 @@ export const ProductDetails = ({
             </p>
           )}
           <h1 className="text-2xl md:text-xl font-bold">{data.name}</h1>
-          <p className="text-[#088466] mt-2">
-            4.1 ⭐ <span className="underline">(9 ratings & 4 Reviews)</span>
-          </p>
+          {avgRating && (
+            <p className="text-[#088466] mt-2">
+              {avgRating} ⭐ <span>({totalReviews} review)</span>
+            </p>
+          )}
 
           <div className="py-2 rounded-md max-w-md">
             <div className="flex items-center justify-between flex-wrap gap-3 md:gap-0">
