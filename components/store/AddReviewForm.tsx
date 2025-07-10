@@ -1,18 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { FaStar, FaCamera, FaTimes } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import Link from "next/link";
+import { useOrder } from "@/hooks/use-order";
+import { Order, OrderProduct } from "@prisma/client";
 
 interface AddReviewFormProps {
   productId: string;
-  onReviewSubmitted: () => void; // Add callback for refresh
+  onReviewSubmitted: () => void;
 }
 
 export const AddReviewForm = ({
@@ -26,10 +27,30 @@ export const AddReviewForm = ({
   const [images, setImages] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const router = useRouter();
+  const {
+    data: orders,
+    isLoading: isOrderLoading,
+  }: {
+    data: (Order & {
+      orderProduct: (OrderProduct & {
+        comment: Comment | null;
+      })[];
+    })[];
+    isLoading: boolean;
+  } = useOrder();
 
   const isAuthenticated = status === "authenticated";
+  const userId = session?.user?.id;
   const userName = session?.user?.name || "Anonymous User";
+
+  const isVerifiedBuyer =
+    isAuthenticated &&
+    orders?.some(
+      (order) =>
+        order.isPaid &&
+        order.userId === userId &&
+        order.orderProduct.some((product) => product.productId === productId)
+    );
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -48,8 +69,14 @@ export const AddReviewForm = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!isAuthenticated) {
       toast.error("Please log in to submit a review.");
+      return;
+    }
+
+    if (!isVerifiedBuyer) {
+      toast.error("You must purchase this product to submit a review.");
       return;
     }
 
@@ -61,7 +88,6 @@ export const AddReviewForm = ({
     setIsLoading(true);
 
     try {
-      // Upload images to Cloudinary
       let imageUrls: string[] = [];
       if (images.length > 0) {
         const formData = new FormData();
@@ -80,7 +106,6 @@ export const AddReviewForm = ({
         imageUrls = uploadData.imageUrls;
       }
 
-      // Submit review
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/products/${productId}/reviews`,
         {
@@ -94,7 +119,7 @@ export const AddReviewForm = ({
             rating,
             text,
             images: imageUrls,
-            userId: session?.user?.id,
+            userId,
           }),
         }
       );
@@ -105,13 +130,10 @@ export const AddReviewForm = ({
 
       toast.success("Review submitted successfully!");
 
-      // Reset form
       setRating(0);
       setText("");
       setImages([]);
       setShowForm(false);
-
-      // Call the callback to refresh reviews
       onReviewSubmitted();
     } catch (error) {
       console.error("[ADD_REVIEW_FORM]", error);
@@ -131,24 +153,35 @@ export const AddReviewForm = ({
 
   return (
     <div className="w-full">
-      {!showForm ? (
+      {isOrderLoading ? (
         <div className="text-center py-4">
-          <Button
-            onClick={() => setShowForm(true)}
-            className="bg-orange-400 hover:bg-orange-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
-            disabled={!isAuthenticated}
-          >
-            Write a Review
-          </Button>
-          {!isAuthenticated && (
-            <p className="text-sm text-gray-500 mt-2">
-              <Link
-                href="/auth/signin"
-                className="text-blue-600 hover:underline"
-              >
-                Sign in
-              </Link>{" "}
-              to write a review
+          <p className="text-sm text-gray-500">Loading order data...</p>
+        </div>
+      ) : !showForm ? (
+        <div className="text-center py-4">
+          {isVerifiedBuyer ? (
+            <Button
+              onClick={() => setShowForm(true)}
+              className="bg-orange-400 hover:bg-orange-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
+              disabled={!isAuthenticated}
+            >
+              Write a Review
+            </Button>
+          ) : (
+            <p className="text-sm text-gray-500">
+              {isAuthenticated ? (
+                "You must purchase this product to write a review."
+              ) : (
+                <>
+                  <Link
+                    href="/auth/signin"
+                    className="text-blue-600 hover:underline"
+                  >
+                    Sign in
+                  </Link>{" "}
+                  to write a review after purchasing the product.
+                </>
+              )}
             </p>
           )}
         </div>

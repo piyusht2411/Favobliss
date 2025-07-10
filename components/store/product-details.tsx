@@ -225,24 +225,16 @@ export const ProductDetails = (props: ProductDetailsProps) => {
   // }, [locations, selectedVariant, session, addresses, isAddressLoading]);
 
   const initializeDefaultPrice = useCallback(() => {
-    console.log("Initializing default price...");
     let activeLocation: any = null;
-
-    // 1. Use first session address if available
     if (session?.user && addresses?.length && !isAddressLoading) {
       const firstAddress = addresses[0];
-      // Convert to string and trim
       const sessionPincode = String(firstAddress.zipCode).trim();
-      console.log("Using session address with pincode:", sessionPincode);
 
       activeLocation = locations.find(
-        (loc) =>
-          // Convert location pincode to string for comparison
-          String(loc.pincode).trim() === sessionPincode
+        (loc) => String(loc.pincode).trim() === sessionPincode
       );
 
       if (activeLocation) {
-        console.log("Found location for session pincode:", activeLocation);
         const sessionLocation = {
           city: firstAddress.district || "Unknown",
           pincode: sessionPincode,
@@ -255,9 +247,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
       }
     }
 
-    // 2. Try localStorage if session location is not found
     if (!activeLocation) {
-      console.log("Trying localStorage...");
       const storedLocation = localStorage.getItem("locationData");
       if (storedLocation) {
         try {
@@ -267,14 +257,9 @@ export const ProductDetails = (props: ProductDetailsProps) => {
             : null;
 
           if (storedPincode) {
-            console.log("Found stored pincode:", storedPincode);
             activeLocation = locations.find(
               (loc) => String(loc.pincode).trim() === storedPincode
             );
-
-            if (activeLocation) {
-              console.log("Found location for stored pincode:", activeLocation);
-            }
           }
         } catch (e) {
           console.error("Error parsing locationData:", e);
@@ -282,16 +267,13 @@ export const ProductDetails = (props: ProductDetailsProps) => {
       }
     }
 
-    // 3. Fallback to default pincode ONLY if not found
     if (!activeLocation) {
-      console.log("Falling back to default pincode");
       const fallbackPincode = "110040";
       activeLocation = locations.find(
         (loc) => String(loc.pincode).trim() === fallbackPincode
       );
 
       if (activeLocation) {
-        console.log("Using fallback location:", activeLocation);
         const fallbackLocation = {
           city: activeLocation.city,
           state: activeLocation.state,
@@ -305,7 +287,6 @@ export const ProductDetails = (props: ProductDetailsProps) => {
 
     // 4. Set price and state from resolved location
     if (activeLocation) {
-      console.log("Active location found:", activeLocation);
       const variantPrice = selectedVariant.variantPrices?.find(
         (vp) => vp.locationId === activeLocation.id
       );
@@ -318,15 +299,12 @@ export const ProductDetails = (props: ProductDetailsProps) => {
       });
     } else {
       console.error("No active location found!");
-      // Fallback to variant's default price
       setLocationPrice({
         price: selectedVariant.price,
         mrp: selectedVariant.mrp || selectedVariant.price,
       });
     }
   }, [locations, selectedVariant, session, addresses, isAddressLoading]);
-
-  console.log(defaultLocationData, locationPrice, "defaultLocationData");
 
   const handlePincodeCheck = () => {
     if (pincode.trim()) {
@@ -658,7 +636,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
           <h1 className="text-2xl md:text-xl font-bold">{data.name}</h1>
           {avgRating && (
             <p className="text-[#088466] mt-2">
-              {avgRating} ⭐ <span>({totalReviews} review)</span>
+              {avgRating?.toFixed(1)} ⭐ <span>({totalReviews} review)</span>
             </p>
           )}
 

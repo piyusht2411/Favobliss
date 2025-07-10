@@ -69,13 +69,13 @@ const ProductPage = async ({ params }: ProductPageProps) => {
     })
   ).filter((item) => item.id !== product.id);
 
-  const locations = await getLocations(params.storeId); // Fetch locations
+  const locations = await getLocations(params.storeId);
 
   return (
     <ProductPageContent
       product={product}
       suggestProducts={suggestProducts}
-      locations={locations} // Pass locations
+      locations={locations}
     />
   );
 };

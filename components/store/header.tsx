@@ -169,7 +169,6 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
 
           // Only update if pincode changed
           if (currentLocation.pincode !== addressPincode) {
-            console.log("Updating location from address:", locationData);
             localStorage.setItem("locationData", JSON.stringify(locationData));
             window.dispatchEvent(new Event("locationDataUpdated"));
           }

@@ -31,8 +31,6 @@ export const Summary = (props: Props) => {
   const { onOpen } = usePaymentSuccessErrorModal();
   const [loading, setLoading] = useState(false);
 
-  console.log(checkOutItems);
-
   const getTotalAmount = () => {
     const amount = checkOutItems.reduce((total, item) => {
       return total + (item.price || 0) * item.quantity;
