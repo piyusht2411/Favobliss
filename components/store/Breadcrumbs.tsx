@@ -37,8 +37,8 @@ const Breadcrumb = ({ items }: BreadcrumbProps) => {
               href={item.href}
               className="hover:text-gray-800 transition-colors capitalize"
             >
-              {item.label.charAt(0).toUpperCase() +
-                item.label.slice(1).toLowerCase()}
+              {item?.label.charAt(0).toUpperCase() +
+                item?.label.slice(1).toLowerCase()}
             </Link>
           ) : (
             <span className="text-gray-800 font-medium capitalize">

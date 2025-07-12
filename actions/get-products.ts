@@ -6,6 +6,7 @@ const HOT_DEALS_URL = `${process.env.NEXT_PUBLIC_API_URL}/products/hot-deals`;
 
 interface Query {
   categoryId?: string;
+  brandId?: string;
   colorId?: string;
   sizeId?: string;
   isFeatured?: boolean;
@@ -26,6 +27,7 @@ export const getProducts = async (query: Query): Promise<Product[]> => {
       colorId: query.colorId,
       sizeId: query.sizeId,
       categoryId: query.categoryId,
+      brandId: query.brandId,
       isFeatured: query.isFeatured,
       limit: query.limit,
       type: query.type,
@@ -33,6 +35,8 @@ export const getProducts = async (query: Query): Promise<Product[]> => {
       page: query.page,
     },
   });
+
+  console.log("first", url);
 
   try {
     const res = await fetch(url, {

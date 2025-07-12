@@ -200,9 +200,9 @@ export const ProductCard = ({ data, locations }: ProductCardProps) => {
         </p>
 
         {/* Brand */}
-        {data.brand && (
+        {/* {data.brand && (
           <p className="text-xs text-zinc-500 font-medium">{data.brand}</p>
-        )}
+        )} */}
 
         {/* Price Display */}
         <div className="flex items-center gap-2">

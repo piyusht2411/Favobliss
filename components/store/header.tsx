@@ -46,6 +46,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
     categories: any[];
     products: any[];
     subCategories?: any[];
+    brands?: any[];
     pagination: {
       page: number;
       limit: number;
@@ -554,6 +555,24 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
                               </button>
                             )
                           )}
+                        </div>
+                      )}
+                      {(searchResults?.brands ?? []).length > 0 && (
+                        <div className="border-b border-gray-200 pb-2">
+                          <h3 className="px-4 py-2 text-sm font-semibold text-gray-900">
+                            Brands
+                          </h3>
+                          {(searchResults?.brands ?? []).map((brand) => (
+                            <button
+                              key={brand.id}
+                              onClick={() =>
+                                handleResultClick(`/brand/${brand.slug}?page=1`)
+                              }
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                            >
+                              {brand.name}
+                            </button>
+                          ))}
                         </div>
                       )}
 

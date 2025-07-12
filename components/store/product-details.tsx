@@ -408,7 +408,6 @@ export const ProductDetails = (props: ProductDetailsProps) => {
 
   useEffect(() => {
     if (!isPincodeChecked) {
-      console.log("Triggering price initialization");
       initializeDefaultPrice();
     }
   }, [
@@ -628,11 +627,11 @@ export const ProductDetails = (props: ProductDetailsProps) => {
               New Arrival
             </div>
           )}
-          {data.brand && (
+          {/* {data?.brand.name && (
             <p className="text-sm text-gray-600 mb-1 font-medium">
-              {data.brand}
+              {data.brand.name}
             </p>
-          )}
+          )} */}
           <h1 className="text-2xl md:text-xl font-bold">{data.name}</h1>
           {avgRating && (
             <p className="text-[#088466] mt-2">

@@ -6,7 +6,7 @@ import { Metadata, ResolvingMetadata } from "next";
 import { ProductPageContent } from "@/components/store/ProductPageClient";
 
 interface ProductPageProps {
-  params: { storeId: string; slug: string }; // Include storeId
+  params: { storeId: string; slug: string };
 }
 
 export async function generateMetadata(

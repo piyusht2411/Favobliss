@@ -4,6 +4,14 @@ export interface Billboard {
   imageUrl: string;
 }
 
+export interface Brand {
+  id: string;
+  slug: string;
+  name: string;
+  bannerImage?: string;
+  cardImage?: string;
+}
+
 export interface Location {
   id: string;
   pincode: string;
