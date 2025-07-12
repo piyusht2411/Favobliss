@@ -14,12 +14,13 @@ import BrandList from "@/components/store/BrandList";
 export const revalidate = 0;
 
 const LandingPage = async ({ params }: { params: { storeId: string } }) => {
-  const products = await getProducts({ isFeatured: true });
+  const products = await getProducts();
   const deals = await getHotDeals({
     limit: "10",
     timeFrame: "30 days",
   });
 
+  const favoblissChoice = await getProducts({ isFeatured: true });
   const locations = await getLocations(params.storeId);
   const brands = await getBrands();
 
@@ -40,6 +41,11 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
             <ProductList
               title="Hot Deals Products"
               data={deals || []}
+              locations={locations}
+            />
+            <ProductList
+              title="Favobliss's Choice"
+              data={favoblissChoice || []}
               locations={locations}
             />
             <BrandList brands={Array.isArray(brands) ? brands : [brands]} />

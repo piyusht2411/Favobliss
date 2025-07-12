@@ -20,19 +20,19 @@ interface HotDealsQuery extends Query {
   timeFrame?: "7 days" | "30 days" | "90 days" | "all time";
 }
 
-export const getProducts = async (query: Query): Promise<Product[]> => {
+export const getProducts = async (query?: Query): Promise<Product[]> => {
   const url = qs.stringifyUrl({
     url: URL,
     query: {
-      colorId: query.colorId,
-      sizeId: query.sizeId,
-      categoryId: query.categoryId,
-      brandId: query.brandId,
-      isFeatured: query.isFeatured,
-      limit: query.limit,
-      type: query.type,
-      price: query.price,
-      page: query.page,
+      ...(query?.colorId && { colorId: query.colorId }),
+      ...(query?.sizeId && { sizeId: query.sizeId }),
+      ...(query?.categoryId && { categoryId: query.categoryId }),
+      ...(query?.brandId && { brandId: query.brandId }),
+      ...(query?.isFeatured && { isFeatured: query.isFeatured }),
+      ...(query?.limit && { limit: query.limit }),
+      ...(query?.type && { type: query.type }),
+      ...(query?.price && { price: query.price }),
+      ...(query?.page && { page: query.page }),
     },
   });
 
