@@ -8,8 +8,8 @@ export interface Brand {
   id: string;
   slug: string;
   name: string;
-  bannerImage?: string;
-  cardImage?: string;
+  bannerImage: string;
+  cardImage: string;
 }
 
 export interface Location {

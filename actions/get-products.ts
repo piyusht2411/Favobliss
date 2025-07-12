@@ -36,8 +36,6 @@ export const getProducts = async (query: Query): Promise<Product[]> => {
     },
   });
 
-  console.log("first", url);
-
   try {
     const res = await fetch(url, {
       cache: "no-store",

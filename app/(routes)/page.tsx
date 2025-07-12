@@ -8,6 +8,8 @@ import { Container } from "@/components/ui/container";
 import { CategorySlider } from "@/components/home/category-slider";
 import HotDealSlider from "@/components/store/hotDealSlider";
 import GalleryImage from "@/components/store/GalleryImage";
+import { getBrands } from "@/actions/get-brands";
+import BrandList from "@/components/store/BrandList";
 
 export const revalidate = 0;
 
@@ -19,6 +21,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
   });
 
   const locations = await getLocations(params.storeId);
+  const brands = await getBrands();
 
   return (
     <>
@@ -39,6 +42,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
               data={deals || []}
               locations={locations}
             />
+            <BrandList brands={Array.isArray(brands) ? brands : [brands]} />
             <LatestLaunches />
             <div className="pt-8 ">
               <h3 className="text-3xl font-bold">Hot Deals</h3>
