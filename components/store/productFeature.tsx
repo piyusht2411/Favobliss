@@ -15,7 +15,7 @@ export const ProductFeatures = ({ data }: ProductFeaturesProps) => {
   }
 
   return (
-    <div className="flex flex-col gap-y-2 mt-6">
+    <div className="flex flex-col gap-y-2 mt-3">
       <h3 className="text-base font-semibold text-orange-500">
         Enabled Features
       </h3>

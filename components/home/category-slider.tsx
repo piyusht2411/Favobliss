@@ -89,10 +89,10 @@ export function CategorySlider() {
           {categories.map((category, index) => (
             <CarouselItem
               key={index}
-              className="pl-2 md:pl-4 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-[12.5%]"
+              className="pl-2 md:pl-4 basis-1/3 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-[12.5%]"
             >
               <div className="group">
-                <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 mx-auto mb-3 rounded-full bg-black border-4 border-orange-500 overflow-hidden transition-all duration-300 hover:scale-105 hover:border-orange-400">
+                <div className="relative w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 mx-auto mb-3 rounded-full bg-black border-4 border-orange-500 overflow-hidden transition-all duration-300 hover:scale-105 hover:border-orange-400">
                   <img
                     src={category.image}
                     alt={category.alt}

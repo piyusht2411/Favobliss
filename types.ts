@@ -79,6 +79,18 @@ export interface Product {
   expressDelivery: boolean;
   warranty: string;
   isNewArrival: boolean;
+  averageRating: number;
+  subCategory: SubCategory;
+}
+
+export interface SubCategory {
+  id: string;
+  name: string;
+  slug: string;
+  bannerImage?: string;
+  categoryId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ProductSpecification {

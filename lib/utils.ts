@@ -1,21 +1,28 @@
 import { Category } from "@/types";
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export const formatter = new Intl.NumberFormat("en-IN", {
-  style : "currency",
-  currency : "INR"
+  style: "currency",
+  currency: "INR",
+  maximumFractionDigits: 0,
 });
 
-export const getCategories = ( key: string, type : "TOPWEAR" | "BOTTOMWEAR" | "FOOTWEAR" | "INNERWEARANDSLEEPWEAR" , category : Category[] ) => {
-  const formattedCategory = category.filter((c) => c.classification.toString() === type);
+export const getCategories = (
+  key: string,
+  type: "TOPWEAR" | "BOTTOMWEAR" | "FOOTWEAR" | "INNERWEARANDSLEEPWEAR",
+  category: Category[]
+) => {
+  const formattedCategory = category.filter(
+    (c) => c.classification.toString() === type
+  );
   const categoryURL = formattedCategory.map((c) => ({
-    url : `/category/${c.id}?category=${key}&page=1`,
-    label : c.name
+    url: `/category/${c.id}?category=${key}&page=1`,
+    label: c.name,
   }));
   return categoryURL;
-}
+};

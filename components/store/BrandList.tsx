@@ -22,7 +22,7 @@ const BrandList = ({ brands }: Props) => {
         Discover Leading Brands
       </h2>
       <div className="flex flex-wrap justify-center items-center gap-6 mb-8">
-        {brands?.map((item) => (
+        {brands?.slice(0,8).map((item) => (
           <div
             key={item.id}
             className="w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 flex items-center justify-center bg-gray-100 rounded-full overflow-hidden cursor-pointer"

@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { MouseEventHandler, useState, useEffect } from "react";
 import { usePreviewModal } from "@/hooks/use-preview-modal";
 import { useCart } from "@/hooks/use-cart";
+import { Star } from "lucide-react";
 
 interface ProductCardProps {
   data: Product;
@@ -112,6 +113,19 @@ export const ProductCard = ({ data, locations }: ProductCardProps) => {
     }
   };
 
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <Star
+        key={i}
+        className={`w-4 h-4 ${
+          i < Math.floor(rating)
+            ? "text-yellow-400 fill-yellow-400"
+            : "text-gray-300"
+        }`}
+      />
+    ));
+  };
+
   const onVariantChange = (index: number) => {
     setSelectedVariantIndex(index);
   };
@@ -119,7 +133,7 @@ export const ProductCard = ({ data, locations }: ProductCardProps) => {
   const selectedVariant =
     data.variants[selectedVariantIndex] || data.variants[0];
   const imageUrl = selectedVariant?.images[0]?.url || "/placeholder-image.jpg";
-  const priceDisplay = formatter.format(locationPrice.price); // Use location-based price
+  const priceDisplay = formatter.format(locationPrice.price);
   const mrpDisplay = locationPrice.mrp
     ? formatter.format(locationPrice.mrp)
     : null;
@@ -144,13 +158,21 @@ export const ProductCard = ({ data, locations }: ProductCardProps) => {
     return acc;
   }, [] as (typeof data.variants)[0]["size"][]);
 
+  const calculateDiscount = (price: number, mrp: number) => {
+    if (!mrp || mrp <= price) return 0;
+    return Math.round(((mrp - price) / mrp) * 100);
+  };
+
+  const cleanNumber = (value: string) =>
+    Number(value.replace(/[₹,]/g, "").trim());
+
   return (
     <div
       onClick={onClick}
-      className="group md:cursor-pointer hover:shadow-xl transition-shadow duration-300 bg-white rounded-lg overflow-hidden border border-gray-100"
+      className="group md:cursor-pointer hover:shadow-xl transition-shadow duration-300 bg-white rounded-lg overflow-hidden"
     >
       <div className="relative">
-        <div className="aspect-[3/4] relative overflow-hidden bg-gray-50">
+        <div className="aspect-[3/4] relative overflow-hidden bg-white-50">
           <Image
             src={imageUrl}
             alt={data.name}
@@ -190,7 +212,7 @@ export const ProductCard = ({ data, locations }: ProductCardProps) => {
         </div> */}
       </div>
 
-      <div className="w-full flex flex-col space-y-3 p-4">
+      <div className="w-full flex flex-col space-y-2 p-4">
         <h3 className="text-black font-bold text-sm leading-5 h-10 overflow-hidden">
           <span className="line-clamp-2">{data.name}</span>
         </h3>
@@ -198,6 +220,9 @@ export const ProductCard = ({ data, locations }: ProductCardProps) => {
         <p className="w-full text-sm text-zinc-600 line-clamp-1">
           {data.about}
         </p>
+        <div className="flex items-center space-x-1">
+          {renderStars(data.averageRating || 0)}
+        </div>
 
         {/* Brand */}
         {/* {data.brand && (
@@ -205,17 +230,23 @@ export const ProductCard = ({ data, locations }: ProductCardProps) => {
         )} */}
 
         {/* Price Display */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <p className="text-lg font-bold text-zinc-900">{priceDisplay}</p>
           {mrpDisplay && mrpDisplay !== priceDisplay && (
             <p className="text-sm text-zinc-500 line-through">{mrpDisplay}</p>
           )}
+          <span className="bg-orange-400 text-white text-xs px-2 py-1 rounded">
+            {calculateDiscount(
+              cleanNumber(priceDisplay),
+              cleanNumber(mrpDisplay || "0")
+            )}
+            % off
+          </span>
         </div>
 
         {/* Variant Options */}
-        {data.variants.length > 0 && (
+        {/* {data.variants.length > 0 && (
           <div className="space-y-2">
-            {/* Color Variants */}
             {uniqueColors.length > 0 && (
               <div className="flex flex-col gap-1">
                 <div className="flex gap-2 flex-wrap">
@@ -246,7 +277,7 @@ export const ProductCard = ({ data, locations }: ProductCardProps) => {
               </div>
             )}
           </div>
-        )}
+        )} */}
 
         {/* Quick Add to Cart for Mobile */}
         {/* <div className="md:hidden">

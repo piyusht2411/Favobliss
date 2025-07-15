@@ -17,6 +17,8 @@ import { useCart } from "@/hooks/use-cart";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useAddress } from "@/hooks/use-address";
+import { GoShareAndroid } from "react-icons/go";
+import { useShareModal } from "@/hooks/use-share-modal";
 
 interface ProductDetailsProps {
   data: Product;
@@ -72,6 +74,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
   const buttonsRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const { onOpen } = useShareModal();
 
   const uniqueSizes = Array.from(
     new Map(
@@ -102,127 +105,6 @@ export const ProductDetails = (props: ProductDetailsProps) => {
       ? data.variants.some((v) => v.colorId === id && v.sizeId === selectedSize)
       : true
   );
-
-  // const initializeDefaultPrice = useCallback(() => {
-  //   let activeLocation = null;
-
-  //   // 1. Try getting location from localStorage
-  //   const storedLocation = localStorage.getItem("locationData");
-  //   if (storedLocation) {
-  //     try {
-  //       const parsed = JSON.parse(storedLocation);
-  //       if (parsed?.pincode) {
-  //         activeLocation = locations.find(
-  //           (loc) => loc.pincode === parsed.pincode
-  //         );
-  //       }
-  //     } catch (e) {
-  //       console.error("Error parsing locationData:", e);
-  //     }
-  //   }
-
-  //   // 2. If not found, fallback to default pincode
-  //   if (!activeLocation) {
-  //     const defaultPincode = "110040";
-  //     activeLocation = locations.find((loc) => loc.pincode === defaultPincode);
-  //     if (activeLocation) {
-  //       const defaultLocationDataUpdated = {
-  //         city: activeLocation.city,
-  //         state: activeLocation.state,
-  //         country: activeLocation.country,
-  //         pincode: activeLocation.pincode,
-  //       };
-  //       localStorage.setItem(
-  //         "locationData",
-  //         JSON.stringify(defaultLocationDataUpdated)
-  //       );
-  //       window.dispatchEvent(new Event("locationDataUpdated"));
-  //     }
-  //   }
-
-  //   const variantPrice = activeLocation
-  //     ? selectedVariant.variantPrices?.find(
-  //         (vp) => vp.locationId === activeLocation.id
-  //       )
-  //     : null;
-
-  //   setDefaultLocationData(activeLocation || null);
-  //   setSelectedLocationId(activeLocation?.id || null);
-  //   setLocationPrice({
-  //     price: variantPrice?.price || selectedVariant.price,
-  //     mrp: variantPrice?.mrp || selectedVariant.mrp || selectedVariant.price,
-  //   });
-  // }, [locations, selectedVariant]);
-
-  // const initializeDefaultPrice = useCallback(() => {
-  //   let activeLocation = null;
-
-  //   // 1. Use first session address if available
-  //   if (session?.user && addresses?.length && !isAddressLoading) {
-  //     const firstAddress = addresses[0];
-  //     const sessionLocation = {
-  //       city: firstAddress.district || "Unknown",
-  //       pincode: firstAddress.zipCode,
-  //       state: firstAddress.state,
-  //       country: "India",
-  //     };
-
-  //     localStorage.setItem("locationData", JSON.stringify(sessionLocation));
-  //     window.dispatchEvent(new Event("locationDataUpdated"));
-
-  //     activeLocation = locations.find(
-  //       (loc) => loc.pincode === sessionLocation.pincode
-  //     );
-  //   }
-
-  //   // 2. Try localStorage if session location is not found
-  //   if (!activeLocation) {
-  //     const storedLocation = localStorage.getItem("locationData");
-  //     if (storedLocation) {
-  //       try {
-  //         const parsed = JSON.parse(storedLocation);
-  //         if (parsed?.pincode) {
-  //           activeLocation = locations.find(
-  //             (loc) => loc.pincode === parsed.pincode
-  //           );
-  //         }
-  //       } catch (e) {
-  //         console.error("Error parsing locationData:", e);
-  //       }
-  //     }
-  //   }
-
-  //   // 3. Fallback to default pincode
-  //   if (!activeLocation) {
-  //     const fallbackPincode = "110040"; // New Delhi
-  //     activeLocation = locations.find((loc) => loc.pincode === fallbackPincode);
-
-  //     if (activeLocation) {
-  //       const fallbackLocation = {
-  //         city: activeLocation.city,
-  //         state: activeLocation.state,
-  //         country: activeLocation.country,
-  //         pincode: activeLocation.pincode,
-  //       };
-  //       localStorage.setItem("locationData", JSON.stringify(fallbackLocation));
-  //       window.dispatchEvent(new Event("locationDataUpdated"));
-  //     }
-  //   }
-
-  //   // 4. Set price and state from resolved location
-  //   const variantPrice = activeLocation
-  //     ? selectedVariant.variantPrices?.find(
-  //         (vp) => vp.locationId === activeLocation.id
-  //       )
-  //     : null;
-
-  //   setDefaultLocationData(activeLocation || null);
-  //   setSelectedLocationId(activeLocation?.id || null);
-  //   setLocationPrice({
-  //     price: variantPrice?.price || selectedVariant.price,
-  //     mrp: variantPrice?.mrp || selectedVariant.mrp || selectedVariant.price,
-  //   });
-  // }, [locations, selectedVariant, session, addresses, isAddressLoading]);
 
   const initializeDefaultPrice = useCallback(() => {
     let activeLocation: any = null;
@@ -285,7 +167,6 @@ export const ProductDetails = (props: ProductDetailsProps) => {
       }
     }
 
-    // 4. Set price and state from resolved location
     if (activeLocation) {
       const variantPrice = selectedVariant.variantPrices?.find(
         (vp) => vp.locationId === activeLocation.id
@@ -311,7 +192,6 @@ export const ProductDetails = (props: ProductDetailsProps) => {
       const location = locations.find((loc) => loc.pincode === pincode.trim());
 
       if (location) {
-        // Location found - product is available
         const variantPrice = selectedVariant.variantPrices?.find(
           (vp) => vp.locationId === location.id
         );
@@ -360,32 +240,6 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         );
         window.dispatchEvent(new Event("locationDataUpdated"));
         setIsPincodeChecked(true);
-
-        // setIsProductAvailable(false);
-        // setSelectedLocationId(null);
-        // setDeliveryInfo({
-        //   location: `Pincode ${pincode.trim()}`,
-        //   estimatedDelivery: "Not available",
-        //   deliveryCharges: "Not available",
-        // });
-
-        // if (!defaultLocationData) {
-        //   const fallbackPincode = "110040";
-        //   const fallbackLocation = locations.find(
-        //     (loc) => loc.pincode.trim() === fallbackPincode
-        //   );
-
-        //   if (fallbackLocation) {
-        //     const fallbackData = {
-        //       city: fallbackLocation.city,
-        //       state: fallbackLocation.state,
-        //       country: fallbackLocation.country,
-        //       pincode: fallbackLocation.pincode,
-        //     };
-        //     localStorage.setItem("locationData", JSON.stringify(fallbackData));
-        //     window.dispatchEvent(new Event("locationDataUpdated"));
-        //   }
-        // }
       }
     }
   };
@@ -398,13 +252,6 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     // Reset to default price
     initializeDefaultPrice();
   };
-
-  // Initialize default price when component mounts or variant changes
-  // useEffect(() => {
-  //   if (!isPincodeChecked) {
-  //     initializeDefaultPrice();
-  //   }
-  // }, [selectedVariant, initializeDefaultPrice, isPincodeChecked]);
 
   useEffect(() => {
     if (!isPincodeChecked) {
@@ -538,7 +385,6 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         price: locationPrice.price,
         selectedVariant,
         checkOutQuantity: 1,
-        // locationId: selectedLocationId,
         pincode: itemPincode,
       });
     } catch (error) {
@@ -604,7 +450,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         disabled={selectedVariant.stock <= 0 || !isProductAvailable}
       >
         <HiShoppingBag className="mr-2 h-5 w-5" />
-        ADD TO BAG
+        ADD TO Cart
       </Button>
       <Button
         variant="outline"
@@ -620,56 +466,54 @@ export const ProductDetails = (props: ProductDetailsProps) => {
   return (
     <>
       <div ref={containerRef} className="text-black bg-white">
-        <div className="container mx-auto px-4 py-6 pb-3 md:py-6">
+        <div className="container mx-auto px-4 py-3 pb-3 md:py-3">
+          <div
+            onClick={onOpen}
+            className="flex items-center justify-end cursor-pointer gap-1"
+          >
+            <GoShareAndroid />
+            <span className="text-sm">Share</span>
+          </div>
           {data.isNewArrival && (
             <div className="text-black w-fit border border-[#434343] rounded-[16px] text-[12px] px-2 py-[2px] mb-3">
               {" "}
               New Arrival
             </div>
           )}
-          {/* {data?.brand.name && (
-            <p className="text-sm text-gray-600 mb-1 font-medium">
-              {data.brand.name}
-            </p>
-          )} */}
-          <h1 className="text-2xl md:text-xl font-bold">{data.name}</h1>
+
+          <h1 className="text-xl md:text-xl font-bold">{data.name}</h1>
           {avgRating && (
-            <p className="text-[#088466] mt-2">
-              {avgRating?.toFixed(1)} ⭐ <span>({totalReviews} review)</span>
-            </p>
-          )}
-
-          <div className="py-2 rounded-md max-w-md">
-            <div className="flex items-center justify-between flex-wrap gap-3 md:gap-0">
-              <div className="mt-3 flex items-center gap-2 text-sm flex-wrap">
-                <span className="text-3xl font-semibold">
-                  ₹{locationPrice.price}
+            <div className="mt-2">
+              <p className="text-[#088466] text-base">
+                <span className="inline-flex items-center gap-1">
+                  {/* Render stars */}
+                  {Array.from({ length: 5 }, (_, i) => (
+                    <span
+                      key={i}
+                      className={`text-yellow-400 ${
+                        i < Math.floor(5) ? "fill-current" : "text-gray-300"
+                      }`}
+                      style={{ fontSize: "1.2em" }}
+                    >
+                      ★
+                    </span>
+                  ))}
+                  <span className="ml-1 font-bold text-gray-600 text-sm">
+                    {avgRating.toFixed(1)}{" "}
+                  </span>
+                  <span className="text-gray-600 text-sm">
+                    ({totalReviews} Ratings & {totalReviews} Reviews)
+                  </span>
                 </span>
-                {locationPrice.mrp && (
-                  <>
-                    <span className="text-gray-500 text-base mr-2">
-                      MRP{" "}
-                      <span className="line-through">₹{locationPrice.mrp}</span>
-                    </span>
-                    <span className="bg-orange-400 text-white text-sm font-bold rounded-full px-2 py-1">
-                      {discountPercentage}% off
-                    </span>
-                    <span className="text-base text-gray-500">
-                      (Incl. of all taxes)
-                    </span>
-                  </>
-                )}
-              </div>
+              </p>
+              <a
+                href="https://www.apple.com/store"
+                className="text-[#088466] text-sm underline hover:text-[#066955]"
+              >
+                Visit the Apple Store
+              </a>
             </div>
-
-            <div className="mt-2 text-sm text-gray-700">
-              <span className="font-medium">
-                Low Cost EMI starting from ₹
-                {(locationPrice.price / 24).toFixed(0)}/mo*
-              </span>
-            </div>
-          </div>
-
+          )}
           {selectedVariant.stock <= 0 && (
             <Alert variant="destructive" className="mt-2">
               <AlertDescription>Out of stock</AlertDescription>
@@ -683,14 +527,9 @@ export const ProductDetails = (props: ProductDetailsProps) => {
             </Alert>
           )} */}
 
-          <div className="flex flex-col gap-y-6 mt-4">
-            {availableColors.length > 0 && (
+          {/* <div className="flex flex-col gap-y-6 mt-4"> */}
+          {/* {availableColors.length > 0 && (
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm text-gray-500">
-                    {availableColors.length} available
-                  </span>
-                </div>
                 <div className="flex flex-wrap gap-3">
                   {availableColors.map(({ id, color }) => {
                     const isSelected = selectedColor === id;
@@ -762,9 +601,9 @@ export const ProductDetails = (props: ProductDetailsProps) => {
                   })}
                 </div>
               </div>
-            )}
+            )} */}
 
-            {availableSizes.length > 0 && (
+          {/* {availableSizes.length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-3"></div>
                 <div className="flex flex-wrap gap-3">
@@ -803,11 +642,150 @@ export const ProductDetails = (props: ProductDetailsProps) => {
                   })}
                 </div>
               </div>
+            )} */}
+          {/* </div> */}
+
+          <div className="flex flex-col gap-y-1 mt-4 border-t border-b pt-[12px] pb-[12px] border-t-[#d9d9d9] border-b-[#d9d9d9]">
+            {availableSizes.length > 0 && (
+              <div className="flex items-center justify-between mb-2">
+                <div className="">
+                  <span className="font-bold text-sm text-[#262626]">
+                    Internal Storage
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {availableSizes.map(({ id, size }) => {
+                    const isSelected = selectedSize === id;
+                    const isAvailable = selectedColor
+                      ? data.variants.some(
+                          (v) =>
+                            v.sizeId === id &&
+                            v.colorId === selectedColor &&
+                            v.stock > 0
+                        )
+                      : data.variants.some(
+                          (v) => v.sizeId === id && v.stock > 0
+                        );
+
+                    return (
+                      <button
+                        key={id}
+                        onClick={() =>
+                          isAvailable && id && handleSizeChange(id)
+                        }
+                        disabled={!isAvailable}
+                        className={cn(
+                          "text-[12px] px-[12px] py-[4px] rounded-[5px] min-w-[4rem] font-medium border transition-all duration-200",
+                          isSelected
+                            ? "border-black bg-black text-white"
+                            : "border-gray-300 bg-white text-gray-900 hover:border-gray-400",
+                          !isAvailable &&
+                            "opacity-50 cursor-not-allowed line-through"
+                        )}
+                      >
+                        {size?.value || "Unknown"}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {availableColors.length > 0 && (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mb-4 flex-col gap-1">
+                  <span className="font-bold text-sm text-[#262626]">
+                    Color
+                  </span>
+                  <span className="text-sm text-gray-900">
+                    {availableColors.find((c) => c.id === selectedColor)?.color
+                      ?.name || "Black"}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {availableColors.map(({ id, color }) => {
+                    const isSelected = selectedColor === id;
+                    const isAvailable = selectedSize
+                      ? data.variants.some(
+                          (v) =>
+                            v.colorId === id &&
+                            v.sizeId === selectedSize &&
+                            v.stock > 0
+                        )
+                      : data.variants.some(
+                          (v) => v.colorId === id && v.stock > 0
+                        );
+
+                    return (
+                      <div
+                        key={id}
+                        className={cn(
+                          "relative cursor-pointer transition-all duration-200",
+                          !isAvailable && "opacity-50 cursor-not-allowed"
+                        )}
+                        onClick={() =>
+                          isAvailable && id && handleColorChange(id)
+                        }
+                      >
+                        <div
+                          className={cn(
+                            "w-[30px] h-[30px] rounded-full border-1 transition-all duration-200",
+                            isSelected
+                              ? "border-black ring-2 ring-black ring-offset-2"
+                              : "border-gray-300",
+                            !isAvailable && "grayscale"
+                          )}
+                          style={{
+                            backgroundColor: color?.value || "#f3f4f6",
+                          }}
+                        />
+                        {!isAvailable && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-6 h-0.5 bg-red-500 rotate-45 absolute" />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             )}
           </div>
 
-          <ProductFeatures data={data} />
+          <div className="py-2 rounded-md max-w-md">
+            <div className="flex items-center justify-between flex-wrap gap-3 md:gap-0">
+              <div className="mt-3 flex items-center gap-2 text-sm flex-wrap">
+                <span className="text-2xl font-semibold">
+                  ₹{locationPrice.price}
+                </span>
+                {locationPrice.mrp && (
+                  <>
+                    <span className="text-gray-500 text-sm mr-2">
+                      MRP{" "}
+                      <span className="line-through">₹{locationPrice.mrp}</span>
+                    </span>
+                    <span className="bg-orange-400 text-white text-sm font-bold rounded-full px-2 py-1">
+                      {discountPercentage}% off
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      (Incl. of all taxes)
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
 
+            <div className="mt-2 text-sm text-gray-700">
+              <span className="font-medium">
+                Low Cost EMI starting from ₹
+                {(locationPrice.price / 24).toFixed(0)}/mo*
+              </span>
+            </div>
+          </div>
+
+          <div ref={buttonsRef} className="mt-8 max-w-sm md:block hidden">
+            <ActionButtons />
+          </div>
           <div className="mt-4 border rounded-lg p-4 bg-gray-50">
             <div className="flex items-center gap-2 mb-3">
               <svg
@@ -977,11 +955,6 @@ export const ProductDetails = (props: ProductDetailsProps) => {
             )}
           </div>
 
-          {data.expressDelivery && (
-            <p className="font-bold text-orange-500 text-2xl pt-6">
-              Express Delivery | Delhi Ncr Only | Call Now +91-9540717161
-            </p>
-          )}
           <div className="mt-6 space-y-4">
             <div>
               <BankOffers />
@@ -992,9 +965,17 @@ export const ProductDetails = (props: ProductDetailsProps) => {
             </div> */}
           </div>
 
-          <div ref={buttonsRef} className="mt-8 max-w-sm md:block hidden">
+          <ProductFeatures data={data} />
+
+          {data.expressDelivery && (
+            <p className="font-bold text-orange-500 text-2xl pt-6">
+              Express Delivery | Delhi Ncr Only | Call Now +91-9540717161
+            </p>
+          )}
+
+          {/* <div ref={buttonsRef} className="mt-8 max-w-sm md:block hidden">
             <ActionButtons />
-          </div>
+          </div> */}
         </div>
       </div>
     </>
