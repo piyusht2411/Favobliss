@@ -506,12 +506,12 @@ export const ProductDetails = (props: ProductDetailsProps) => {
                   </span>
                 </span>
               </p>
-              <a
+              {/* <a
                 href="https://www.apple.com/store"
                 className="text-[#088466] text-sm underline hover:text-[#066955]"
               >
                 Visit the Apple Store
-              </a>
+              </a> */}
             </div>
           )}
           {selectedVariant.stock <= 0 && (
