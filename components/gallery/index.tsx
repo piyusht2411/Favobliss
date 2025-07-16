@@ -134,7 +134,7 @@ export const Gallery = ({ images }: GalleryProps) => {
             <TabsContent
               key={image.id}
               value={image.id}
-              className="aspect-[3/4] relative overflow-hidden bg-gray-50"
+              className="aspect-[3/4] relative overflow-hidden bg-white"
             >
               <Image
                 src={image.url}
