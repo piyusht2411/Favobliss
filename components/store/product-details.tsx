@@ -466,10 +466,12 @@ export const ProductDetails = (props: ProductDetailsProps) => {
   return (
     <>
       <div ref={containerRef} className="text-black bg-white">
-        <div className="container mx-auto px-4 py-3 pb-3 md:py-3">
+        <div className="container mx-auto px-4 py-3 md:py-3">
           <div
             onClick={onOpen}
-            className="flex items-center justify-end cursor-pointer gap-1"
+            className={`flex items-center justify-end cursor-pointer gap-1 ${
+              !data?.isNewArrival ? "pb-4" : "pb-0"
+            }`}
           >
             <GoShareAndroid />
             <span className="text-sm">Share</span>
@@ -645,124 +647,128 @@ export const ProductDetails = (props: ProductDetailsProps) => {
             )} */}
           {/* </div> */}
 
-          <div className="flex flex-col gap-y-1 mt-4 border-t border-b pt-[12px] pb-[12px] border-t-[#d9d9d9] border-b-[#d9d9d9]">
-            {availableSizes.length > 0 && (
-              <div className="flex items-center justify-between mb-2">
-                <div className="">
-                  <span className="font-bold text-sm text-[#262626]">
-                    Internal Storage
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  {availableSizes.map(({ id, size }) => {
-                    const isSelected = selectedSize === id;
-                    const isAvailable = selectedColor
-                      ? data.variants.some(
-                          (v) =>
-                            v.sizeId === id &&
-                            v.colorId === selectedColor &&
-                            v.stock > 0
-                        )
-                      : data.variants.some(
-                          (v) => v.sizeId === id && v.stock > 0
-                        );
+          {(availableSizes.length > 0 || availableColors.length > 0) && (
+            <div className="flex flex-col gap-y-1 mt-4 border-t border-b pt-[12px] pb-[12px] border-t-[#d9d9d9] border-b-[#d9d9d9]">
+              {availableSizes.length > 0 && (
+                <div className="flex items-center justify-between mb-2">
+                  <div className="">
+                    <span className="font-bold text-sm text-[#262626]">
+                      Internal Storage
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    {availableSizes.map(({ id, size }) => {
+                      const isSelected = selectedSize === id;
+                      const isAvailable = selectedColor
+                        ? data.variants.some(
+                            (v) =>
+                              v.sizeId === id &&
+                              v.colorId === selectedColor &&
+                              v.stock > 0
+                          )
+                        : data.variants.some(
+                            (v) => v.sizeId === id && v.stock > 0
+                          );
 
-                    return (
-                      <button
-                        key={id}
-                        onClick={() =>
-                          isAvailable && id && handleSizeChange(id)
-                        }
-                        disabled={!isAvailable}
-                        className={cn(
-                          "text-[12px] px-[12px] py-[4px] rounded-[5px] min-w-[4rem] font-medium border transition-all duration-200",
-                          isSelected
-                            ? "border-black bg-black text-white"
-                            : "border-gray-300 bg-white text-gray-900 hover:border-gray-400",
-                          !isAvailable &&
-                            "opacity-50 cursor-not-allowed line-through"
-                        )}
-                      >
-                        {size?.value || "Unknown"}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {availableColors.length > 0 && (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center justify-between mb-4 flex-col gap-1">
-                  <span className="font-bold text-sm text-[#262626]">
-                    Color
-                  </span>
-                  <span className="text-sm text-gray-900">
-                    {availableColors.find((c) => c.id === selectedColor)?.color
-                      ?.name || "Black"}
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  {availableColors.map(({ id, color }) => {
-                    const isSelected = selectedColor === id;
-                    const isAvailable = selectedSize
-                      ? data.variants.some(
-                          (v) =>
-                            v.colorId === id &&
-                            v.sizeId === selectedSize &&
-                            v.stock > 0
-                        )
-                      : data.variants.some(
-                          (v) => v.colorId === id && v.stock > 0
-                        );
-
-                    return (
-                      <div
-                        key={id}
-                        className={cn(
-                          "relative cursor-pointer transition-all duration-200",
-                          !isAvailable && "opacity-50 cursor-not-allowed"
-                        )}
-                        onClick={() =>
-                          isAvailable && id && handleColorChange(id)
-                        }
-                      >
-                        <div
+                      return (
+                        <button
+                          key={id}
+                          onClick={() =>
+                            isAvailable && id && handleSizeChange(id)
+                          }
+                          disabled={!isAvailable}
                           className={cn(
-                            "w-[30px] h-[30px] rounded-full border-1 transition-all duration-200",
+                            "text-[12px] px-[12px] py-[4px] rounded-[5px] min-w-[4rem] font-medium border transition-all duration-200",
                             isSelected
-                              ? "border-black ring-2 ring-black ring-offset-2"
-                              : "border-gray-300",
-                            !isAvailable && "grayscale"
+                              ? "border-black bg-black text-white"
+                              : "border-gray-300 bg-white text-gray-900 hover:border-gray-400",
+                            !isAvailable &&
+                              "opacity-50 cursor-not-allowed line-through"
                           )}
-                          style={{
-                            backgroundColor: color?.value || "#f3f4f6",
-                          }}
-                        />
-                        {!isAvailable && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-6 h-0.5 bg-red-500 rotate-45 absolute" />
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                        >
+                          {size?.value || "Unknown"}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+
+              {availableColors.length > 0 && (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-4 flex-col gap-1">
+                    <span className="font-bold text-sm text-[#262626]">
+                      Color
+                    </span>
+                    <span className="text-sm text-gray-900">
+                      {availableColors.find((c) => c.id === selectedColor)
+                        ?.color?.name || "Black"}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    {availableColors.map(({ id, color }) => {
+                      const isSelected = selectedColor === id;
+                      const isAvailable = selectedSize
+                        ? data.variants.some(
+                            (v) =>
+                              v.colorId === id &&
+                              v.sizeId === selectedSize &&
+                              v.stock > 0
+                          )
+                        : data.variants.some(
+                            (v) => v.colorId === id && v.stock > 0
+                          );
+
+                      return (
+                        <div
+                          key={id}
+                          className={cn(
+                            "relative cursor-pointer transition-all duration-200",
+                            !isAvailable && "opacity-50 cursor-not-allowed"
+                          )}
+                          onClick={() =>
+                            isAvailable && id && handleColorChange(id)
+                          }
+                        >
+                          <div
+                            className={cn(
+                              "w-[30px] h-[30px] rounded-full border-1 transition-all duration-200",
+                              isSelected
+                                ? "border-black ring-2 ring-black ring-offset-2"
+                                : "border-gray-300",
+                              !isAvailable && "grayscale"
+                            )}
+                            style={{
+                              backgroundColor: color?.value || "#f3f4f6",
+                            }}
+                          />
+                          {!isAvailable && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="w-6 h-0.5 bg-red-500 rotate-45 absolute" />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="py-2 rounded-md max-w-md">
             <div className="flex items-center justify-between flex-wrap gap-3 md:gap-0">
               <div className="mt-3 flex items-center gap-2 text-sm flex-wrap">
                 <span className="text-2xl font-semibold">
-                  ₹{locationPrice.price}
+                  {formatter.format(locationPrice.price)}
                 </span>
                 {locationPrice.mrp && (
                   <>
                     <span className="text-gray-500 text-sm mr-2">
                       MRP{" "}
-                      <span className="line-through">₹{locationPrice.mrp}</span>
+                      <span className="line-through">
+                        {formatter.format(locationPrice.mrp)}
+                      </span>
                     </span>
                     <span className="bg-orange-400 text-white text-sm font-bold rounded-full px-2 py-1">
                       {discountPercentage}% off

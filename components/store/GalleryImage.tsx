@@ -47,7 +47,7 @@ const Gallery = () => {
           <a
             key={index}
             href={img.href}
-            className="block overflow-hidden rounded-lg shadow-md bg-white hover:scale-105 transition-transform duration-300 flex-shrink-0 w-[45%] sm:w-auto snap-start mr-4 sm:mr-0"
+            className="block overflow-hidden rounded-lg shadow-md bg-white transition-transform duration-300 flex-shrink-0 w-[45%] sm:w-auto snap-start mr-4 sm:mr-0"
           >
             <div className="relative aspect-[3/4] w-full">
               <Image

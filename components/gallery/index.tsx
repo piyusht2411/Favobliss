@@ -92,7 +92,7 @@ export const Gallery = ({ images }: GalleryProps) => {
           >
             {images.map((image) => (
               <SwiperSlide key={image.id}>
-                <div className="relative aspect-[3/4] w-full h-full bg-gray-50">
+                <div className="relative aspect-[3/4] w-full h-full bg-white">
                   <Image
                     src={image.url}
                     alt="Variant Image"
