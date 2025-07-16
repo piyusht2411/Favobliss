@@ -79,7 +79,7 @@ export const OrderCard = ({ data, date, paid }: OrderCardProps) => {
               </h6>
             </div>
           </div>
-          {paid && (
+          {/* {paid && (
             <div className="flex items-center justify-between mt-2">
               <Rating
                 comment={data.comment}
@@ -94,7 +94,7 @@ export const OrderCard = ({ data, date, paid }: OrderCardProps) => {
                 productName={data.about}
               />
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>
