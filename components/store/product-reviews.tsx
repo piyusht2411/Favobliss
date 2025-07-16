@@ -375,7 +375,7 @@ export const ProductReviews = (props: ProductReviewsProps) => {
                     {review.rating}.0
                   </span>
                   {/* Delete Button */}
-                  {/* {canDeleteReview(review) && (
+                  {canDeleteReview(review) && (
                     <button
                       onClick={() => openDeleteModal(review.id)}
                       className="ml-4 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-all duration-200 group"
@@ -383,7 +383,7 @@ export const ProductReviews = (props: ProductReviewsProps) => {
                     >
                       <FaTrash className="h-3 w-3 group-hover:scale-110 transition-transform" />
                     </button>
-                  )} */}
+                  )}
                 </div>
               </div>
             </div>
