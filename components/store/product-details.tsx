@@ -696,7 +696,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
 
               {availableColors.length > 0 && (
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center justify-between mb-4 flex-col gap-1">
+                  <div className="flex items-start justify-between mb-4 flex-col gap-1">
                     <span className="font-bold text-sm text-[#262626]">
                       Color
                     </span>
