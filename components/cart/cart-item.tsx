@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { QuantityModal } from "../modals/quantity-modal";
 import { useCart } from "@/hooks/use-cart";
 import { useCheckout } from "@/hooks/use-checkout";
+import { useRouter } from "next/navigation";
 
 interface CartItemProps {
   data: Product & {
@@ -35,6 +36,11 @@ export const CartItem = ({ data }: CartItemProps) => {
   const isChecked = !!checkOutItems.find(
     (item) => item.variantId === data.selectedVariant.id
   );
+  const router = useRouter();
+
+  const handleProductAnchor = (path: string) => {
+    router.push(`/product/${path}`);
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -106,7 +112,8 @@ export const CartItem = ({ data }: CartItemProps) => {
               src={data.selectedVariant.images[0].url}
               alt={data.name}
               fill
-              className="object-cover"
+              className="object-cover cursor-pointer"
+              onClick={() => handleProductAnchor(data.slug)}
             />
           ) : (
             <div className="bg-gray-200 w-full h-full" />
@@ -128,7 +135,10 @@ export const CartItem = ({ data }: CartItemProps) => {
           </div>
           <div className="relative pr-12 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:pr-0">
             <div className="flex flex-col">
-              <p className="md:text-lg font-bold text-zinc-700 max-w-36 md:max-w-sm truncate">
+              <p
+                className="md:text-lg font-bold text-zinc-700 max-w-36 md:max-w-sm truncate cursor-pointer"
+                onClick={() => handleProductAnchor(data.slug)}
+              >
                 {data.name}
               </p>
               <p className="text-sm font-semibold max-w-36 md:max-w-sm text-zinc-600 truncate">

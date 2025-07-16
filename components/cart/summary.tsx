@@ -19,7 +19,7 @@ interface Props {
 }
 
 export const Summary = (props: Props) => {
-  const { isAddressCorrect } = props;
+  const { isAddressCorrect = true } = props;
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

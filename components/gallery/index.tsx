@@ -144,12 +144,12 @@ export const Gallery = ({ images }: GalleryProps) => {
                 onLoad={() => handleImageLoad(image.id)}
                 onError={() => handleImageError(image.id)}
               />
-              <div
+              {/* <div
                 className="absolute h-10 w-10 top-4 right-4 rounded-full flex items-center justify-center md:cursor-pointer bg-white/70 backdrop-blur-sm"
                 onClick={onOpen}
               >
                 <PiShareFatFill className="text-zinc-700 h-6 w-6" />
-              </div>
+              </div> */}
             </TabsContent>
           ))}
         </Tabs>
