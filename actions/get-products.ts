@@ -14,6 +14,8 @@ interface Query {
   page?: string;
   type?: "MEN" | "WOMEN" | "KIDS" | "BEAUTY" | "ELECTRONICS";
   price?: string;
+  variantIds?: string;
+  pincode?: number;
 }
 
 interface HotDealsQuery extends Query {
@@ -33,6 +35,8 @@ export const getProducts = async (query?: Query): Promise<Product[]> => {
       ...(query?.type && { type: query.type }),
       ...(query?.price && { price: query.price }),
       ...(query?.page && { page: query.page }),
+      ...(query?.variantIds && { variantIds: query.variantIds }),
+      ...(query?.pincode && { pincode: query.pincode }),
     },
   });
 

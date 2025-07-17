@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import axios from "axios";
 import { useState } from "react";
+import qs from "query-string";
+import { getProducts } from "@/actions/get-products";
 
 interface UserAddressCardProps {
   data: Address[];
@@ -42,7 +44,10 @@ const PricingDialog = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={handleOverlayClick}>
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      onClick={handleOverlayClick}
+    >
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-auto">
         <div className="p-6">
           <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-amber-100 rounded-full">
@@ -68,11 +73,11 @@ const PricingDialog = ({
           <p className="text-sm text-gray-600 text-center mb-6">
             <span className="font-medium">{mismatchedCount} item(s)</span> in
             your cart were added for a different pincode. Kindly change your
-            address.
-            {/* update prices for <span className="font-medium">{newPincode}</span>? */}
+            address. update prices for{" "}
+            <span className="font-medium">{newPincode}</span>?
           </p>
 
-          {/* <div className="flex space-x-3">
+          <div className="flex space-x-3">
             <button
               onClick={onClose}
               disabled={isLoading}
@@ -113,7 +118,7 @@ const PricingDialog = ({
                 "Update Prices"
               )}
             </button>
-          </div> */}
+          </div>
         </div>
       </div>
     </div>
@@ -144,7 +149,7 @@ export const UserAddressCard = ({ data, label }: UserAddressCardProps) => {
     if (mismatched.length === 0) {
       // No conflicts - proceed normally
       addAddress(address);
-      router.push("/checkout/payment");
+      // router.push("/checkout/payment");
       return;
     }
 
@@ -160,34 +165,45 @@ export const UserAddressCard = ({ data, label }: UserAddressCardProps) => {
     setIsUpdatingPrices(true);
 
     try {
-      // Call API to get updated prices
-      const response = await axios.post("/api/v1/products/variant-prices", {
-        variantIds: mismatchedItems.map((item) => item.selectedVariant.id),
+      const response = await getProducts({
+        variantIds: mismatchedItems
+          .map((item) => item.selectedVariant.id)
+          .join(","),
         pincode: selectedAddress.zipCode,
       });
-
       // Update cart with new prices
       mismatchedItems.forEach((item) => {
-        const newPrice = response.data[item.selectedVariant.id];
+        const newPrice = response[item.selectedVariant.id];
         if (newPrice) {
           updateItemPrice(
             item.selectedVariant.id,
+            //@ts-ignore
             newPrice,
             String(selectedAddress.zipCode)
           );
           toast.success(`Updated price for ${item.name}`);
+          addAddress(selectedAddress);
         } else {
-          removeItem(item.selectedVariant.id);
+          // removeItem(item.selectedVariant.id);
+          // toast.warning(
+          //   `Removed ${item.name} - unavailable at ${selectedAddress.zipCode}`
+          // );
           toast.warning(
-            `Removed ${item.name} - unavailable at ${selectedAddress.zipCode}`
+            `The product is unavailabile at this location at ${selectedAddress.zipCode}`
           );
         }
       });
-
-      addAddress(selectedAddress);
       setShowPricingDialog(false);
-      router.push("/checkout/payment");
-    } catch (error) {
+      // router.push("/checkout/payment");
+    } catch (error: any) {
+      console.log("Error details:", error);
+      if (error?.response?.status === 404) {
+        toast.error(
+          "The entered pincode is invalid. Please enter a valid pincode or select a different address."
+        );
+        setSelectedAddress(null);
+        return;
+      }
       toast.error("Failed to update prices for selected address");
       console.error(error);
     } finally {
