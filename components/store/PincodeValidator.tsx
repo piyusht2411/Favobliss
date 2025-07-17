@@ -3,6 +3,7 @@
 import { getProducts } from "@/actions/get-products";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
+import { useCheckout } from "@/hooks/use-checkout";
 import { useCheckoutAddress } from "@/hooks/use-checkout-address";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -16,6 +17,7 @@ interface Props {
 export const PincodeValidator = (props: Props) => {
   const { handleAddressCorrect } = props;
   const { address } = useCheckoutAddress();
+  const { updateItemCheckoutPrice } = useCheckout();
   const { items, updateItemPrice, removeItem } = useCart();
   const [mismatchedItems, setMismatchedItems] = useState<number>(0);
   const [originalPincodes, setOriginalPincodes] = useState<string[]>([]);
@@ -28,7 +30,6 @@ export const PincodeValidator = (props: Props) => {
         (item) => String(item.pincode) !== String(address.zipCode)
       ).length;
 
-      // Get unique original pincodes
       const uniquePincodes = Array.from(
         new Set(items.map((item) => item.pincode).filter(Boolean))
       );
@@ -52,39 +53,51 @@ export const PincodeValidator = (props: Props) => {
     setLoading(true);
 
     try {
-      // const response = await axios.get(
-      //   `${process.env.NEXT_PUBLIC_API_URL}/products?` +
-      //   new URLSearchParams({
-      //     variantIds: items.map((item) => item.selectedVariant.id).join(","),
-      //     pincode: address.zipCode,
-      //   })
-      // );
-
       const response = await getProducts({
         variantIds: items.map((item) => item.selectedVariant.id).join(","),
         pincode: address.zipCode,
       });
 
-      // Update cart with new prices
       items.forEach((item) => {
+        const product = response.find((p) =>
+          p.variants?.some((v) => v.id === item.selectedVariant.id)
+        );
+
+        const variant = product?.variants.find(
+          (v) => v.id === item.selectedVariant.id
+        );
+
+        const targetPincode = String(address.zipCode).trim();
+
         //@ts-ignore
-        const newPrice = response[item?.selectedVariant?.id];
-        if (newPrice) {
+        const variantPrice = variant?.variantPrices?.find((vp) => {
+          //@ts-ignore
+          const apiPincode = String(vp?.location?.pincode).trim();
+          return apiPincode === targetPincode;
+        });
+
+        if (variantPrice && variantPrice.price) {
           updateItemPrice(
             item.selectedVariant.id,
-            newPrice,
+            variantPrice.price,
             String(address.zipCode)
           );
+
+          updateItemCheckoutPrice(
+            // From useCheckout
+            item.selectedVariant.id,
+            variantPrice.price,
+            String(address.zipCode) // Or address.zipCode
+          );
           toast.success(`Updated price for ${item.name}`);
-          // addAddress(address);
         } else {
           toast.warning(
             `The product is unavailable at this location at ${address.zipCode}`
           );
         }
       });
-      // setShowPricingDialog(false);
     } catch (error) {
+      console.log("Error details:", error); // Log error details
       //@ts-ignore
       if (error?.response?.status === 404) {
         toast.error(

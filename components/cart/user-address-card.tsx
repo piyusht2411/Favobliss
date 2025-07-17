@@ -7,10 +7,10 @@ import { useCart } from "@/hooks/use-cart";
 import { useCheckoutAddress } from "@/hooks/use-checkout-address";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import axios from "axios";
 import { useState } from "react";
 import qs from "query-string";
 import { getProducts } from "@/actions/get-products";
+import { useCheckout } from "@/hooks/use-checkout";
 
 interface UserAddressCardProps {
   data: Address[];
@@ -88,7 +88,7 @@ const PricingDialog = ({
             <button
               onClick={onConfirm}
               disabled={isLoading}
-              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-orange-400 border border-transparent rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
             >
               {isLoading ? (
                 <>
@@ -134,6 +134,7 @@ export const UserAddressCard = ({ data, label }: UserAddressCardProps) => {
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [mismatchedItems, setMismatchedItems] = useState<any[]>([]);
   const [isUpdatingPrices, setIsUpdatingPrices] = useState(false);
+  const { updateItem, updateItemCheckoutPrice } = useCheckout();
 
   const defaultAddress =
     data && data.find((address) => address.isDefault === true);
@@ -163,6 +164,7 @@ export const UserAddressCard = ({ data, label }: UserAddressCardProps) => {
     if (!selectedAddress || mismatchedItems.length === 0) return;
 
     setIsUpdatingPrices(true);
+    // Get updateItem from useCheckout
 
     try {
       const response = await getProducts({
@@ -171,30 +173,55 @@ export const UserAddressCard = ({ data, label }: UserAddressCardProps) => {
           .join(","),
         pincode: selectedAddress.zipCode,
       });
-      // Update cart with new prices
+
       mismatchedItems.forEach((item) => {
-        const newPrice = response[item.selectedVariant.id];
-        if (newPrice) {
+        // Find the product containing the variant
+        const product = response.find((p) =>
+          p.variants?.some((v) => v.id === item.selectedVariant.id)
+        );
+        // Find the variant
+        const variant = product?.variants.find(
+          (v) => v.id === item.selectedVariant.id
+        );
+        const targetPincode = String(selectedAddress.zipCode).trim();
+
+        // Find the price for the given pincode
+        //@ts-ignore
+        const variantPrice = variant?.variantPrices?.find((vp) => {
+          //@ts-ignore
+          const apiPincode = String(vp?.location?.pincode).trim();
+          console.log(
+            "Comparing pincodes:",
+            apiPincode,
+            "vs",
+            targetPincode,
+            apiPincode === targetPincode
+          );
+          return apiPincode === targetPincode;
+        });
+
+        if (variantPrice && variantPrice.price) {
           updateItemPrice(
             item.selectedVariant.id,
-            //@ts-ignore
-            newPrice,
+            variantPrice.price,
+            String(selectedAddress.zipCode)
+          );
+
+          updateItemCheckoutPrice(
+            item.selectedVariant.id,
+            variantPrice.price,
             String(selectedAddress.zipCode)
           );
           toast.success(`Updated price for ${item.name}`);
           addAddress(selectedAddress);
         } else {
-          // removeItem(item.selectedVariant.id);
-          // toast.warning(
-          //   `Removed ${item.name} - unavailable at ${selectedAddress.zipCode}`
-          // );
           toast.warning(
-            `The product is unavailabile at this location at ${selectedAddress.zipCode}`
+            `The product is unavailable at this location at ${selectedAddress.zipCode}`
           );
         }
       });
       setShowPricingDialog(false);
-      // router.push("/checkout/payment");
+      // router.push("/checkout/payment"); // Uncomment if needed
     } catch (error: any) {
       console.log("Error details:", error);
       if (error?.response?.status === 404) {

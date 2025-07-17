@@ -10,6 +10,11 @@ interface UseCheckOutProps {
   setCheckOutItems: (items: CartSelectedItem[]) => void;
   clearCheckOutItems: () => void;
   addItem: (data: CartSelectedItem) => void;
+  updateItemCheckoutPrice: (
+    variantId: string,
+    price: number,
+    locationId: string
+  ) => void;
 }
 
 export const useCheckout = create(
@@ -64,6 +69,28 @@ export const useCheckout = create(
             }
             return item;
           });
+          set({ checkOutItems: updatedItems });
+        }
+      },
+
+      // In useCheckout store
+      updateItemCheckoutPrice: (
+        variantId: string,
+        price: number,
+        locationId: string
+      ) => {
+        const currentItems = get().checkOutItems;
+        const itemIndex = currentItems.findIndex(
+          (item) => item.variantId === variantId
+        );
+
+        if (itemIndex !== -1) {
+          const updatedItems = [...currentItems];
+          updatedItems[itemIndex] = {
+            ...updatedItems[itemIndex],
+            price,
+            locationId,
+          };
           set({ checkOutItems: updatedItems });
         }
       },
