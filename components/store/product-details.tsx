@@ -29,6 +29,28 @@ interface ProductDetailsProps {
   avgRating: number | null;
 }
 
+// Utility function to format delivery date
+const formatDeliveryDate = (deliveryDays: number | null): string => {
+  const today = new Date();
+  if (deliveryDays === null || deliveryDays === undefined) {
+    return "Delivery date not available";
+  }
+  if (deliveryDays === 0) {
+    return "Today";
+  }
+  if (deliveryDays === 1) {
+    return "Tomorrow";
+  }
+  const deliveryDate = new Date(today);
+  deliveryDate.setDate(today.getDate() + deliveryDays);
+  return deliveryDate.toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
 export const ProductDetails = (props: ProductDetailsProps) => {
   const {
     data,
@@ -62,13 +84,11 @@ export const ProductDetails = (props: ProductDetailsProps) => {
   const [isProductAvailable, setIsProductAvailable] = useState(true);
   const { data: session } = useSession();
   const { data: addresses, isLoading: isAddressLoading } = useAddress();
-  // const [locationInitialized, setLocationInitialized] = useState(false);
   const [defaultLocationData, setDefaultLocationData] =
-    useState<Location | null>();
+    useState<Location | null>(null);
   const [deliveryInfo, setDeliveryInfo] = useState<{
     location: string;
     estimatedDelivery: string;
-    deliveryCharges: string;
   } | null>(null);
   const [isCodAvailableForPincode, setIsCodAvailableForPincode] = useState<
     boolean | null
@@ -109,6 +129,11 @@ export const ProductDetails = (props: ProductDetailsProps) => {
       : true
   );
 
+  const isCodAvailable = (pincode: string, locations: Location[]) => {
+    const currentLocation = locations.find((item) => item.pincode === pincode);
+    return currentLocation?.codAvailable || false;
+  };
+
   const initializeDefaultPrice = useCallback(() => {
     let activeLocation: any = null;
     if (session?.user && addresses?.length && !isAddressLoading) {
@@ -130,6 +155,10 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         localStorage.setItem("locationData", JSON.stringify(sessionLocation));
         window.dispatchEvent(new Event("locationDataUpdated"));
         setIsCodAvailableForPincode(isCodAvailable(sessionPincode, locations));
+        setDeliveryInfo({
+          location: `${activeLocation.city}, ${activeLocation.pincode}`,
+          estimatedDelivery: formatDeliveryDate(activeLocation.deliveryDays),
+        });
       }
     }
 
@@ -146,9 +175,17 @@ export const ProductDetails = (props: ProductDetailsProps) => {
             activeLocation = locations.find(
               (loc) => String(loc.pincode).trim() === storedPincode
             );
-            setIsCodAvailableForPincode(
-              isCodAvailable(storedPincode, locations)
-            );
+            if (activeLocation) {
+              setIsCodAvailableForPincode(
+                isCodAvailable(storedPincode, locations)
+              );
+              setDeliveryInfo({
+                location: `${activeLocation.city}, ${activeLocation.pincode}`,
+                estimatedDelivery: formatDeliveryDate(
+                  activeLocation.deliveryDays
+                ),
+              });
+            }
           }
         } catch (e) {
           console.error("Error parsing locationData:", e);
@@ -172,6 +209,10 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         localStorage.setItem("locationData", JSON.stringify(fallbackLocation));
         window.dispatchEvent(new Event("locationDataUpdated"));
         setIsCodAvailableForPincode(isCodAvailable(fallbackPincode, locations));
+        setDeliveryInfo({
+          location: `${activeLocation.city}, ${activeLocation.pincode}`,
+          estimatedDelivery: formatDeliveryDate(activeLocation.deliveryDays),
+        });
       }
     }
 
@@ -193,6 +234,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         mrp: selectedVariant.mrp || selectedVariant.price,
       });
       setIsCodAvailableForPincode(false);
+      setDeliveryInfo(null);
     }
   }, [locations, selectedVariant, session, addresses, isAddressLoading]);
 
@@ -213,11 +255,8 @@ export const ProductDetails = (props: ProductDetailsProps) => {
             variantPrice?.mrp || selectedVariant.mrp || selectedVariant.price,
         });
         setDeliveryInfo({
-          location:
-            `${location.city}, ${location.pincode}` ||
-            `Pincode ${pincode.trim()}`,
-          estimatedDelivery: "2-3 business days",
-          deliveryCharges: "Free delivery",
+          location: `${location.city}, ${location.pincode}`,
+          estimatedDelivery: formatDeliveryDate(location.deliveryDays),
         });
         setIsCodAvailableForPincode(isCodAvailable(pincode.trim(), locations));
         const locationData = {
@@ -230,13 +269,11 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         window.dispatchEvent(new Event("locationDataUpdated"));
         setIsPincodeChecked(true);
       } else {
-        // Location not found - product not available
         setIsProductAvailable(false);
         setSelectedLocationId(null);
         setDeliveryInfo({
           location: `Pincode ${pincode.trim()}`,
           estimatedDelivery: "Not available",
-          deliveryCharges: "Not available",
         });
         setIsCodAvailableForPincode(false);
         const defaultLocationDataUpdated = {
@@ -274,10 +311,9 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     addresses,
     isAddressLoading,
     locations,
-    selectedVariant, // Add this to re-run when variant changes
+    selectedVariant,
   ]);
 
-  // Handle sticky bar visibility
   useEffect(() => {
     const handleScroll = () => {
       const footer = document.querySelector("footer");
@@ -347,7 +383,6 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         )?.colorId;
         setSelectedColor(availableColorForSize);
       }
-      // handlePincodeCheck();
     },
     [selectedColor, data.variants]
   );
@@ -439,11 +474,6 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     isProductAvailable,
   ]);
 
-  const isCodAvailable = (pincode: string, locations: Location[]) => {
-    const currentLocation = locations.find((item) => item.pincode === pincode);
-    return currentLocation?.codAvailable || false;
-  };
-
   const discountPercentage = locationPrice.mrp
     ? Math.round(
         ((locationPrice.mrp - locationPrice.price) / locationPrice.mrp) * 100
@@ -492,7 +522,6 @@ export const ProductDetails = (props: ProductDetailsProps) => {
           </div>
           {data.isNewArrival && (
             <div className="text-black w-fit border border-[#434343] rounded-[16px] text-[12px] px-2 py-[2px] mb-3">
-              {" "}
               New Arrival
             </div>
           )}
@@ -502,12 +531,13 @@ export const ProductDetails = (props: ProductDetailsProps) => {
             <div className="mt-2">
               <p className="text-[#088466] text-base">
                 <span className="inline-flex items-center gap-1">
-                  {/* Render stars */}
                   {Array.from({ length: 5 }, (_, i) => (
                     <span
                       key={i}
                       className={`text-yellow-400 ${
-                        i < Math.floor(5) ? "fill-current" : "text-gray-300"
+                        i < Math.floor(avgRating)
+                          ? "fill-current"
+                          : "text-gray-300"
                       }`}
                       style={{ fontSize: "1.2em" }}
                     >
@@ -522,12 +552,6 @@ export const ProductDetails = (props: ProductDetailsProps) => {
                   </span>
                 </span>
               </p>
-              {/* <a
-                href="https://www.apple.com/store"
-                className="text-[#088466] text-sm underline hover:text-[#066955]"
-              >
-                Visit the Apple Store
-              </a> */}
             </div>
           )}
           {selectedVariant.stock <= 0 && (
@@ -535,131 +559,6 @@ export const ProductDetails = (props: ProductDetailsProps) => {
               <AlertDescription>Out of stock</AlertDescription>
             </Alert>
           )}
-          {/* {selectedVariant.stock > 0 && selectedVariant.stock <= 5 && (
-            <Alert variant="default" className="mt-2">
-              <AlertDescription>
-                Only {selectedVariant.stock} left in stock!
-              </AlertDescription>
-            </Alert>
-          )} */}
-
-          {/* <div className="flex flex-col gap-y-6 mt-4"> */}
-          {/* {availableColors.length > 0 && (
-              <div>
-                <div className="flex flex-wrap gap-3">
-                  {availableColors.map(({ id, color }) => {
-                    const isSelected = selectedColor === id;
-                    const isAvailable = selectedSize
-                      ? data.variants.some(
-                          (v) =>
-                            v.colorId === id &&
-                            v.sizeId === selectedSize &&
-                            v.stock > 0
-                        )
-                      : data.variants.some(
-                          (v) => v.colorId === id && v.stock > 0
-                        );
-
-                    const variantWithColor = data.variants.find(
-                      (v) => v.colorId === id
-                    );
-                    const previewImage = variantWithColor?.images?.[0]?.url;
-
-                    return (
-                      <div
-                        key={id}
-                        className={cn(
-                          "relative group cursor-pointer transition-all duration-200",
-                          !isAvailable && "opacity-50 cursor-not-allowed"
-                        )}
-                        onClick={() =>
-                          isAvailable && id && handleColorChange(id)
-                        }
-                      >
-                        <div
-                          className={cn(
-                            "w-16 h-16 rounded-lg border-2 transition-all duration-200 overflow-hidden",
-                            isSelected
-                              ? "border-black shadow-lg ring-2 ring-black ring-offset-2"
-                              : "border-gray-200 hover:border-gray-400",
-                            !isAvailable && "grayscale"
-                          )}
-                        >
-                          {previewImage ? (
-                            <Image
-                              src={previewImage}
-                              alt={color?.name || "Color Preview"}
-                              width={64}
-                              height={64}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div
-                              className="w-full h-full"
-                              style={{
-                                backgroundColor: color?.value || "#f3f4f6",
-                              }}
-                            />
-                          )}
-                        </div>
-                        <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                          <div className="bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                            {color?.name ?? "Unknown"}
-                          </div>
-                        </div>
-                        {!isAvailable && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-8 h-0.5 bg-red-500 rotate-45 absolute" />
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )} */}
-
-          {/* {availableSizes.length > 0 && (
-              <div>
-                <div className="flex items-center justify-between mb-3"></div>
-                <div className="flex flex-wrap gap-3">
-                  {availableSizes.map(({ id, size }) => {
-                    const isSelected = selectedSize === id;
-                    const isAvailable = selectedColor
-                      ? data.variants.some(
-                          (v) =>
-                            v.sizeId === id &&
-                            v.colorId === selectedColor &&
-                            v.stock > 0
-                        )
-                      : data.variants.some(
-                          (v) => v.sizeId === id && v.stock > 0
-                        );
-
-                    return (
-                      <button
-                        key={id}
-                        onClick={() =>
-                          isAvailable && id && handleSizeChange(id)
-                        }
-                        disabled={!isAvailable}
-                        className={cn(
-                          "px-4 py-3 min-w-[3rem] text-sm font-medium rounded-lg border-2 transition-all duration-200",
-                          isSelected
-                            ? "border-black bg-black text-white"
-                            : "border-gray-200 bg-white text-gray-900 hover:border-gray-400",
-                          !isAvailable &&
-                            "opacity-50 cursor-not-allowed line-through"
-                        )}
-                      >
-                        {size?.value || "Unknown"}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )} */}
-          {/* </div> */}
 
           {(availableSizes.length > 0 || availableColors.length > 0) && (
             <div className="flex flex-col gap-y-1 mt-4 border-t border-b pt-[12px] pb-[12px] border-t-[#d9d9d9] border-b-[#d9d9d9]">
@@ -891,7 +790,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
                     >
                       {isProductAvailable
                         ? `Deliver to ${deliveryInfo?.location}`
-                        : `{Product not available at ${pincode.trim()}}`}
+                        : `Product not available at ${pincode.trim()}`}
                     </span>
                   </div>
                   <button
@@ -904,7 +803,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
 
                 {deliveryInfo && isProductAvailable && (
                   <div className="space-y-2">
-                    {/* <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       <svg
                         className="w-4 h-4 text-green-600"
                         fill="none"
@@ -919,10 +818,10 @@ export const ProductDetails = (props: ProductDetailsProps) => {
                         />
                       </svg>
                       <span className="text-sm text-gray-700">
-                        {deliveryInfo.estimatedDelivery}
+                        Estimated Delivery: {deliveryInfo.estimatedDelivery}
                       </span>
-                    </div> */}
-                    {/* <div className="flex items-center gap-2">
+                    </div>
+                    <div className="flex items-center gap-2">
                       <svg
                         className="w-4 h-4 text-green-600"
                         fill="none"
@@ -936,69 +835,48 @@ export const ProductDetails = (props: ProductDetailsProps) => {
                           d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
                         />
                       </svg>
-                      <span className="text-sm text-gray-700">
-                        {deliveryInfo.deliveryCharges}
-                      </span>
-                    </div> */}
-                    {/* <div className="flex items-center gap-2">
+                    </div>
+                    <div className="flex items-center gap-2">
                       <svg
-                        className="w-4 h-4 text-green-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                        className={cn(
+                          "w-4 h-4",
+                          isCodAvailableForPincode
+                            ? "text-green-600"
+                            : "text-red-600"
+                        )}
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
+                        {isCodAvailableForPincode ? (
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
+                        ) : (
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                            clipRule="evenodd"
+                          />
+                        )}
                       </svg>
-                      <span className="text-sm text-gray-700">
-                        Pay on Delivery available
+                      <span
+                        className={cn(
+                          "text-sm",
+                          isCodAvailableForPincode
+                            ? "text-gray-700"
+                            : "text-red-700"
+                        )}
+                      >
+                        {isCodAvailableForPincode
+                          ? "Cash on Delivery Available"
+                          : "Cash on Delivery Not Available"}
                       </span>
-                    </div> */}
+                    </div>
                   </div>
                 )}
 
-                <div className="flex items-center gap-2">
-                  <svg
-                    className={cn(
-                      "w-4 h-4",
-                      isCodAvailableForPincode
-                        ? "text-green-600"
-                        : "text-red-600"
-                    )}
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    {isCodAvailableForPincode ? (
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clipRule="evenodd"
-                      />
-                    ) : (
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                        clipRule="evenodd"
-                      />
-                    )}
-                  </svg>
-                  <span
-                    className={cn(
-                      "text-sm",
-                      isCodAvailableForPincode
-                        ? "text-gray-700"
-                        : "text-red-700"
-                    )}
-                  >
-                    {isCodAvailableForPincode
-                      ? "Cash on Delivery Available"
-                      : "Cash on Delivery Not Available"}
-                  </span>
-                </div>
                 {!isProductAvailable && (
                   <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-2">
                     <p className="text-sm text-red-700">
@@ -1017,17 +895,13 @@ export const ProductDetails = (props: ProductDetailsProps) => {
             <div>
               <BankOffers />
             </div>
-            {/* <div className="max-w-4xl mx-auto py-4 mt-5">
-              <DeliveryInfo />
-              <KeyFeatures />
-            </div> */}
           </div>
 
           <ProductFeatures data={data} />
 
           {data.expressDelivery && (
             <p className="font-bold text-orange-500 text-2xl pt-6">
-              Express Delivery | Delhi Ncr Only | Call Now +91-9540717161
+              Express Delivery | Delhi NCR Only | Call Now +91-9540717161
             </p>
           )}
         </div>

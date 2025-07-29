@@ -19,6 +19,7 @@ export interface Location {
   codAvailable: boolean;
   state: string;
   country: string;
+  deliveryDays: number;
 }
 
 export enum CategoryType {
