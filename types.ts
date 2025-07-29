@@ -16,6 +16,7 @@ export interface Location {
   id: string;
   pincode: string;
   city: string;
+  codAvailable: boolean;
   state: string;
   country: string;
 }

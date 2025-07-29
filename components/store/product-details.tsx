@@ -70,6 +70,9 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     estimatedDelivery: string;
     deliveryCharges: string;
   } | null>(null);
+  const [isCodAvailableForPincode, setIsCodAvailableForPincode] = useState<
+    boolean | null
+  >(null);
   const { addItem } = useCart();
   const buttonsRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -126,6 +129,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
 
         localStorage.setItem("locationData", JSON.stringify(sessionLocation));
         window.dispatchEvent(new Event("locationDataUpdated"));
+        setIsCodAvailableForPincode(isCodAvailable(sessionPincode, locations));
       }
     }
 
@@ -141,6 +145,9 @@ export const ProductDetails = (props: ProductDetailsProps) => {
           if (storedPincode) {
             activeLocation = locations.find(
               (loc) => String(loc.pincode).trim() === storedPincode
+            );
+            setIsCodAvailableForPincode(
+              isCodAvailable(storedPincode, locations)
             );
           }
         } catch (e) {
@@ -164,6 +171,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         };
         localStorage.setItem("locationData", JSON.stringify(fallbackLocation));
         window.dispatchEvent(new Event("locationDataUpdated"));
+        setIsCodAvailableForPincode(isCodAvailable(fallbackPincode, locations));
       }
     }
 
@@ -184,6 +192,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         price: selectedVariant.price,
         mrp: selectedVariant.mrp || selectedVariant.price,
       });
+      setIsCodAvailableForPincode(false);
     }
   }, [locations, selectedVariant, session, addresses, isAddressLoading]);
 
@@ -210,6 +219,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
           estimatedDelivery: "2-3 business days",
           deliveryCharges: "Free delivery",
         });
+        setIsCodAvailableForPincode(isCodAvailable(pincode.trim(), locations));
         const locationData = {
           city: location.city,
           state: location.state,
@@ -228,6 +238,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
           estimatedDelivery: "Not available",
           deliveryCharges: "Not available",
         });
+        setIsCodAvailableForPincode(false);
         const defaultLocationDataUpdated = {
           city: defaultLocationData?.city,
           state: defaultLocationData?.state,
@@ -249,7 +260,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     setIsProductAvailable(true);
     setDeliveryInfo(null);
     setPincode("");
-    // Reset to default price
+    setIsCodAvailableForPincode(null);
     initializeDefaultPrice();
   };
 
@@ -412,7 +423,6 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         price: locationPrice.price,
         selectedVariant,
         checkOutQuantity: 1,
-        // locationId: selectedLocationId,
         pincode: itemPincode,
       });
       router.push("/checkout/cart");
@@ -429,7 +439,11 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     isProductAvailable,
   ]);
 
-  // Calculate discount percentage
+  const isCodAvailable = (pincode: string, locations: Location[]) => {
+    const currentLocation = locations.find((item) => item.pincode === pincode);
+    return currentLocation?.codAvailable || false;
+  };
+
   const discountPercentage = locationPrice.mrp
     ? Math.round(
         ((locationPrice.mrp - locationPrice.price) / locationPrice.mrp) * 100
@@ -947,6 +961,44 @@ export const ProductDetails = (props: ProductDetailsProps) => {
                   </div>
                 )}
 
+                <div className="flex items-center gap-2">
+                  <svg
+                    className={cn(
+                      "w-4 h-4",
+                      isCodAvailableForPincode
+                        ? "text-green-600"
+                        : "text-red-600"
+                    )}
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    {isCodAvailableForPincode ? (
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
+                    ) : (
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clipRule="evenodd"
+                      />
+                    )}
+                  </svg>
+                  <span
+                    className={cn(
+                      "text-sm",
+                      isCodAvailableForPincode
+                        ? "text-gray-700"
+                        : "text-red-700"
+                    )}
+                  >
+                    {isCodAvailableForPincode
+                      ? "Cash on Delivery Available"
+                      : "Cash on Delivery Not Available"}
+                  </span>
+                </div>
                 {!isProductAvailable && (
                   <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-2">
                     <p className="text-sm text-red-700">

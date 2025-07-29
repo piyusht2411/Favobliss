@@ -41,8 +41,6 @@ export const ProductReviews = (props: ProductReviewsProps) => {
 
   const isAdmin = session?.user?.email === "favoblis@gmail.com";
 
-  console.log("first", session);
-
   const fetchReviews = async () => {
     try {
       setIsLoading(true);
@@ -150,7 +148,7 @@ export const ProductReviews = (props: ProductReviewsProps) => {
   );
 
   const allReviewVideos = reviews.flatMap((review) =>
-    review.videos.map((vid) => ({
+    review?.videos?.map((vid) => ({
       ...vid,
       reviewId: review.id,
       userName: review.userName,
