@@ -113,11 +113,25 @@ export const ProductCard = ({ data, locations }: ProductCardProps) => {
     }
   };
 
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
+
+  const calculateDiscount = (price: number, mrp: number) => {
+    if (!mrp || mrp <= price) return 0;
+    return Math.round(((mrp - price) / mrp) * 100);
+  };
+
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`w-4 h-4 ${
+        className={`w-3 h-3 md:w-4 md:h-4 ${
           i < Math.floor(rating)
             ? "text-yellow-400 fill-yellow-400"
             : "text-gray-300"
@@ -133,10 +147,7 @@ export const ProductCard = ({ data, locations }: ProductCardProps) => {
   const selectedVariant =
     data.variants[selectedVariantIndex] || data.variants[0];
   const imageUrl = selectedVariant?.images[0]?.url || "/placeholder-image.jpg";
-  const priceDisplay = formatter.format(locationPrice.price);
-  const mrpDisplay = locationPrice.mrp
-    ? formatter.format(locationPrice.mrp)
-    : null;
+  const discount = calculateDiscount(locationPrice.price, locationPrice.mrp);
 
   // Get unique colors for variant display
   const uniqueColors = data.variants.reduce((acc, variant) => {
@@ -158,38 +169,20 @@ export const ProductCard = ({ data, locations }: ProductCardProps) => {
     return acc;
   }, [] as (typeof data.variants)[0]["size"][]);
 
-  const calculateDiscount = (price: number, mrp: number) => {
-    if (!mrp || mrp <= price) return 0;
-    return Math.round(((mrp - price) / mrp) * 100);
-  };
-
-  const cleanNumber = (value: string) =>
-    Number(value.replace(/[₹,]/g, "").trim());
-
   return (
-    <div
-      onClick={onClick}
-      className="group md:cursor-pointer hover:shadow-xl transition-shadow duration-300 bg-white rounded-lg overflow-hidden"
-    >
-      <div className="relative">
-        <div className="aspect-[3/4] relative overflow-hidden bg-white-50">
+    <div onClick={onClick} className="w-full cursor-pointer">
+      <div className="bg-gray-100 rounded-xl p-3 md:p-4 hover:shadow-lg transition-shadow duration-200 h-full">
+        {/* Product Image */}
+        <div className="aspect-square mb-3 md:mb-4 flex items-center justify-center bg-white rounded-lg relative overflow-hidden">
           <Image
             src={imageUrl}
             alt={data.name}
             fill
-            className="object-contain hover:scale-105 transition duration-300 p-2"
+            className="object-contain rounded-lg p-2"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
 
           {/* Stock status badge */}
-          {/* {selectedVariant &&
-            selectedVariant.stock <= 5 &&
-            selectedVariant.stock > 0 && (
-              <div className="absolute top-2 left-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                Only {selectedVariant.stock} left
-              </div>
-            )} */}
-
           {selectedVariant && selectedVariant.stock === 0 && (
             <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
               Out of Stock
@@ -197,100 +190,39 @@ export const ProductCard = ({ data, locations }: ProductCardProps) => {
           )}
         </div>
 
-        {/* <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute w-full px-6 bottom-5">
-          <div className="gap-x-6 justify-center hidden md:flex">
-            <IconButton
-              onClick={onPreview}
-              icon={<ExpandIcon size={20} className="text-gray-600" />}
-            />
-            <IconButton
-              onClick={onHandleCart}
-              icon={<ShoppingCart size={20} className="text-pink-600" />}
-              disabled={!selectedVariant || selectedVariant.stock <= 0}
-            />
+        {/* Product Details */}
+        <div className="space-y-2">
+          <h3 className="font-medium text-gray-900 text-xs md:text-sm leading-tight line-clamp-2 min-h-[2rem] md:min-h-[2.5rem]">
+            {data.name}
+          </h3>
+
+          {/* Rating */}
+          <div className="flex items-center space-x-1">
+            {renderStars(data.averageRating || 0)}
           </div>
-        </div> */}
-      </div>
 
-      <div className="w-full flex flex-col space-y-2 p-4">
-        <h3 className="text-black font-bold text-sm leading-5 h-10 overflow-hidden">
-          <span className="line-clamp-2">{data.name}</span>
-        </h3>
-
-        <p className="w-full text-sm text-zinc-600 line-clamp-1">
-          {data.about}
-        </p>
-        <div className="flex items-center space-x-1">
-          {renderStars(data.averageRating || 0)}
-        </div>
-
-        {/* Brand */}
-        {/* {data.brand && (
-          <p className="text-xs text-zinc-500 font-medium">{data.brand}</p>
-        )} */}
-
-        {/* Price Display */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <p className="text-lg font-bold text-zinc-900">{priceDisplay}</p>
-          {mrpDisplay && mrpDisplay !== priceDisplay && (
-            <p className="text-sm text-zinc-500 line-through">{mrpDisplay}</p>
-          )}
-          <span className="bg-orange-400 text-white text-xs px-2 py-1 rounded">
-            {calculateDiscount(
-              cleanNumber(priceDisplay),
-              cleanNumber(mrpDisplay || "0")
-            )}
-            % off
-          </span>
-        </div>
-
-        {/* Variant Options */}
-        {/* {data.variants.length > 0 && (
-          <div className="space-y-2">
-            {uniqueColors.length > 0 && (
-              <div className="flex flex-col gap-1">
-                <div className="flex gap-2 flex-wrap">
-                  {uniqueColors.map((color, index) => {
-                    if (!color) return null;
-                    const variantIndex = data.variants.findIndex(
-                      (v) => v.color && color && v.color.id === color.id
-                    );
-                    const isSelected = selectedVariantIndex === variantIndex;
-                    return (
-                      <button
-                        key={color.id}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onVariantChange(variantIndex);
-                        }}
-                        className={`w-6 h-6 rounded-full border-2 transition-all duration-200 ${
-                          isSelected
-                            ? "border-zinc-800 scale-110"
-                            : "border-zinc-300"
-                        }`}
-                        style={{ backgroundColor: color.value }}
-                        title={color.name}
-                      />
-                    );
-                  })}
+          {/* Price Section */}
+          <div className="space-y-1">
+            <div className="flex flex-col md:flex-row md:items-center space-y-1 md:space-y-0 md:space-x-2 flex-wrap">
+              <span className="text-sm md:text-lg font-bold text-gray-900">
+                {formatPrice(locationPrice.price)}
+              </span>
+              {locationPrice.mrp > locationPrice.price && (
+                <div className="text-xs md:text-sm text-gray-500">
+                  MRP{" "}
+                  <span className="line-through">
+                    {formatPrice(locationPrice.mrp)}
+                  </span>
                 </div>
-              </div>
-            )}
+              )}
+              {discount > 0 && (
+                <span className="bg-orange-400 text-white text-xs px-2 py-1 rounded font-medium self-start">
+                  {discount}% off
+                </span>
+              )}
+            </div>
           </div>
-        )} */}
-
-        {/* Quick Add to Cart for Mobile */}
-        {/* <div className="md:hidden">
-          <button
-            onClick={onHandleCart}
-            disabled={!selectedVariant || selectedVariant.stock <= 0}
-            className="w-full bg-pink-600 text-white py-2 rounded-lg font-medium text-sm hover:bg-pink-700 transition-colors duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed"
-          >
-            {selectedVariant && selectedVariant.stock <= 0
-              ? "Out of Stock"
-              : "Add to Cart"}
-          </button>
-        </div> */}
+        </div>
       </div>
     </div>
   );

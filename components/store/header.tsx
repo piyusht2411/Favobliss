@@ -56,6 +56,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
   } | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const searchDropdownRef = useRef<HTMLDivElement>(null);
+  const [showSearchResults, setShowSearchResults] = useState(false);
   const [defaultLocation, setDefaultLocation] = useState({
     city: "Delhi",
     pincode: "110040",
@@ -76,6 +77,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
       ) {
         setSearchResults(null);
         setSearchQuery("");
+        setShowSearchResults(false);
       }
     };
 
@@ -93,47 +95,6 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
 
   useEffect(() => {
     const updateLocation = () => {
-      // if (session?.user && addresses?.length && !isAddressLoading) {
-      //   const firstAddress = addresses[0];
-      //   const locationData = {
-      //     city: firstAddress.district || "Unknown",
-      //     pincode: firstAddress.zipCode,
-      //     state: firstAddress.state,
-      //     country: "India",
-      //   };
-      //   localStorage.setItem("locationData", JSON.stringify(locationData));
-      //   window.dispatchEvent(new Event("locationDataUpdated"));
-      //   setDefaultLocation({
-      //     city: locationData.city,
-      //     pincode: locationData.pincode,
-      //   });
-      //   return;
-      // }
-
-      // if (session?.user && addresses?.length && !isAddressLoading) {
-      //   const firstAddress = addresses[0];
-      //   const locationData = {
-      //     city: firstAddress.district || "Unknown",
-      //     pincode: firstAddress.zipCode,
-      //     state: firstAddress.state,
-      //     country: "India",
-      //   };
-
-      //   // Only update if different from current
-      //   const currentLocation = JSON.parse(
-      //     localStorage.getItem("locationData") || "{}"
-      //   );
-      //   if (currentLocation.pincode !== locationData.pincode) {
-      //     localStorage.setItem("locationData", JSON.stringify(locationData));
-      //     window.dispatchEvent(new Event("locationDataUpdated"));
-      //   }
-      //   setDefaultLocation({
-      //     city: locationData.city,
-      //     pincode: locationData.pincode,
-      //   });
-      //   return;
-      // }
-
       const locationData = localStorage.getItem("locationData");
 
       if (locationData) {
@@ -153,13 +114,12 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
 
       if (session?.user && addresses?.length && !isAddressLoading) {
         const firstAddress = addresses[0];
-        // Convert to string and trim
         const addressPincode = String(firstAddress.zipCode).trim();
 
         if (addressPincode) {
           const locationData = {
             city: firstAddress.district || "Unknown",
-            pincode: addressPincode, // Store as string
+            pincode: addressPincode,
             state: firstAddress.state,
             country: "India",
           };
@@ -167,8 +127,6 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
           const currentLocation = JSON.parse(
             localStorage.getItem("locationData") || "{}"
           );
-
-          // Only update if pincode changed
           if (currentLocation.pincode !== addressPincode) {
             localStorage.setItem("locationData", JSON.stringify(locationData));
             window.dispatchEvent(new Event("locationDataUpdated"));
@@ -216,6 +174,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
     if (isMounted.current) {
       setIsSearching(true);
     }
+
     try {
       const response = await fetch(
         `${
@@ -448,7 +407,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
             </Link>
           </div>
 
-          <div
+          {/* <div
             className="flex-1 mx-6 max-w-2xl relative"
             ref={searchDropdownRef}
           >
@@ -612,6 +571,307 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
                       )}
                     </>
                   )}
+                </div>
+              </div>
+            )}
+          </div> */}
+
+          <div
+            className="flex-1 mx-6 max-w-2xl relative"
+            ref={searchDropdownRef}
+          >
+            <div className="relative flex bg-white rounded-md overflow-hidden">
+              <div className="relative">
+                <button
+                  onClick={() => setIsSearchDropdownOpen(!isSearchDropdownOpen)}
+                  className="flex items-center gap-1 bg-[rgb(238,140,29)] text-white px-4 py-2.5 text-sm font-medium hover:bg-[rgb(238,140,29)] transition-colors min-w-max"
+                >
+                  <span>{selectedCategory}</span>
+                  <ChevronDown
+                    size={16}
+                    className={`transform transition-transform ${
+                      isSearchDropdownOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+              </div>
+
+              <div className="flex-1 relative">
+                <input
+                  type="text"
+                  placeholder="Search for Product Brand..."
+                  className="w-full py-2.5 px-4 text-black focus:outline-none text-sm"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  onFocus={() => setShowSearchResults(true)}
+                />
+                <button className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 rounded transition-colors">
+                  <Search size={24} className="text-black" />
+                </button>
+              </div>
+            </div>
+
+            {/* Category Dropdown */}
+            {isSearchDropdownOpen && (
+              <div className="absolute top-full left-0 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-60 overflow-y-auto mt-1">
+                <div className="py-1">
+                  {searchCategories.map((category) => (
+                    <button
+                      key={category}
+                      onClick={() => {
+                        setSelectedCategory(category);
+                        setIsSearchDropdownOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Search Results Dropdown */}
+            {showSearchResults && (
+              <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-[9999] mt-1 overflow-hidden">
+                <div className="flex min-h-[400px] max-h-[500px]">
+                  {/* Left Side - Suggestions */}
+                  <div className="w-1/2 border-r border-gray-200">
+                    <div className="p-4 bg-gray-50 border-b border-gray-200">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Suggestions
+                      </h3>
+                    </div>
+                    <div className="overflow-y-auto max-h-[450px]">
+                      {isSearching ? (
+                        <div className="px-4 py-3 text-sm text-gray-700">
+                          Searching...
+                        </div>
+                      ) : (
+                        <div className="py-2">
+                          {/* Categories */}
+                          {(searchResults?.categories ?? []).length > 0 && (
+                            <>
+                              {searchResults?.categories.map((category) => (
+                                <button
+                                  key={category.id}
+                                  onClick={() =>
+                                    handleResultClick(
+                                      `/category/${category.slug}?page=1`
+                                    )
+                                  }
+                                  className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors border-b border-gray-100 last:border-b-0"
+                                >
+                                  {category.name}
+                                </button>
+                              ))}
+                            </>
+                          )}
+
+                          {/* Subcategories */}
+                          {(searchResults?.subCategories ?? []).length > 0 && (
+                            <>
+                              {(searchResults?.subCategories ?? []).map(
+                                (subCategory) => (
+                                  <button
+                                    key={subCategory.id}
+                                    onClick={() =>
+                                      handleResultClick(
+                                        `/category/${subCategory.slug}?page=1`
+                                      )
+                                    }
+                                    className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors border-b border-gray-100 last:border-b-0"
+                                  >
+                                    {subCategory.name}
+                                  </button>
+                                )
+                              )}
+                            </>
+                          )}
+
+                          {/* Brands */}
+                          {(searchResults?.brands ?? []).length > 0 && (
+                            <>
+                              {(searchResults?.brands ?? []).map((brand) => (
+                                <button
+                                  key={brand.id}
+                                  onClick={() =>
+                                    handleResultClick(
+                                      `/brand/${brand.slug}?page=1`
+                                    )
+                                  }
+                                  className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors border-b border-gray-100 last:border-b-0"
+                                >
+                                  {brand.name}
+                                </button>
+                              ))}
+                            </>
+                          )}
+
+                          {/* Show default suggestions when no search results */}
+                          {!searchQuery && (
+                            <div className="py-2">
+                              <button className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors border-b border-gray-100">
+                                Air Purifiers
+                              </button>
+                              <button className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors border-b border-gray-100">
+                                Qubo Air Purifiers
+                              </button>
+                              <button className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors border-b border-gray-100">
+                                Philips Air Purifiers
+                              </button>
+                              <button className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors border-b border-gray-100">
+                                Kent Air Purifiers
+                              </button>
+                              <button className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors border-b border-gray-100">
+                                Honeywell Air Purifiers
+                              </button>
+                              <button className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+                                Home Air Purifiers
+                              </button>
+                            </div>
+                          )}
+
+                          {/* No results message */}
+                          {searchQuery &&
+                            !isSearching &&
+                            (searchResults?.categories ?? []).length === 0 &&
+                            (searchResults?.subCategories ?? []).length === 0 &&
+                            (searchResults?.brands ?? []).length === 0 &&
+                            (searchResults?.products ?? []).length === 0 && (
+                              <div className="px-4 py-6 text-sm text-gray-500 text-center">
+                                No suggestions found
+                              </div>
+                            )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right Side - Products */}
+                  <div className="w-1/2">
+                    <div className="p-4 bg-gray-50 border-b border-gray-200">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Products
+                      </h3>
+                    </div>
+                    <div className="overflow-y-auto max-h-[450px]">
+                      {isSearching ? (
+                        <div className="px-4 py-3 text-sm text-gray-700">
+                          Loading products...
+                        </div>
+                      ) : (
+                        <div className="py-2">
+                          {(searchResults?.products ?? []).length > 0 ? (
+                            <>
+                              {(searchResults?.products ?? []).map(
+                                (product) => (
+                                  <button
+                                    key={product.id}
+                                    onClick={() =>
+                                      handleResultClick(
+                                        `/product/${product.slug}`
+                                      )
+                                    }
+                                    className="w-full text-left px-4 py-3 hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      {product.variants[0]?.images[0] && (
+                                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                          <img
+                                            src={
+                                              product.variants[0].images[0].url
+                                            }
+                                            alt={product.name}
+                                            className="w-10 h-10 object-contain rounded"
+                                          />
+                                        </div>
+                                      )}
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-gray-900 line-clamp-2">
+                                          {product.name}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </button>
+                                )
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              {/* Show default products when no search results */}
+                              {!searchQuery && (
+                                <div className="py-2">
+                                  <div className="px-4 py-3 border-b border-gray-100">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <div className="w-8 h-8 bg-gray-300 rounded"></div>
+                                      </div>
+                                      <div className="flex-1">
+                                        <p className="text-sm font-medium text-gray-900">
+                                          Philips AC4221/61 Real Time AQI
+                                          Display | Ideal for Living room
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="px-4 py-3 border-b border-gray-100">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <div className="w-8 h-8 bg-gray-300 rounded"></div>
+                                      </div>
+                                      <div className="flex-1">
+                                        <p className="text-sm font-medium text-gray-900">
+                                          Dyson TP07 Air Purifier Technology
+                                          Pure Cool Tower Air Purifier
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="px-4 py-3 border-b border-gray-100">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <div className="w-8 h-8 bg-gray-300 rounded"></div>
+                                      </div>
+                                      <div className="flex-1">
+                                        <p className="text-sm font-medium text-gray-900">
+                                          SHARP DW-J27FM-S Air Purifier with
+                                          dehumidifier
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="px-4 py-3">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <div className="w-8 h-8 bg-gray-300 rounded"></div>
+                                      </div>
+                                      <div className="flex-1">
+                                        <p className="text-sm font-medium text-gray-900">
+                                          Honeywell Air Touch V4 Air Purifier
+                                          Activated Carbon filter
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* No products message */}
+                              {searchQuery &&
+                                !isSearching &&
+                                (searchResults?.products ?? []).length ===
+                                  0 && (
+                                  <div className="px-4 py-6 text-sm text-gray-500 text-center">
+                                    No products found
+                                  </div>
+                                )}
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

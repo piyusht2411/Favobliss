@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Urbanist } from "next/font/google";
+import { Roboto } from "next/font/google";
 import "./globals.css";
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
@@ -11,6 +12,11 @@ import Script from "next/script";
 import "react-loading-skeleton/dist/skeleton.css";
 
 const inter = Urbanist({ subsets: ["latin"] });
+const roboto = Roboto({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Favobliss – Your One-Stop Shop for the Latest Electronics",
@@ -29,11 +35,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <link rel="icon" href="/assets/favicon.ico" sizes="any" />
-      <body className={inter.className}>
-        <SessionProvider
-          refetchInterval={5 * 60} // Refresh session every 5 minutes
-          refetchOnWindowFocus={true}
-        >
+      <body className={roboto.className}>
+        <SessionProvider refetchInterval={5 * 60} refetchOnWindowFocus={true}>
           <ModalProvider />
           <FlowbiteProvider />
           <Toaster position="bottom-right" />

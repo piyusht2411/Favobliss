@@ -19,10 +19,10 @@ export const ProductList = ({
 }: ProductListProps) => {
   return (
     <div className="space-y-2 md:space-y-8">
-      <h3 className="text-3xl font-bold">{title}</h3>
+      <h3 className="text-3xl font-bold mb-5">{title}</h3>
       {data.length === 0 && <NoResults />}
       <div
-        className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 ${
+        className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 mb-2 ${
           isSpaceTop ? "mt-0!" : ""
         }`}
         style={isSpaceTop ? { marginTop: "0px" } : {}}

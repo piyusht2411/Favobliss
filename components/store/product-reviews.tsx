@@ -4,6 +4,7 @@ import { useState, useEffect, SetStateAction, Dispatch } from "react";
 import { FaStar, FaTrash } from "react-icons/fa";
 import { AddReviewForm } from "./AddReviewForm";
 import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 interface Review {
   id: string;
@@ -11,6 +12,7 @@ interface Review {
   rating: number;
   text: string;
   images: { url: string }[];
+  videos: { url: string }[];
   createdAt: string;
   userId: string;
 }
@@ -26,14 +28,20 @@ interface ProductReviewsProps {
 export const ProductReviews = (props: ProductReviewsProps) => {
   const { productId, avgRating, setAvgRating, totalReviews, setTotalReviews } =
     props;
-  const { data: session } = useSession(); // Get user session
+  const { data: session } = useSession();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showImageModal, setShowImageModal] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
+  const [selectedVideo, setSelectedVideo] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [reviewToDelete, setReviewToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const isAdmin = session?.user?.email === "favoblis@gmail.com";
+
+  console.log("first", session);
 
   const fetchReviews = async () => {
     try {
@@ -70,7 +78,6 @@ export const ProductReviews = (props: ProductReviewsProps) => {
     fetchReviews();
   };
 
-  // Open delete confirmation modal
   const openDeleteModal = (reviewId: string) => {
     setReviewToDelete(reviewId);
     setShowDeleteModal(true);
@@ -104,6 +111,7 @@ export const ProductReviews = (props: ProductReviewsProps) => {
       closeDeleteModal();
     } catch (error) {
       console.error("[DELETE_REVIEW]", error);
+      toast.error("Failed to delete review. Please try again.");
     } finally {
       setIsDeleting(false);
     }
@@ -123,6 +131,16 @@ export const ProductReviews = (props: ProductReviewsProps) => {
     setSelectedImage("");
   };
 
+  const openVideoModal = (videoUrl: string) => {
+    setSelectedVideo(videoUrl);
+    setShowVideoModal(true);
+  };
+
+  const closeVideoModal = () => {
+    setShowVideoModal(false);
+    setSelectedVideo("");
+  };
+
   const allReviewImages = reviews.flatMap((review) =>
     review.images.map((img) => ({
       ...img,
@@ -131,8 +149,17 @@ export const ProductReviews = (props: ProductReviewsProps) => {
     }))
   );
 
+  const allReviewVideos = reviews.flatMap((review) =>
+    review.videos.map((vid) => ({
+      ...vid,
+      reviewId: review.id,
+      userName: review.userName,
+    }))
+  );
+
   const canDeleteReview = (review: Review) => {
     if (!session?.user) return false;
+    if (isAdmin) return true;
     return (
       session.user.name === review.userName && session.user.id === review.userId
     );
@@ -175,21 +202,20 @@ export const ProductReviews = (props: ProductReviewsProps) => {
 
   return (
     <div className="w-full bg-white rounded-lg shadow-sm border">
-      {/* Header */}
       <div className="p-6 border-b">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">
           Customer Reviews
         </h2>
 
-        {allReviewImages.length > 0 && (
+        {(allReviewImages.length > 0 || allReviewVideos.length > 0) && (
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-700 mb-3">
-              Customer Photos
+              Customer Media
             </h3>
             <div className="flex gap-2 overflow-x-auto pb-2">
-              {allReviewImages.slice(0, 10).map((image, index) => (
+              {allReviewImages.slice(0, 5).map((image, index) => (
                 <div
-                  key={index}
+                  key={`image-${index}`}
                   className="flex-shrink-0 relative cursor-pointer group"
                   onClick={() => openImageModal(image.url)}
                 >
@@ -205,10 +231,28 @@ export const ProductReviews = (props: ProductReviewsProps) => {
                   </div>
                 </div>
               ))}
-              {allReviewImages.length > 10 && (
+              {allReviewVideos.slice(0, 5).map((video, index) => (
+                <div
+                  key={`video-${index}`}
+                  className="flex-shrink-0 relative cursor-pointer group"
+                  onClick={() => openVideoModal(video.url)}
+                >
+                  <video
+                    src={video.url}
+                    className="h-16 w-16 object-cover rounded-lg border-2 border-gray-200 group-hover:border-blue-400 transition-colors"
+                    muted
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity rounded-lg flex items-center justify-center">
+                    <span className="text-white opacity-0 group-hover:opacity-100 text-xs">
+                      Play
+                    </span>
+                  </div>
+                </div>
+              ))}
+              {allReviewImages.length + allReviewVideos.length > 5 && (
                 <div className="flex-shrink-0 h-16 w-16 bg-gray-100 rounded-lg border-2 border-gray-200 flex items-center justify-center">
                   <span className="text-xs text-gray-600">
-                    +{allReviewImages.length - 10}
+                    +{allReviewImages.length + allReviewVideos.length - 5}
                   </span>
                 </div>
               )}
@@ -216,9 +260,7 @@ export const ProductReviews = (props: ProductReviewsProps) => {
           </div>
         )}
 
-        {/* Rating Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          {/* Average Rating */}
           <div className="flex items-center gap-4">
             <div className="text-center">
               <div className="text-4xl font-bold text-gray-800 mb-1">
@@ -245,8 +287,6 @@ export const ProductReviews = (props: ProductReviewsProps) => {
               </div>
             </div>
           </div>
-
-          {/* Rating Distribution */}
           <div className="md:col-span-2">
             <div className="space-y-2">
               {[5, 4, 3, 2, 1].map((star) => {
@@ -295,7 +335,6 @@ export const ProductReviews = (props: ProductReviewsProps) => {
         </div>
       </div>
 
-      {/* Add Review Form */}
       <div className="p-6 border-b bg-gray-50">
         <AddReviewForm
           productId={productId}
@@ -303,7 +342,6 @@ export const ProductReviews = (props: ProductReviewsProps) => {
         />
       </div>
 
-      {/* Reviews List */}
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-gray-800">
@@ -317,7 +355,6 @@ export const ProductReviews = (props: ProductReviewsProps) => {
               key={review.id}
               className="border-b border-gray-100 pb-6 last:border-b-0"
             >
-              {/* Review Header */}
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center">
@@ -337,16 +374,44 @@ export const ProductReviews = (props: ProductReviewsProps) => {
                       })}
                     </div>
                     <div className="mt-4">
-                      {review.images.length > 0 && (
+                      {(review.images.length > 0 ||
+                        review.videos.length > 0) && (
                         <div className="flex gap-2 mb-3 overflow-x-auto pb-1">
                           {review.images.map((image, index) => (
                             <img
-                              key={index}
+                              key={`image-${index}`}
                               src={image.url}
                               alt={`Review image ${index + 1}`}
-                              className="h-20 w-20 object-cover rounded-lg border cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0"
+                              className="h-20 w-20 object-cover rounded-lg border cursor-pointer flex-shrink-0"
                               onClick={() => openImageModal(image.url)}
                             />
+                          ))}
+                          {review.videos.map((video, index) => (
+                            <div
+                              key={`video-${index}`}
+                              className="relative flex-shrink-0 cursor-pointer"
+                              onClick={() => openVideoModal(video.url)}
+                            >
+                              <video
+                                src={video.url}
+                                className="h-20 w-20 object-cover rounded-lg border"
+                                muted
+                              />
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity rounded-lg flex items-center justify-center">
+                                <span className="text-white opacity-0 group-hover:opacity-100 text-xs">
+                                  View
+                                </span>
+                              </div>
+                              {/* <div className="absolute inset-0 flex items-center justify-center">
+                                <svg
+                                  className="h-6 w-6 text-white opacity-70"
+                                  fill="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path d="M8 5v14l11-7z" />
+                                </svg>
+                              </div> */}
+                            </div>
                           ))}
                         </div>
                       )}
@@ -374,7 +439,6 @@ export const ProductReviews = (props: ProductReviewsProps) => {
                   <span className="ml-2 text-sm font-medium text-gray-700">
                     {review.rating}.0
                   </span>
-                  {/* Delete Button */}
                   {canDeleteReview(review) && (
                     <button
                       onClick={() => openDeleteModal(review.id)}
@@ -391,7 +455,6 @@ export const ProductReviews = (props: ProductReviewsProps) => {
         </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
@@ -411,7 +474,7 @@ export const ProductReviews = (props: ProductReviewsProps) => {
 
             <p className="text-gray-700 mb-6">
               Are you sure you want to delete this review? This will permanently
-              remove your review and all associated images.
+              remove the review and all associated images and videos.
             </p>
 
             <div className="flex gap-3 justify-end">
@@ -444,7 +507,6 @@ export const ProductReviews = (props: ProductReviewsProps) => {
         </div>
       )}
 
-      {/* Image Modal */}
       {showImageModal && (
         <div
           className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
@@ -458,6 +520,39 @@ export const ProductReviews = (props: ProductReviewsProps) => {
             />
             <button
               onClick={closeImageModal}
+              className="absolute top-2 right-2 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showVideoModal && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+          onClick={closeVideoModal}
+        >
+          <div className="relative max-w-4xl max-h-[90vh] p-4">
+            <video
+              src={selectedVideo}
+              controls
+              className="max-w-full max-h-full object-contain rounded-lg"
+            />
+            <button
+              onClick={closeVideoModal}
               className="absolute top-2 right-2 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors"
             >
               <svg

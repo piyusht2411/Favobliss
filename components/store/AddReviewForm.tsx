@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
-import { FaStar, FaCamera, FaTimes } from "react-icons/fa";
+import { FaStar, FaCamera, FaTimes, FaVideo } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
-
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input"; // Assuming you have an Input component
 import { toast } from "sonner";
 import Link from "next/link";
 import { useOrder } from "@/hooks/use-order";
@@ -25,6 +25,8 @@ export const AddReviewForm = ({
   const [hoverRating, setHoverRating] = useState(0);
   const [text, setText] = useState("");
   const [images, setImages] = useState<File[]>([]);
+  const [videos, setVideos] = useState<File[]>([]);
+  const [customUserName, setCustomUserName] = useState(""); // For admin to set userName
   const [isLoading, setIsLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const {
@@ -42,6 +44,7 @@ export const AddReviewForm = ({
   const isAuthenticated = status === "authenticated";
   const userId = session?.user?.id;
   const userName = session?.user?.name || "Anonymous User";
+  const isAdmin = session?.user?.email === "favoblis@gmail.com";
 
   const isVerifiedBuyer =
     isAuthenticated &&
@@ -51,6 +54,8 @@ export const AddReviewForm = ({
         order.userId === userId &&
         order.orderProduct.some((product) => product.productId === productId)
     );
+
+  const canSubmitReview = isAdmin || isVerifiedBuyer;
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -63,8 +68,23 @@ export const AddReviewForm = ({
     }
   };
 
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newVideos = Array.from(e.target.files);
+      if (videos.length + newVideos.length > 5) {
+        toast.error("Maximum 5 videos allowed");
+        return;
+      }
+      setVideos([...videos, ...newVideos]);
+    }
+  };
+
   const removeImage = (index: number) => {
     setImages(images.filter((_, i) => i !== index));
+  };
+
+  const removeVideo = (index: number) => {
+    setVideos(videos.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -75,7 +95,7 @@ export const AddReviewForm = ({
       return;
     }
 
-    if (!isVerifiedBuyer) {
+    if (!canSubmitReview) {
       toast.error("You must purchase this product to submit a review.");
       return;
     }
@@ -85,10 +105,17 @@ export const AddReviewForm = ({
       return;
     }
 
+    if (isAdmin && !customUserName.trim()) {
+      toast.error("Please enter a username for the review.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       let imageUrls: string[] = [];
+      let videoUrls: string[] = [];
+
       if (images.length > 0) {
         const formData = new FormData();
         images.forEach((image) => formData.append("images", image));
@@ -106,6 +133,23 @@ export const AddReviewForm = ({
         imageUrls = uploadData.imageUrls;
       }
 
+      if (videos.length > 0) {
+        const formData = new FormData();
+        videos.forEach((video) => formData.append("videos", video));
+
+        const uploadResponse = await fetch("/api/v1/video-upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error("Failed to upload videos");
+        }
+
+        const uploadData = await uploadResponse.json();
+        videoUrls = uploadData.videoUrls;
+      }
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/products/${productId}/reviews`,
         {
@@ -115,11 +159,13 @@ export const AddReviewForm = ({
           },
           credentials: "omit",
           body: JSON.stringify({
-            userName,
+            userName: isAdmin ? customUserName : userName,
             rating,
             text,
             images: imageUrls,
+            videos: videoUrls,
             userId,
+            // isAdmin, // Include isAdmin flag for backend validation
           }),
         }
       );
@@ -133,6 +179,8 @@ export const AddReviewForm = ({
       setRating(0);
       setText("");
       setImages([]);
+      setVideos([]);
+      setCustomUserName("");
       setShowForm(false);
       onReviewSubmitted();
     } catch (error) {
@@ -159,7 +207,7 @@ export const AddReviewForm = ({
         </div>
       ) : !showForm ? (
         <div className="text-center py-4">
-          {isVerifiedBuyer ? (
+          {canSubmitReview ? (
             <Button
               onClick={() => setShowForm(true)}
               className="bg-orange-400 hover:bg-orange-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
@@ -200,7 +248,21 @@ export const AddReviewForm = ({
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Rating Selection */}
+            {isAdmin && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Username for Review *
+                </label>
+                <Input
+                  value={customUserName}
+                  onChange={(e) => setCustomUserName(e.target.value)}
+                  placeholder="Enter username for the review"
+                  className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  required
+                />
+              </div>
+            )}
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Rating *
@@ -233,7 +295,6 @@ export const AddReviewForm = ({
               </div>
             </div>
 
-            {/* Review Text */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Your Review *
@@ -250,7 +311,6 @@ export const AddReviewForm = ({
               </p>
             </div>
 
-            {/* Image Upload */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Add Photos (Optional)
@@ -282,12 +342,10 @@ export const AddReviewForm = ({
                   </p>
                 </label>
               </div>
-
-              {/* Image Previews */}
               {images.length > 0 && (
                 <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                   {images.map((image, index) => (
-                    <div key={index} className="relative group">
+                    <div key={`image-${index}`} className="relative group">
                       <img
                         src={URL.createObjectURL(image)}
                         alt={`Preview ${index + 1}`}
@@ -306,11 +364,68 @@ export const AddReviewForm = ({
               )}
             </div>
 
-            {/* Submit Button */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Add Videos (Optional)
+              </label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
+                <input
+                  type="file"
+                  accept="video/*"
+                  multiple
+                  onChange={handleVideoChange}
+                  className="hidden"
+                  id="video-upload"
+                  disabled={videos.length >= 5}
+                />
+                <label
+                  htmlFor="video-upload"
+                  className={`cursor-pointer ${
+                    videos.length >= 5 ? "cursor-not-allowed opacity-50" : ""
+                  }`}
+                >
+                  <FaVideo className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                  <p className="text-sm text-gray-600">
+                    {videos.length >= 5
+                      ? "Maximum 5 videos"
+                      : "Click to upload videos"}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    MP4, WebM up to 50MB each
+                  </p>
+                </label>
+              </div>
+              {videos.length > 0 && (
+                <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                  {videos.map((video, index) => (
+                    <div key={`video-${index}`} className="relative group">
+                      <video
+                        src={URL.createObjectURL(video)}
+                        className="h-24 w-24 object-cover rounded-lg border"
+                        muted
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeVideo(index)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full h-6 w-6 flex items-center justify-center hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        <FaTimes className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="flex gap-3 pt-4">
               <Button
                 type="submit"
-                disabled={isLoading || rating === 0 || !text.trim()}
+                disabled={
+                  isLoading ||
+                  rating === 0 ||
+                  !text.trim() ||
+                  (isAdmin && !customUserName.trim())
+                }
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50"
               >
                 {isLoading ? (

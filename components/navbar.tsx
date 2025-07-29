@@ -39,29 +39,6 @@ export const Navbar = async () => {
 
   return (
     <header className="shadow-neutral-100 shadow-lg border-b">
-      {/* <Container>
-                <div className='px-4 relative md:px-6 lg:px-8 h-16 flex items-center'>
-                    <MobileNavbar data={data}  />
-                    <Link className='ml-4 flex lg:ml-0 gap-x-2'
-                        href="/"
-                    >
-                        <li className={cn(
-                            'list-none font-extrabold text-2xl',
-                            font.className
-                        )}>
-                            <img width="120px" className='rounded-md' src="/assets/favo-logo.jpg" />
-                        </li>
-                    </Link>
-                    <div className='hidden md:block'>
-                        <MainNav data={data} />
-                    </div>
-                    <NavbarActions
-                        wishlistItems={wishlistItems}
-                    />
-                </div>
-
-            </Container> */}
-
       <HeaderMobile categories={data} />
       <Header categories={data} />
     </header>

@@ -978,10 +978,6 @@ export const ProductDetails = (props: ProductDetailsProps) => {
               Express Delivery | Delhi Ncr Only | Call Now +91-9540717161
             </p>
           )}
-
-          {/* <div ref={buttonsRef} className="mt-8 max-w-sm md:block hidden">
-            <ActionButtons />
-          </div> */}
         </div>
       </div>
     </>

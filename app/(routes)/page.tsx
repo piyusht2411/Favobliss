@@ -68,7 +68,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
   ];
 
   return (
-    <>
+    <div className="bg-[#f8f8f8]">
       <HeroSlider />
       <CategorySlider />
       <GalleryImage />
@@ -174,7 +174,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
           </div>
         </div>
       </Container>
-    </>
+    </div>
   );
 };
 

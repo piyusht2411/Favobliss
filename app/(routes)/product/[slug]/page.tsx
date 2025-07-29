@@ -1,6 +1,6 @@
 import { getProductBySlug } from "@/actions/get-product";
 import { getProducts } from "@/actions/get-products";
-import { getLocations } from "@/actions/get-locations"; // New import
+import { getLocations } from "@/actions/get-locations";
 import { redirect } from "next/navigation";
 import { Metadata, ResolvingMetadata } from "next";
 import { ProductPageContent } from "@/components/store/ProductPageClient";
