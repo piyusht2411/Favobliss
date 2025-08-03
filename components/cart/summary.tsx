@@ -167,7 +167,7 @@ export const Summary = (props: Props) => {
         address,
         coupon: appliedCoupon
           ? { code: appliedCoupon.code, value: discount }
-          : null, // Include coupon in order
+          : null,
       });
 
       const orderId = order.data.orderId;
@@ -182,7 +182,7 @@ export const Summary = (props: Props) => {
             locationId: item.locationId,
           })),
           orderId: orderId,
-          discount: discount, // Pass discount to checkout API
+          discount: discount,
         }
       );
 
@@ -250,7 +250,6 @@ export const Summary = (props: Props) => {
         Order Summary
       </h2>
       <div className="mt-6 space-y-4 border-t">
-        {/* Improved Coupon UI */}
         {!appliedCoupon ? (
           <div className="relative flex items-stretch overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm focus-within:border-pink-400 focus-within:ring-2 focus-within:ring-pink-100 transition-all duration-200">
             <input
@@ -258,7 +257,7 @@ export const Summary = (props: Props) => {
               placeholder="Enter coupon code"
               value={couponCode}
               onChange={(e) => setCouponCode(e.target.value)}
-              className="flex-1 px-4 py-3 text-gray-700 placeholder-gray-400 bg-transparent border-0 outline-none text-sm font-medium tracking-wide uppercase"
+              className="flex-1 px-4 py-3 text-gray-700 placeholder-gray-400 bg-transparent border-0 outline-none text-sm font-medium tracking-wide"
             />
             <Button
               onClick={handleApplyCoupon}
