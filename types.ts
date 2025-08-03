@@ -4,6 +4,18 @@ export interface Billboard {
   imageUrl: string;
 }
 
+export interface Coupons {
+  code: string;
+  value: number;
+  isActive: boolean;
+  startDate: string;
+  expiryDate: string;
+  usagePerUser: number;
+  usedCount: number;
+  description: string;
+  products: Product[];
+}
+
 export interface Brand {
   id: string;
   slug: string;
@@ -83,6 +95,7 @@ export interface Product {
   isNewArrival: boolean;
   averageRating: number;
   subCategory: SubCategory;
+  productId: string;
 }
 
 export interface Brand {

@@ -13,6 +13,8 @@ import { useCheckout } from "@/hooks/use-checkout";
 import { useCheckoutAddress } from "@/hooks/use-checkout-address";
 import { usePaymentSuccessErrorModal } from "@/hooks/use-payment-success-error-modal";
 import { useCart } from "@/hooks/use-cart";
+import { getCoupons } from "@/actions/get-coupons";
+import { Coupons } from "@/types";
 
 interface Props {
   isAddressCorrect?: boolean;
@@ -30,12 +32,78 @@ export const Summary = (props: Props) => {
   const { checkOutItems, clearCheckOutItems } = useCheckout();
   const { onOpen } = usePaymentSuccessErrorModal();
   const [loading, setLoading] = useState(false);
+  const [coupons, setCoupons] = useState<Coupons[]>([]);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupons | null>(null);
+  const [discount, setDiscount] = useState(0);
+  const [loadingCoupons, setLoadingCoupons] = useState(true);
+
+  console.log(coupons, "coupons");
+  console.log(checkOutItems, "checkOutItems");
+
+  useEffect(() => {
+    const fetchCoupons = async () => {
+      try {
+        const fetchedCoupons = await getCoupons();
+        setCoupons(fetchedCoupons);
+      } catch (error) {
+        console.error("Failed to fetch coupons:", error);
+        toast.error("Failed to load coupons");
+      } finally {
+        setLoadingCoupons(false);
+      }
+    };
+    fetchCoupons();
+  }, []);
 
   const getTotalAmount = () => {
     const amount = checkOutItems.reduce((total, item) => {
       return total + (item.price || 0) * item.quantity;
     }, 0);
     return amount;
+  };
+
+  const applyCoupon = () => {
+    const coupon = coupons.find((c) => c.code === couponCode);
+    if (!coupon) {
+      toast.error("Invalid coupon code");
+      return;
+    }
+    if (!coupon.isActive) {
+      toast.error("Coupon is not active");
+      return;
+    }
+    const currentDate = new Date();
+    const expiryDate = new Date(coupon.expiryDate);
+    if (currentDate > expiryDate) {
+      toast.error("Coupon has expired");
+      return;
+    }
+    if (
+      coupon.products &&
+      coupon.products.length > 0 &&
+      coupon.products[0].id
+    ) {
+      const cartProductIds = checkOutItems.map((item) => item?.id);
+      const couponProductIds = coupon.products.map((p) => p.productId);
+      const isMatch = couponProductIds.some((id) =>
+        cartProductIds.includes(id)
+      );
+      if (!isMatch) {
+        toast.error("Coupon does not apply to the products in your cart");
+        return;
+      }
+    }
+    setAppliedCoupon(coupon);
+    setDiscount(coupon.value);
+    toast.success("Coupon applied successfully");
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setDiscount(0);
+    setCouponCode("");
+    toast.success("Coupon removed");
   };
 
   const updateOrder = async (id: string) => {
@@ -108,8 +176,8 @@ export const Summary = (props: Props) => {
           products: checkOutItems.map((item) => ({
             id: item.variantId,
             quantity: item.quantity,
-            price: item.price, // Add location-based price
-            locationId: item.locationId, // Add locationId
+            price: item.price,
+            locationId: item.locationId,
           })),
           orderId: orderId,
         }
@@ -179,6 +247,83 @@ export const Summary = (props: Props) => {
         Order Summary
       </h2>
       <div className="mt-6 space-y-4 border-t">
+        {/* Improved Coupon UI */}
+        {!appliedCoupon ? (
+          <div className="relative flex items-stretch overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm focus-within:border-pink-400 focus-within:ring-2 focus-within:ring-pink-100 transition-all duration-200">
+            <input
+              type="text"
+              placeholder="Enter coupon code"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value)}
+              className="flex-1 px-4 py-3 text-gray-700 placeholder-gray-400 bg-transparent border-0 outline-none text-sm font-medium tracking-wide uppercase"
+            />
+            <Button
+              onClick={applyCoupon}
+              disabled={loadingCoupons || !couponCode}
+              className={`px-6 py-3 text-sm font-semibold transition-all duration-200 border-0 ${
+                loadingCoupons || !couponCode
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-pink-500 to-pink-600 text-white hover:from-pink-600 hover:to-pink-700 hover:shadow-md active:scale-95"
+              }`}
+            >
+              {loadingCoupons ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                  <span>Loading</span>
+                </div>
+              ) : (
+                "Apply"
+              )}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                <svg
+                  className="w-5 h-5 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-green-800">
+                  Coupon Applied: {appliedCoupon.code}
+                </p>
+                <p className="text-xs text-green-600">
+                  You saved {formatter.format(discount)}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={removeCoupon}
+              className="text-green-600 hover:text-green-800 transition-colors duration-200"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        )}
+
         <p className="text-zinc-600 text-base font-semibold mt-2">
           PRICE DETAILS ( {checkOutItems.length} Item )
         </p>
@@ -189,6 +334,16 @@ export const Summary = (props: Props) => {
               {formatter.format(getTotalAmount())}
             </p>
           </div>
+          {appliedCoupon && (
+            <div className="flex items-center justify-between">
+              <p className="text-base font-medium text-zinc-500">
+                Your Savings Estimated
+              </p>
+              <p className="text-base font-medium text-green-600">
+                -{formatter.format(discount)}
+              </p>
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <p className="text-base font-medium text-zinc-500">
               Shipping Charges
@@ -200,7 +355,7 @@ export const Summary = (props: Props) => {
         <div className="flex items-center justify-between">
           <p className="text-base font-bold text-zinc-800">Total Amount</p>
           <p className="text-base font-bold text-zinc-800">
-            {formatter.format(getTotalAmount())}
+            {formatter.format(getTotalAmount() - discount)}
           </p>
         </div>
       </div>
