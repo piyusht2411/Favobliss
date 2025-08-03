@@ -154,7 +154,7 @@ const BestOfProduct = (props: Props) => {
   const displayProducts = products.slice(0, 8);
 
   return (
-    <div className="bg-white p-4 md:p-6">
+    <div className="bg-[#f8f8f8] p-4 md:p-6">
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
         {/* Left Section - Title and Info */}
         <div className="w-full lg:w-1/3 space-y-4 lg:space-y-6">

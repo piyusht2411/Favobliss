@@ -28,18 +28,19 @@ export const Summary = (props: Props) => {
   const session = useSession();
   const { address } = useCheckoutAddress();
   const { removeAll } = useCart();
-
-  const { checkOutItems, clearCheckOutItems } = useCheckout();
+  const {
+    checkOutItems,
+    clearCheckOutItems,
+    appliedCoupon,
+    discount,
+    applyCoupon,
+    removeCoupon,
+  } = useCheckout();
   const { onOpen } = usePaymentSuccessErrorModal();
   const [loading, setLoading] = useState(false);
   const [coupons, setCoupons] = useState<Coupons[]>([]);
   const [couponCode, setCouponCode] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState<Coupons | null>(null);
-  const [discount, setDiscount] = useState(0);
   const [loadingCoupons, setLoadingCoupons] = useState(true);
-
-  console.log(coupons, "coupons");
-  console.log(checkOutItems, "checkOutItems");
 
   useEffect(() => {
     const fetchCoupons = async () => {
@@ -63,7 +64,7 @@ export const Summary = (props: Props) => {
     return amount;
   };
 
-  const applyCoupon = () => {
+  const handleApplyCoupon = () => {
     const coupon = coupons.find((c) => c.code === couponCode);
     if (!coupon) {
       toast.error("Invalid coupon code");
@@ -94,15 +95,13 @@ export const Summary = (props: Props) => {
         return;
       }
     }
-    setAppliedCoupon(coupon);
-    setDiscount(coupon.value);
+    applyCoupon(coupon); // Use store's applyCoupon method
     toast.success("Coupon applied successfully");
+    setCouponCode(""); // Clear input after applying
   };
 
-  const removeCoupon = () => {
-    setAppliedCoupon(null);
-    setDiscount(0);
-    setCouponCode("");
+  const handleRemoveCoupon = () => {
+    removeCoupon(); // Use store's removeCoupon method
     toast.success("Coupon removed");
   };
 
@@ -166,6 +165,9 @@ export const Summary = (props: Props) => {
           }),
         })),
         address,
+        coupon: appliedCoupon
+          ? { code: appliedCoupon.code, value: discount }
+          : null, // Include coupon in order
       });
 
       const orderId = order.data.orderId;
@@ -180,6 +182,7 @@ export const Summary = (props: Props) => {
             locationId: item.locationId,
           })),
           orderId: orderId,
+          discount: discount, // Pass discount to checkout API
         }
       );
 
@@ -205,7 +208,7 @@ export const Summary = (props: Props) => {
 
       const options = {
         key,
-        amount,
+        amount: amount - discount, // Apply discount to final amount
         currency,
         name: "Favobliss",
         description: "Order Payment",
@@ -258,7 +261,7 @@ export const Summary = (props: Props) => {
               className="flex-1 px-4 py-3 text-gray-700 placeholder-gray-400 bg-transparent border-0 outline-none text-sm font-medium tracking-wide uppercase"
             />
             <Button
-              onClick={applyCoupon}
+              onClick={handleApplyCoupon}
               disabled={loadingCoupons || !couponCode}
               className={`px-6 py-3 text-sm font-semibold transition-all duration-200 border-0 ${
                 loadingCoupons || !couponCode
@@ -304,7 +307,7 @@ export const Summary = (props: Props) => {
               </div>
             </div>
             <button
-              onClick={removeCoupon}
+              onClick={handleRemoveCoupon}
               className="text-green-600 hover:text-green-800 transition-colors duration-200"
             >
               <svg

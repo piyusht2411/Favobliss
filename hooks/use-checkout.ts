@@ -1,9 +1,11 @@
-import { CartSelectedItem } from "@/types";
+import { CartSelectedItem, Coupons } from "@/types";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 interface UseCheckOutProps {
   checkOutItems: CartSelectedItem[];
+  appliedCoupon: Coupons | null;
+  discount: number;
   selectItem: (data: CartSelectedItem) => void;
   updateItem: (variantId: string, quantity: number) => void;
   removeSelectedItems: (variantId: string) => void;
@@ -15,12 +17,17 @@ interface UseCheckOutProps {
     price: number,
     locationId: string
   ) => void;
+  applyCoupon: (coupon: Coupons) => void;
+  removeCoupon: () => void;
+  setDiscount: (discount: number) => void;
 }
 
 export const useCheckout = create(
   persist<UseCheckOutProps>(
     (set, get) => ({
       checkOutItems: [],
+      appliedCoupon: null,
+      discount: 0,
       selectItem: (data: CartSelectedItem) => {
         const currentItems = get().checkOutItems;
         const isAlreadyExist = currentItems.find(
@@ -72,8 +79,6 @@ export const useCheckout = create(
           set({ checkOutItems: updatedItems });
         }
       },
-
-      // In useCheckout store
       updateItemCheckoutPrice: (
         variantId: string,
         price: number,
@@ -103,7 +108,10 @@ export const useCheckout = create(
           ],
         }),
       setCheckOutItems: (items) => set({ checkOutItems: items }),
-      clearCheckOutItems: () => set({ checkOutItems: [] }),
+      clearCheckOutItems: () => set({ checkOutItems: [], appliedCoupon: null, discount: 0 }),
+      applyCoupon: (coupon: Coupons) => set({ appliedCoupon: coupon, discount: coupon.value }),
+      removeCoupon: () => set({ appliedCoupon: null, discount: 0 }),
+      setDiscount: (discount: number) => set({ discount }),
     }),
     {
       name: "store-checkout-items",

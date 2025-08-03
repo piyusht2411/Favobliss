@@ -142,13 +142,11 @@ export const UserAddressCard = ({ data, label }: UserAddressCardProps) => {
     data && data.filter((address) => address.isDefault === false);
 
   const handleAddressSelect = async (address: Address) => {
-    // Check if all items match the new address pincode
     const mismatched = items.filter(
       (item) => String(item.pincode) !== String(address.zipCode)
     );
 
     if (mismatched.length === 0) {
-      // No conflicts - proceed normally
       addAddress(address);
       // router.push("/checkout/payment");
       return;
@@ -175,17 +173,14 @@ export const UserAddressCard = ({ data, label }: UserAddressCardProps) => {
       });
 
       mismatchedItems.forEach((item) => {
-        // Find the product containing the variant
         const product = response.find((p) =>
           p.variants?.some((v) => v.id === item.selectedVariant.id)
         );
-        // Find the variant
         const variant = product?.variants.find(
           (v) => v.id === item.selectedVariant.id
         );
         const targetPincode = String(selectedAddress.zipCode).trim();
 
-        // Find the price for the given pincode
         //@ts-ignore
         const variantPrice = variant?.variantPrices?.find((vp) => {
           //@ts-ignore
@@ -221,7 +216,6 @@ export const UserAddressCard = ({ data, label }: UserAddressCardProps) => {
         }
       });
       setShowPricingDialog(false);
-      // router.push("/checkout/payment"); // Uncomment if needed
     } catch (error: any) {
       console.log("Error details:", error);
       if (error?.response?.status === 404) {
