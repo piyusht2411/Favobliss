@@ -138,7 +138,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
             />
             <div className="space-y-4 md:space-y-16">
               <Image
-                src="https://www.vijaysales.com/_jcr_content/root/container/container/vscontainer_318402664/vscontainer/productpromtioncardt.coreimg.jpeg/1751543089144/kitchen-appliances-desktop.jpeg"
+                src="https://www.vijaysales.com/_jcr_content/root/container/container/vscontainer_318402664/vscontainer/productpromtioncardt.coreimg.jpeg/1753689025425/kitchen-appliances-desktop.jpeg"
                 alt="Image"
                 width={1500}
                 height={300}

@@ -10,6 +10,7 @@ import { SessionProvider } from "next-auth/react";
 import { FlowbiteProvider } from "@/providers/flowbite";
 import Script from "next/script";
 import "react-loading-skeleton/dist/skeleton.css";
+import WhatsAppButton from "@/components/store/WhatsAppButton";
 
 const inter = Urbanist({ subsets: ["latin"] });
 const roboto = Roboto({
@@ -42,6 +43,7 @@ export default function RootLayout({
           <Toaster position="bottom-right" />
           <Navbar />
           {children}
+          <WhatsAppButton />
           <Footer />
           <Script src="https://checkout.razorpay.com/v1/checkout.js" />
         </SessionProvider>
