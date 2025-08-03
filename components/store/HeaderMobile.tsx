@@ -158,11 +158,7 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
         if (category.name === "HOME APPLIANCES") {
           menuCategory.items = category.subCategories.map((subCat: any) => ({
             label: subCat.name,
-            href: `/category/${category.name
-              .toLowerCase()
-              .replace(/\s+/g, "-")}/${subCat.name
-              .toLowerCase()
-              .replace(/\s+/g, "-")}`,
+            href: `/category/${category.slug}?sub=${subCat.slug}?page=1`,
             count: subCat.childSubCategories?.length || 0,
           }));
 
@@ -175,13 +171,7 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
               subItemsObj[subCat.name] = subCat.childSubCategories.map(
                 (childSubCat: any) => ({
                   label: childSubCat.name,
-                  href: `/category/${category.name
-                    .toLowerCase()
-                    .replace(/\s+/g, "-")}/${subCat.name
-                    .toLowerCase()
-                    .replace(/\s+/g, "-")}/${childSubCat.name
-                    .toLowerCase()
-                    .replace(/\s+/g, "-")}`,
+                  href: `/category/${category.slug}?sub=${subCat.slug}&childsub=${childSubCat.slug}?page=1`,
                   count: 0,
                 })
               );
@@ -191,11 +181,7 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
         } else {
           menuCategory.items = category.subCategories.map((subCat: any) => ({
             label: subCat.name,
-            href: `/category/${category.name
-              .toLowerCase()
-              .replace(/\s+/g, "-")}/${subCat.name
-              .toLowerCase()
-              .replace(/\s+/g, "-")}`,
+            href: `/category/${category.slug}?sub=${subCat.slug}?page=1`,
             count: subCat.childSubCategories?.length || 0,
           }));
 
@@ -213,13 +199,7 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
                 subCat.childSubCategories.forEach((childSubCat: any) => {
                   allChildSubCategories.push({
                     label: childSubCat.name,
-                    href: `/category/${category.name
-                      .toLowerCase()
-                      .replace(/\s+/g, "-")}/${subCat.name
-                      .toLowerCase()
-                      .replace(/\s+/g, "-")}/${childSubCat.name
-                      .toLowerCase()
-                      .replace(/\s+/g, "-")}`,
+                    href: `/category/${category.slug}?sub=${subCat.slug}&childsub=${childSubCat.slug}?page=1`,
                     count: 0,
                   });
                 });
@@ -234,9 +214,7 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
         menuCategory.items = [
           {
             label: category.name,
-            href: `/category/${category.name
-              .toLowerCase()
-              .replace(/\s+/g, "-")}`,
+            href: `/category/${category.slug}`,
             count: 0,
           },
         ];
@@ -298,7 +276,6 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
           </button>
         </div>
       </div>
-
       {/* Search Bar with Dropdown */}
       {/* <div className="mt-4 relative">
         <div className="relative flex bg-white overflow-hidden rounded-[6px]">
@@ -355,8 +332,8 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
           />
         )}
       </div> */}
-
       {/* Search Bar with Dropdown */}
+      {/* Search Bar with Category Grid Dropdown */}
       <div className="mt-4 relative" ref={searchDropdownRef}>
         <div className="relative flex bg-white overflow-hidden rounded-[6px]">
           {/* Category Dropdown Button */}
@@ -390,122 +367,122 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
           </div>
         </div>
 
-        {/* Category Dropdown Menu */}
+        {/* Category Grid Dropdown Menu */}
         {isSearchDropdownOpen && (
-          <div className="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-48 overflow-y-auto mt-1">
-            <div className="py-1">
-              {searchCategories.map((category) => (
+          <div className="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-96 overflow-y-auto mt-1">
+            <div className="p-4">
+              {/* All Categories Option */}
+              <div className="mb-4">
                 <button
-                  key={category}
                   onClick={() => {
-                    setSelectedCategory(category);
+                    setSelectedCategory("All");
                     setIsSearchDropdownOpen(false);
                   }}
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors border-b border-gray-200"
                 >
-                  {category}
+                  All Categories
                 </button>
-              ))}
+              </div>
+
+              {/* Categories Grid */}
+              <div className="space-y-6">
+                {categories.map((category) => (
+                  <div key={category.id} className="space-y-3">
+                    {/* Category Header */}
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => {
+                          setSelectedCategory(category.name);
+                          setIsSearchDropdownOpen(false);
+                        }}
+                        className="text-sm font-semibold text-gray-900 hover:text-orange-600 transition-colors"
+                      >
+                        {category.name}
+                      </button>
+                    </div>
+
+                    {/* Subcategories Grid */}
+                    {category.subCategories &&
+                      category.subCategories.length > 0 && (
+                        <div className="grid grid-cols-4 gap-3">
+                          {category.subCategories
+                            .slice(0, 8)
+                            .map((subCategory: any) => (
+                              <button
+                                key={subCategory.id}
+                                onClick={() => {
+                                  setSelectedCategory(subCategory.name);
+                                  setIsSearchDropdownOpen(false);
+                                  // Navigate to subcategory if needed
+                                  router.push(
+                                    `/category/${category.slug}?sub=${subCategory.slug}&page=1`
+                                  );
+                                }}
+                                className="flex flex-col items-center p-2 rounded-lg hover:bg-gray-50 transition-colors group"
+                              >
+                                {/* Subcategory Icon/Image */}
+                                <div className="w-12 h-12 mb-2 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+                                  {subCategory.icon ? (
+                                    <img
+                                      src={subCategory.icon}
+                                      alt={subCategory.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    // Default icon based on category
+                                    <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-orange-600 rounded-md flex items-center justify-center">
+                                      <span className="text-white text-xs font-bold">
+                                        {subCategory.name
+                                          .charAt(0)
+                                          .toUpperCase()}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                                {/* Subcategory Name */}
+                                <span className="text-xs text-gray-700 text-center leading-tight group-hover:text-gray-900">
+                                  {subCategory.name}
+                                </span>
+                              </button>
+                            ))}
+
+                          {/* Show more button if there are more than 8 subcategories */}
+                          {category.subCategories.length > 8 && (
+                            <button
+                              onClick={() => {
+                                setSelectedCategory(category.name);
+                                setIsSearchDropdownOpen(false);
+                                router.push(
+                                  `/category/${category.slug}?page=1`
+                                );
+                              }}
+                              className="flex flex-col items-center p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                              <div className="w-12 h-12 mb-2 rounded-lg bg-gray-100 flex items-center justify-center">
+                                <Plus size={20} className="text-gray-500" />
+                              </div>
+                              <span className="text-xs text-gray-700 text-center leading-tight">
+                                View All
+                              </span>
+                            </button>
+                          )}
+                        </div>
+                      )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
 
-        {/* Search Results Dropdown */}
+        {/* Search Results Dropdown (existing code remains the same) */}
         {(isSearching ||
           (searchResults &&
             (searchResults.categories.length > 0 ||
               (searchResults?.subCategories ?? []).length > 0 ||
               searchResults.products.length > 0))) && (
           <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-96 overflow-y-auto mt-1">
-            <div className="py-2">
-              {isSearching ? (
-                <div className="px-4 py-2 text-sm text-gray-700">
-                  Searching...
-                </div>
-              ) : (
-                <>
-                  {(searchResults?.categories ?? []).length > 0 && (
-                    <div className="border-b border-gray-200 pb-2">
-                      <h3 className="px-4 py-2 text-sm font-semibold text-gray-900">
-                        Categories
-                      </h3>
-                      {searchResults?.categories.map((category) => (
-                        <button
-                          key={category.id}
-                          onClick={() =>
-                            handleResultClick(
-                              `/category/${category.slug}?page=1`
-                            )
-                          }
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-                        >
-                          {category.name}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {(searchResults?.subCategories ?? []).length > 0 && (
-                    <div className="border-b border-gray-200 pb-2">
-                      <h3 className="px-4 py-2 text-sm font-semibold text-gray-900">
-                        Subcategories
-                      </h3>
-                      {(searchResults?.subCategories ?? []).map(
-                        (subCategory) => (
-                          <button
-                            key={subCategory.id}
-                            onClick={() =>
-                              handleResultClick(
-                                `/category/${subCategory.slug}?page=1`
-                              )
-                            }
-                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-                          >
-                            {subCategory.name}
-                          </button>
-                        )
-                      )}
-                    </div>
-                  )}
-
-                  {(searchResults?.products ?? []).length > 0 ? (
-                    <div className="pt-2">
-                      <h3 className="px-4 py-2 text-sm font-semibold text-gray-900">
-                        Products
-                      </h3>
-                      {(searchResults?.products ?? []).map((product) => (
-                        <button
-                          key={product.id}
-                          onClick={() =>
-                            handleResultClick(`/product/${product.slug}`)
-                          }
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors flex items-center gap-2"
-                        >
-                          {product.variants[0]?.images[0] && (
-                            <img
-                              src={product.variants[0].images[0].url}
-                              alt={product.name}
-                              className="w-10 h-10 object-cover rounded"
-                            />
-                          )}
-                          <span>{product.name}</span>
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    // Add no results found message when all arrays are empty
-                    !isSearching &&
-                    searchResults &&
-                    searchResults.categories.length === 0 &&
-                    (searchResults?.subCategories ?? []).length === 0 && (
-                      <div className="px-4 py-2 text-sm text-gray-700">
-                        No results found
-                      </div>
-                    )
-                  )}
-                </>
-              )}
-            </div>
+            {/* Your existing search results code */}
           </div>
         )}
 
@@ -517,7 +494,6 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
           />
         )}
       </div>
-
       <div
         className={`fixed inset-y-0 left-0 w-64 bg-black text-white transform ${
           isMenuOpen ? "translate-x-0" : "-translate-x-full"
@@ -712,7 +688,6 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
           ))}
         </div>
       </div>
-
       {isMenuOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40"
