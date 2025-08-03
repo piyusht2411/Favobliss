@@ -6,6 +6,7 @@ const HOT_DEALS_URL = `${process.env.NEXT_PUBLIC_API_URL}/products/hot-deals`;
 
 interface Query {
   categoryId?: string;
+  subCategoryId?: string;
   brandId?: string;
   colorId?: string;
   sizeId?: string;
@@ -37,6 +38,7 @@ export const getProducts = async (query?: Query): Promise<Product[]> => {
       ...(query?.page && { page: query.page }),
       ...(query?.variantIds && { variantIds: query.variantIds }),
       ...(query?.pincode && { pincode: query.pincode }),
+      ...(query?.subCategoryId && { subCategoryId: query.subCategoryId }),
     },
   });
 

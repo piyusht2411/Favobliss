@@ -64,7 +64,7 @@ const BankOffers: React.FC = () => {
         {offers.map((offer, idx) => (
           <div
             key={idx}
-            className="min-w-[250px] p-4 border border-gray-300 rounded-lg bg-white"
+            className="min-w-[205px] p-4 border border-gray-300 rounded-lg bg-white"
           >
             <div className="flex items-center gap-2 mb-2">
               <Image

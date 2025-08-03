@@ -2,7 +2,7 @@ import { getCategoryBySlug } from "@/actions/get-category";
 import { getColors } from "@/actions/get-colors";
 import { getProducts } from "@/actions/get-products";
 import { getSizes } from "@/actions/get-sizes";
-import { getLocations } from "@/actions/get-locations"; // New import
+import { getLocations } from "@/actions/get-locations";
 import { Container } from "@/components/ui/container";
 import { Filter } from "./_components/filter";
 import { NoResults } from "@/components/store/no-results";
@@ -13,10 +13,26 @@ import { Metadata, ResolvingMetadata } from "next";
 import { PriceRange, Location } from "@/types";
 import Image from "next/image";
 import Breadcrumb from "@/components/store/Breadcrumbs";
+import { getSubCategoryBySlug } from "@/actions/get-subcategory";
+
+// Helper function for retrying API calls
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  retries = 3,
+  delay = 100
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    if (retries <= 1) throw error;
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    return withRetry(fn, retries - 1, delay * 2);
+  }
+}
 
 interface CategoryPageProps {
   params: {
-    storeId: string; // Added storeId
+    storeId: string;
     slug: string;
   };
   searchParams: {
@@ -26,6 +42,8 @@ interface CategoryPageProps {
     category?: "MEN" | "WOMEN";
     page?: string;
     price?: string;
+    sub?: string;
+    childsub?: string;
   };
 }
 
@@ -33,10 +51,22 @@ export async function generateMetadata(
   { params, searchParams }: CategoryPageProps,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const category = await getCategoryBySlug(params.slug);
+  // Fetch data with retry
+  const category = await withRetry(() => getCategoryBySlug(params.slug));
+  const subCategory = searchParams.sub
+    ? await withRetry(() => getSubCategoryBySlug(searchParams.sub as string))
+    : null;
+  const childSubCategory = searchParams.childsub
+    ? await withRetry(() =>
+        getSubCategoryBySlug(searchParams.childsub as string)
+      )
+    : null;
+
   const previousImages = (await parent).openGraph?.images || [];
 
-  if (!category) {
+  // Determine current entity based on priority
+  const currentEntity = childSubCategory || subCategory || category;
+  if (!currentEntity) {
     return {
       title: "Category Not Found",
       description: "The requested category does not exist.",
@@ -44,55 +74,29 @@ export async function generateMetadata(
   }
 
   const categoryName = searchParams.category
-    ? `${
-        searchParams.category[0].toUpperCase() +
-        searchParams.category.slice(1).toLowerCase()
-      }'s`
+    ? `${searchParams.category[0].toUpperCase()}${searchParams.category
+        .slice(1)
+        .toLowerCase()}'s`
     : "";
 
   return {
-    title: `Buy ${
-      searchParams.category
-        ? searchParams.category[0].toUpperCase() +
-          searchParams.category.slice(1).toLowerCase() +
-          "'s"
-        : ""
-    } ${category.name} Online | Get Deals, Shop Now!`,
-    description: `Dress to impress: Latest styles & trends for every occasion. Shop ${
-      searchParams.category
-        ? searchParams.category[0].toUpperCase() +
-          searchParams.category.slice(1).toLowerCase() +
-          "'s"
-        : ""
-    } ${category.name}`,
+    title: `Buy ${categoryName} ${currentEntity.name} Online | Get Deals, Shop Now!`,
+    description: `Dress to impress: Latest styles & trends for every occasion. Shop ${categoryName} ${currentEntity.name}`,
     openGraph: {
-      images: [category.billboardId.imageUrl, ...previousImages],
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
-      title: `Buy ${
-        searchParams.category
-          ? searchParams.category[0].toUpperCase() +
-            searchParams.category.slice(1).toLowerCase() +
-            "'s"
-          : ""
-      } ${category.name} Online | Get Deals, Shop Now!`,
-      description: `Dress to impress: Latest styles & trends for every occasion. Shop ${
-        searchParams.category
-          ? searchParams.category[0].toUpperCase() +
-            searchParams.category.slice(1).toLowerCase() +
-            "'s"
-          : ""
-      } ${category.name}`,
-      images: [category.billboardId.imageUrl],
+      title: `Buy ${categoryName} ${currentEntity.name} Online | Get Deals, Shop Now!`,
+      description: `Dress to impress: Latest styles & trends for every occasion. Shop ${categoryName} ${currentEntity.name}`,
     },
     category: "ecommerce",
   };
 }
 
 const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
-  const category = await getCategoryBySlug(params.slug);
+  // Fetch data with retry
+  const category = await withRetry(() => getCategoryBySlug(params.slug));
 
   if (!category) {
     return (
@@ -106,20 +110,40 @@ const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
     );
   }
 
-  const products = await getProducts({
-    type: searchParams.category,
-    categoryId: category.id,
-    colorId: searchParams.colorId,
-    sizeId: searchParams.sizeId,
-    page: searchParams.page || "1",
-    price: searchParams.price,
-    limit: "12",
-  });
+  const subCategory = searchParams.sub
+    ? await withRetry(() => getSubCategoryBySlug(searchParams.sub as string))
+    : null;
 
-  const sizes = await getSizes();
-  const colors = await getColors();
-  const locations = await getLocations(params.storeId);
+  const childSubCategory = searchParams.childsub
+    ? await withRetry(() =>
+        getSubCategoryBySlug(searchParams.childsub as string)
+      )
+    : null;
 
+  // Determine current entity based on priority
+  const currentEntity = childSubCategory || subCategory || category;
+  const subCategoryId = childSubCategory?.id || subCategory?.id || undefined;
+
+  // Fetch products with retry
+  const products = await withRetry(() =>
+    getProducts({
+      type: searchParams.category,
+      categoryId: category.id,
+      subCategoryId,
+      colorId: searchParams.colorId,
+      sizeId: searchParams.sizeId,
+      page: searchParams.page || "1",
+      price: searchParams.price,
+      limit: "12",
+    })
+  );
+
+  // Fetch other data with retry
+  const sizes = await withRetry(() => getSizes());
+  const colors = await withRetry(() => getColors());
+  const locations = await withRetry(() => getLocations(params.storeId));
+
+  // Size filtering logic remains the same
   const sizeMap: { [key: string]: string[] } = {
     TOPWEAR: ["S", "M", "L", "XL", "XXL"],
     BOTTOMWEAR: ["S", "M", "L", "XL", "XXL"],
@@ -143,27 +167,46 @@ const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
     { id: "5000", name: "Above Rs. 5000", value: "5000" },
   ];
 
+  // Build breadcrumbs with hierarchy
   const breadcrumbItems = [
-    {
-      label: category.name,
-      href: `/category/${category.slug}?page=1`,
-    },
+    { label: "Home", href: "/" },
+    { label: category.name, href: `/category/${category.slug}?page=1` },
   ];
+
+  if (subCategory) {
+    breadcrumbItems.push({
+      label: subCategory.name,
+      href: `/category/${category.slug}?sub=${subCategory.slug}&page=1`,
+    });
+  }
+
+  if (childSubCategory) {
+    breadcrumbItems.push({
+      label: childSubCategory.name,
+      href: "/",
+    });
+  }
+
+  // Select banner image based on priority
+  const bannerImage =
+    childSubCategory?.bannerImage ||
+    subCategory?.bannerImage ||
+    category.bannerImage;
 
   return (
     <div className="bg-white">
       <Breadcrumb items={breadcrumbItems} />
       <div className="relative w-full h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden">
         <Image
-          src={category.bannerImage}
-          alt="Exciting Deals Banner"
+          src={bannerImage}
+          alt={`${currentEntity.name} Banner`}
           layout="fill"
           objectFit="cover"
           priority
         />
         <div className="absolute inset-0 flex items-center justify-center bg-black/40">
           <h1 className="text-white text-3xl md:text-5xl font-bold drop-shadow-md">
-            {category.name || "Exciting Deals"}
+            {currentEntity.name}
           </h1>
         </div>
       </div>

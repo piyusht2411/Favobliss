@@ -14,6 +14,7 @@ import BestOfProduct from "@/components/store/BestOfProducts";
 import backtoSchoolImage from "@/public/assets/back-to-school.png";
 import Image from "next/image";
 import OfferImage from "@/components/store/OfferImage";
+import { getCategories } from "@/actions/get-categories";
 
 export const revalidate = 0;
 
@@ -25,6 +26,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
   });
 
   const favoblissChoice = await getProducts({ isFeatured: true });
+  const categories = await getCategories();
   const locations = await getLocations(params.storeId);
   const brands = await getBrands();
   const brandProducts = await getProducts({
@@ -70,7 +72,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
   return (
     <div className="bg-[#f8f8f8]">
       <HeroSlider />
-      <CategorySlider />
+      <CategorySlider categories={categories} />
       <GalleryImage />
       <Container>
         <div className="space-y-10 pb-20 mt-20">

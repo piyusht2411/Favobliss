@@ -184,7 +184,9 @@ export const ProductReviews = (props: ProductReviewsProps) => {
           Customer Reviews
         </h2>
         <div className="text-center py-8">
-          <div className="text-gray-400 text-6xl mb-4">⭐</div>
+          <div className="text-yellow-400 text-6xl mb-4 flex justify-center items-center">
+            <FaStar />
+          </div>
           <p className="text-gray-600 text-lg mb-2">No reviews yet</p>
           <p className="text-gray-500">
             Be the first to share your experience!

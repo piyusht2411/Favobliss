@@ -9,21 +9,35 @@ import { Container } from "@/components/ui/container";
 import { ProductReviews } from "@/components/store/product-reviews";
 import { ProductTabs } from "@/components/store/prodcutTabs";
 import Breadcrumb from "./Breadcrumbs";
+import { ActionButtons } from "./ActionButton";
+import { MobileStickyActionBar } from "./MobileStickyBar";
 
 interface ProductPageContentProps {
   product: Product;
   suggestProducts: Product[];
-  locations: Location[]; // Add locations
+  locations: Location[];
 }
 
 export const ProductPageContent = ({
   product,
   suggestProducts,
-  locations, // Receive locations
+  locations,
 }: ProductPageContentProps) => {
   const [currentVariant, setCurrentVariant] = useState(product.variants[0]);
   const [avgRating, setAvgRating] = useState<number | null>(null);
   const [totalReviews, setTotalReviews] = useState(0);
+  const [selectedVariant, setSelectedVariant] = useState(product.variants[0]);
+  const [locationPrice, setLocationPrice] = useState<{
+    price: number;
+    mrp: number;
+  }>({
+    price: product.variants[0].price,
+    mrp: product.variants[0].mrp || product.variants[0].price,
+  });
+  const [isProductAvailable, setIsProductAvailable] = useState(true);
+  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
+    null
+  );
 
   const handleVariantChange = (variant: Variant) => {
     setCurrentVariant(variant);
@@ -45,9 +59,16 @@ export const ProductPageContent = ({
       <Breadcrumb items={breadcrumbItems} />
       <Container>
         <div className="px-4 py-10 sm:px-6 lg:px-5">
-          <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
-            <div>
-              <Gallery images={currentVariant.images} />
+          <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8 relative">
+            <div className="lg:sticky lg:top-0 lg:overflow-hidden lg:h-auto">
+              <Gallery
+                images={currentVariant.images}
+                product={product}
+                selectedVariant={selectedVariant}
+                locationPrice={locationPrice}
+                selectedLocationId={selectedLocationId}
+                isProductAvailable={isProductAvailable}
+              />
             </div>
             <div className="mt-10 sm:mt-16 lg:mt-0 md:px-24 lg:px-0 flex flex-col gap-y-5">
               <ProductDetails
@@ -57,6 +78,14 @@ export const ProductPageContent = ({
                 locations={locations}
                 totalReviews={totalReviews}
                 avgRating={avgRating}
+                selectedLocationId={selectedLocationId}
+                selectedVariant={selectedVariant}
+                setSelectedVariant={setSelectedVariant}
+                locationPrice={locationPrice}
+                setLocationPrice={setLocationPrice}
+                isProductAvailable={isProductAvailable}
+                setIsProductAvailable={setIsProductAvailable}
+                setSelectedLocationId={setSelectedLocationId}
               />
             </div>
           </div>
@@ -75,6 +104,15 @@ export const ProductPageContent = ({
             title="Similar Products"
             data={suggestProducts}
             locations={locations}
+          />
+          <MobileStickyActionBar
+            show={true}
+            price={locationPrice.price}
+            product={product}
+            selectedVariant={selectedVariant}
+            locationPrice={locationPrice}
+            selectedLocationId={selectedLocationId}
+            isProductAvailable={isProductAvailable}
           />
         </div>
       </Container>

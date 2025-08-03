@@ -7,6 +7,8 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
@@ -40,13 +42,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ videoUrls });
   } catch (error) {
-    console.log("[VIDEO_UPLOAD_POST]", error);
+    console.error("[VIDEO_UPLOAD_POST]", error);
     return new NextResponse("Internal server error", { status: 500 });
   }
 }
-
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};

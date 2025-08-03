@@ -45,8 +45,8 @@ export interface Category {
   name: string;
   type: CategoryType;
   classification: CategoryClassification;
-  billboardId: Billboard;
   bannerImage: string;
+  landingPageBanner: string;
   slug: string;
 }
 
@@ -77,12 +77,17 @@ export interface Product {
   slug: string;
   productSpecifications: ProductSpecification[];
   variants: Variant[];
-  brand: string;
+  brand: Brand;
   expressDelivery: boolean;
   warranty: string;
   isNewArrival: boolean;
   averageRating: number;
   subCategory: SubCategory;
+}
+
+export interface Brand {
+  name: string;
+  slug: string;
 }
 
 export interface SubCategory {

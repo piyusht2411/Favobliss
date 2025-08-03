@@ -224,11 +224,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
         if (category.name === "HOME APPLIANCES") {
           menuCategory.items = category.subCategories.map((subCat: any) => ({
             label: subCat.name,
-            href: `/category/${category.name
-              .toLowerCase()
-              .replace(/\s+/g, "-")}/${subCat.name
-              .toLowerCase()
-              .replace(/\s+/g, "-")}`,
+            href: `/category/${category.slug}?sub=${subCat.slug}?page=1`,
             count: subCat.childSubCategories?.length || 0,
           }));
 
@@ -241,13 +237,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
               subItemsObj[subCat.name] = subCat.childSubCategories.map(
                 (childSubCat: any) => ({
                   label: childSubCat.name,
-                  href: `/category/${category.name
-                    .toLowerCase()
-                    .replace(/\s+/g, "-")}/${subCat.name
-                    .toLowerCase()
-                    .replace(/\s+/g, "-")}/${childSubCat.name
-                    .toLowerCase()
-                    .replace(/\s+/g, "-")}`,
+                  href: `/category/${category.slug}?sub=${subCat.slug}&childsub=${childSubCat.slug}?page=1`,
                   count: 0,
                 })
               );
@@ -257,11 +247,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
         } else {
           menuCategory.items = category.subCategories.map((subCat: any) => ({
             label: subCat.name,
-            href: `/category/${category.name
-              .toLowerCase()
-              .replace(/\s+/g, "-")}/${subCat.name
-              .toLowerCase()
-              .replace(/\s+/g, "-")}`,
+            href: `/category/${category.slug}?sub=${subCat.slug}?page=1`,
             count: subCat.childSubCategories?.length || 0,
           }));
 
@@ -279,13 +265,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
                 subCat.childSubCategories.forEach((childSubCat: any) => {
                   allChildSubCategories.push({
                     label: childSubCat.name,
-                    href: `/category/${category.name
-                      .toLowerCase()
-                      .replace(/\s+/g, "-")}/${subCat.name
-                      .toLowerCase()
-                      .replace(/\s+/g, "-")}/${childSubCat.name
-                      .toLowerCase()
-                      .replace(/\s+/g, "-")}`,
+                    href: `/category/${category.slug}?sub=${subCat.slug}&childsub=${childSubCat.slug}?page=1`,
                     count: 0,
                   });
                 });
@@ -300,9 +280,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
         menuCategory.items = [
           {
             label: category.name,
-            href: `/category/${category.name
-              .toLowerCase()
-              .replace(/\s+/g, "-")}`,
+            href: `/category/${category.slug}`,
             count: 0,
           },
         ];

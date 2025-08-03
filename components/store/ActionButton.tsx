@@ -1,0 +1,88 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { HiShoppingBag } from "react-icons/hi";
+import { cn } from "@/lib/utils";
+import { useCart } from "@/hooks/use-cart";
+import { useRouter } from "next/navigation";
+import { Product, Variant } from "@/types";
+import { IoBagHandle } from "react-icons/io5";
+
+interface ActionButtonsProps {
+  className?: string;
+  isSticky?: boolean;
+  product: Product;
+  selectedVariant: Variant;
+  locationPrice: { price: number; mrp: number };
+  selectedLocationId: string | null;
+  isProductAvailable: boolean;
+}
+
+export const ActionButtons = ({
+  className = "",
+  isSticky = false,
+  product,
+  selectedVariant,
+  locationPrice,
+  selectedLocationId,
+  isProductAvailable,
+}: ActionButtonsProps) => {
+  const { addItem } = useCart();
+  const router = useRouter();
+
+  const onHandleCart = () => {
+    if (!isProductAvailable) return;
+    const itemPincode = selectedLocationId || "";
+
+    try {
+      addItem({
+        ...product,
+        price: locationPrice.price,
+        selectedVariant,
+        checkOutQuantity: 1,
+        pincode: itemPincode,
+      });
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+    }
+  };
+
+  const onHandleBuyNow = () => {
+    if (!isProductAvailable) return;
+    const itemPincode = selectedLocationId || "";
+
+    try {
+      addItem({
+        ...product,
+        price: locationPrice.price,
+        selectedVariant,
+        checkOutQuantity: 1,
+        pincode: itemPincode,
+      });
+      router.push("/checkout/cart");
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+    }
+  };
+
+  return (
+    <div className={cn("grid grid-cols-2 gap-x-4", className)}>
+      <Button
+        className="h-14 font-bold bg-[#ee8c1d] hover:bg-[#ee8c1d] text-black rounded-full"
+        onClick={onHandleCart}
+        disabled={selectedVariant.stock <= 0 || !isProductAvailable}
+      >
+        <HiShoppingBag className="mr-2 h-5 w-5" />
+        ADD TO Cart
+      </Button>
+      <Button
+        className="h-14 font-bold bg-black hover:bg-black text-white rounded-full"
+        onClick={onHandleBuyNow}
+        disabled={selectedVariant.stock <= 0 || !isProductAvailable}
+      >
+        <IoBagHandle className="mr-2 h-5 w-5" />
+        Buy Now
+      </Button>
+    </div>
+  );
+};

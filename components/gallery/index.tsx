@@ -1,24 +1,40 @@
 "use client";
 
 import Image from "next/image";
-import { VariantImage } from "@/types";
+import { Product, Variant, VariantImage } from "@/types";
 import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import { GalleryTab } from "./gallery-tab";
 import { PiShareFatFill } from "react-icons/pi";
 import { useShareModal } from "@/hooks/use-share-modal";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 import { Pagination } from "swiper/modules";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GallerySkeleton } from "./gallery-skeleton";
+import { ActionButtons } from "../store/ActionButton";
 
 interface GalleryProps {
   images: VariantImage[];
+  product: Product;
+  selectedVariant: Variant;
+  locationPrice: {
+    price: number;
+    mrp: number;
+  };
+  isProductAvailable: boolean;
+  selectedLocationId: string | null;
 }
 
-export const Gallery = ({ images }: GalleryProps) => {
+export const Gallery = ({
+  images,
+  product,
+  selectedLocationId,
+  selectedVariant,
+  isProductAvailable,
+  locationPrice,
+}: GalleryProps) => {
   const { onOpen } = useShareModal();
   const [activeTab, setActiveTab] = useState(images[0]?.id || "");
   const [loadedImages, setLoadedImages] = useState<string[]>([]);
@@ -101,12 +117,6 @@ export const Gallery = ({ images }: GalleryProps) => {
                     onLoad={() => handleImageLoad(image.id)}
                     onError={() => handleImageError(image.id)}
                   />
-                  {/* <div
-                    className="absolute h-10 w-10 top-4 right-4 rounded-full flex items-center justify-center md:cursor-pointer bg-white/70 backdrop-blur-sm"
-                    onClick={onOpen}
-                  >
-                    <PiShareFatFill className="text-zinc-700 h-6 w-6" />
-                  </div> */}
                 </div>
               </SwiperSlide>
             ))}
@@ -144,16 +154,20 @@ export const Gallery = ({ images }: GalleryProps) => {
                 onLoad={() => handleImageLoad(image.id)}
                 onError={() => handleImageError(image.id)}
               />
-              {/* <div
-                className="absolute h-10 w-10 top-4 right-4 rounded-full flex items-center justify-center md:cursor-pointer bg-white/70 backdrop-blur-sm"
-                onClick={onOpen}
-              >
-                <PiShareFatFill className="text-zinc-700 h-6 w-6" />
-              </div> */}
             </TabsContent>
           ))}
         </Tabs>
       )}
+      <div className="mt-4 max-w-sm mx-auto hidden md:block">
+        <ActionButtons
+          product={product}
+          selectedVariant={selectedVariant}
+          locationPrice={locationPrice}
+          selectedLocationId={selectedLocationId}
+          isProductAvailable={isProductAvailable}
+          className="w-full"
+        />
+      </div>
     </div>
   );
 };

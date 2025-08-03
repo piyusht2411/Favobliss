@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import { Product, Variant, Location } from "@/types";
 import { formatter } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -8,17 +15,15 @@ import { HiShoppingBag } from "react-icons/hi";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
-import Image from "next/image";
 import { ProductFeatures } from "./productFeature";
 import BankOffers from "./bankOffer";
-import DeliveryInfo from "./delieveryInfo";
-import KeyFeatures from "./keyFeatures";
 import { useCart } from "@/hooks/use-cart";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useAddress } from "@/hooks/use-address";
 import { GoShareAndroid } from "react-icons/go";
 import { useShareModal } from "@/hooks/use-share-modal";
+import Link from "next/link";
 
 interface ProductDetailsProps {
   data: Product;
@@ -27,9 +32,24 @@ interface ProductDetailsProps {
   locations: Location[];
   totalReviews: number;
   avgRating: number | null;
+  selectedVariant: Variant;
+  setSelectedVariant: Dispatch<SetStateAction<Variant>>;
+  locationPrice: {
+    price: number;
+    mrp: number;
+  };
+  setLocationPrice: Dispatch<
+    SetStateAction<{
+      price: number;
+      mrp: number;
+    }>
+  >;
+  isProductAvailable: boolean;
+  setIsProductAvailable: Dispatch<SetStateAction<boolean>>;
+  selectedLocationId: string | null;
+  setSelectedLocationId: Dispatch<SetStateAction<string | null>>;
 }
 
-// Utility function to format delivery date
 const formatDeliveryDate = (deliveryDays: number | null): string => {
   const today = new Date();
   if (deliveryDays === null || deliveryDays === undefined) {
@@ -59,9 +79,16 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     locations,
     totalReviews,
     avgRating,
+    selectedVariant,
+    setSelectedVariant,
+    locationPrice,
+    setLocationPrice,
+    isProductAvailable,
+    setIsProductAvailable,
+    selectedLocationId,
+    setSelectedLocationId,
   } = props;
 
-  const [selectedVariant, setSelectedVariant] = useState(defaultVariant);
   const [selectedSize, setSelectedSize] = useState<string | undefined>(
     defaultVariant.sizeId
   );
@@ -69,19 +96,9 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     defaultVariant.colorId
   );
   const [pincode, setPincode] = useState<string>("");
-  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
-    null
-  );
-  const [locationPrice, setLocationPrice] = useState<{
-    price: number;
-    mrp: number;
-  }>({
-    price: selectedVariant.price,
-    mrp: selectedVariant.mrp || selectedVariant.price,
-  });
+
   const [showStickyBar, setShowStickyBar] = useState(true);
   const [isPincodeChecked, setIsPincodeChecked] = useState(false);
-  const [isProductAvailable, setIsProductAvailable] = useState(true);
   const { data: session } = useSession();
   const { data: addresses, isLoading: isAddressLoading } = useAddress();
   const [defaultLocationData, setDefaultLocationData] =
@@ -527,6 +544,12 @@ export const ProductDetails = (props: ProductDetailsProps) => {
           )}
 
           <h1 className="text-xl md:text-xl font-bold">{data.name}</h1>
+          <Link
+            href={`/brand/${data?.brand?.slug}?page=1`}
+            className="text-sm text-black underline my-2"
+          >
+            Brand store
+          </Link>
           {avgRating && (
             <div className="mt-2">
               <p className="text-[#088466] text-base">
@@ -559,6 +582,38 @@ export const ProductDetails = (props: ProductDetailsProps) => {
               <AlertDescription>Out of stock</AlertDescription>
             </Alert>
           )}
+          <div className="py-2 rounded-md max-w-md">
+            <div className="flex items-center justify-between flex-wrap gap-3 md:gap-0">
+              <div className="mt-3 flex items-center gap-2 text-sm flex-wrap">
+                <span className="text-2xl font-semibold">
+                  {formatter.format(locationPrice.price)}
+                </span>
+                {locationPrice.mrp && (
+                  <>
+                    <span className="text-gray-500 text-sm mr-2">
+                      MRP{" "}
+                      <span className="line-through">
+                        {formatter.format(locationPrice.mrp)}
+                      </span>
+                    </span>
+                    <span className="bg-orange-400 text-white text-sm font-bold rounded-full px-2 py-1">
+                      {discountPercentage}% off
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      (Incl. of all taxes)
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-2 text-sm text-gray-700">
+              <span className="font-medium">
+                Low Cost EMI starting from ₹
+                {(locationPrice.price / 24).toFixed(0)}/mo*
+              </span>
+            </div>
+          </div>
 
           {(availableSizes.length > 0 || availableColors.length > 0) && (
             <div className="flex flex-col gap-y-1 mt-4 border-t border-b pt-[12px] pb-[12px] border-t-[#d9d9d9] border-b-[#d9d9d9]">
@@ -669,42 +724,15 @@ export const ProductDetails = (props: ProductDetailsProps) => {
             </div>
           )}
 
-          <div className="py-2 rounded-md max-w-md">
-            <div className="flex items-center justify-between flex-wrap gap-3 md:gap-0">
-              <div className="mt-3 flex items-center gap-2 text-sm flex-wrap">
-                <span className="text-2xl font-semibold">
-                  {formatter.format(locationPrice.price)}
-                </span>
-                {locationPrice.mrp && (
-                  <>
-                    <span className="text-gray-500 text-sm mr-2">
-                      MRP{" "}
-                      <span className="line-through">
-                        {formatter.format(locationPrice.mrp)}
-                      </span>
-                    </span>
-                    <span className="bg-orange-400 text-white text-sm font-bold rounded-full px-2 py-1">
-                      {discountPercentage}% off
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      (Incl. of all taxes)
-                    </span>
-                  </>
-                )}
-              </div>
-            </div>
-
-            <div className="mt-2 text-sm text-gray-700">
-              <span className="font-medium">
-                Low Cost EMI starting from ₹
-                {(locationPrice.price / 24).toFixed(0)}/mo*
-              </span>
-            </div>
-          </div>
-
-          <div ref={buttonsRef} className="mt-8 max-w-sm md:block hidden">
+          {/* <div ref={buttonsRef} className="mt-8 max-w-sm md:block hidden">
             <ActionButtons />
+          </div> */}
+          <div className="mt-6 space-y-4">
+            <div>
+              <BankOffers />
+            </div>
           </div>
+
           <div className="mt-4 border rounded-lg p-4 bg-gray-50">
             <div className="flex items-center gap-2 mb-3">
               <svg
@@ -889,12 +917,6 @@ export const ProductDetails = (props: ProductDetailsProps) => {
                 )}
               </div>
             )}
-          </div>
-
-          <div className="mt-6 space-y-4">
-            <div>
-              <BankOffers />
-            </div>
           </div>
 
           <ProductFeatures data={data} />

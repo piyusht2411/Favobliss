@@ -112,7 +112,10 @@ export const ModalProductDetails = ({
       {/* Brand */}
       {data.brand && (
         <p className="text-sm text-zinc-500 font-medium mt-1">
-          by {data.brand}
+          by{" "}
+          {typeof data.brand === "object" && "name" in data.brand
+            ? data.brand.name
+            : data.brand}
         </p>
       )}
 
