@@ -99,6 +99,7 @@ export const ProductPageContent = ({
             avgRating={avgRating}
             setAvgRating={setAvgRating}
             setTotalReviews={setTotalReviews}
+            subCategoryId={product?.subCategory?.id || ""}
           />
           <ProductList
             title="Similar Products"

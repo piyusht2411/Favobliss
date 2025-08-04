@@ -1,24 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { FaStar, FaCamera, FaTimes, FaVideo } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input"; // Assuming you have an Input component
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useOrder } from "@/hooks/use-order";
+import { getSubCategoryById } from "@/actions/get-subcategory"; // Adjust import path
 import { Order, OrderProduct } from "@prisma/client";
 
 interface AddReviewFormProps {
   productId: string;
   onReviewSubmitted: () => void;
+  subCategoryId: string;
 }
 
 export const AddReviewForm = ({
   productId,
   onReviewSubmitted,
+  subCategoryId,
 }: AddReviewFormProps) => {
   const { data: session, status } = useSession();
   const [rating, setRating] = useState(0);
@@ -26,9 +29,12 @@ export const AddReviewForm = ({
   const [text, setText] = useState("");
   const [images, setImages] = useState<File[]>([]);
   const [videos, setVideos] = useState<File[]>([]);
-  const [customUserName, setCustomUserName] = useState(""); // For admin to set userName
+  const [customUserName, setCustomUserName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [categoryRatings, setCategoryRatings] = useState<
+    { categoryName: string; rating: number }[]
+  >([]);
   const {
     data: orders,
     isLoading: isOrderLoading,
@@ -52,7 +58,9 @@ export const AddReviewForm = ({
       (order) =>
         order.isPaid &&
         order.userId === userId &&
-        order.orderProduct.some((product) => product.productId === productId)
+        order.orderProduct.some(
+          (product: any) => product.productId === productId
+        )
     );
 
   const canSubmitReview = isAdmin || isVerifiedBuyer;
@@ -101,7 +109,7 @@ export const AddReviewForm = ({
     }
 
     if (rating === 0) {
-      toast.error("Please select a rating.");
+      toast.error("Please select an overall rating.");
       return;
     }
 
@@ -165,7 +173,7 @@ export const AddReviewForm = ({
             images: imageUrls,
             videos: videoUrls,
             userId,
-            // isAdmin, // Include isAdmin flag for backend validation
+            categoryRatings,
           }),
         }
       );
@@ -181,6 +189,7 @@ export const AddReviewForm = ({
       setImages([]);
       setVideos([]);
       setCustomUserName("");
+      setCategoryRatings([]);
       setShowForm(false);
       onReviewSubmitted();
     } catch (error) {
@@ -198,6 +207,46 @@ export const AddReviewForm = ({
     4: "Very Good",
     5: "Excellent",
   };
+
+  // const fetchSubCategoryId = async () => {
+  //   try {
+  //     const productResponse = await fetch(
+  //       `${process.env.NEXT_PUBLIC_API_URL}/products/${productId}`
+  //     );
+  //     if (productResponse.ok) {
+  //       const productData = await productResponse.json();
+  //       setSubCategoryId(productData.subCategoryId);
+  //     }
+  //   } catch (error) {
+  //     console.error("[FETCH_SUBCATEGORY_ID]", error);
+  //   }
+  // };
+
+  const fetchSubCategory = async () => {
+    if (subCategoryId) {
+      try {
+        const data = await getSubCategoryById(subCategoryId);
+        setCategoryRatings(
+          //@ts-ignores
+          data.reviewCategories.map((rc: { name: string }) => ({
+            categoryName: rc.name,
+            rating: 0,
+          }))
+        );
+        console.log(data);
+      } catch (error) {
+        console.error("[FETCH_SUBCATEGORY]", error);
+      }
+    }
+  };
+
+  // useEffect(() => {
+  //   fetchSubCategoryId();
+  // }, [productId]);
+
+  useEffect(() => {
+    fetchSubCategory();
+  }, [subCategoryId]);
 
   return (
     <div className="w-full">
@@ -265,7 +314,7 @@ export const AddReviewForm = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Rating *
+                Overall Rating *
               </label>
               <div className="flex items-center gap-2">
                 <div className="flex gap-1">
@@ -294,6 +343,47 @@ export const AddReviewForm = ({
                 )}
               </div>
             </div>
+
+            {categoryRatings.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Category Ratings *
+                </label>
+                <div className="space-y-4">
+                  {categoryRatings.map((cr, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-gray-700 w-24">
+                        {cr.categoryName}:
+                      </span>
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <FaStar
+                            key={star}
+                            className={`h-6 w-6 cursor-pointer transition-colors ${
+                              cr.rating >= star
+                                ? cr.rating >= 4
+                                  ? "text-green-500"
+                                  : cr.rating >= 3
+                                  ? "text-yellow-400"
+                                  : "text-red-500"
+                                : "text-gray-300"
+                            }`}
+                            onClick={() => {
+                              const newRatings = [...categoryRatings];
+                              newRatings[index] = {
+                                ...cr,
+                                rating: star,
+                              };
+                              setCategoryRatings(newRatings);
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -424,7 +514,8 @@ export const AddReviewForm = ({
                   isLoading ||
                   rating === 0 ||
                   !text.trim() ||
-                  (isAdmin && !customUserName.trim())
+                  (isAdmin && !customUserName.trim()) ||
+                  categoryRatings.some((cr) => cr.rating === 0)
                 }
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50"
               >

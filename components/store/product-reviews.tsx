@@ -5,6 +5,7 @@ import { FaStar, FaTrash } from "react-icons/fa";
 import { AddReviewForm } from "./AddReviewForm";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
+import { getSubCategoryById } from "@/actions/get-subcategory"; // Adjust import path
 
 interface Review {
   id: string;
@@ -15,6 +16,7 @@ interface Review {
   videos: { url: string }[];
   createdAt: string;
   userId: string;
+  categoryRatings: { categoryName: string; rating: number }[];
 }
 
 interface ProductReviewsProps {
@@ -23,11 +25,72 @@ interface ProductReviewsProps {
   setAvgRating: Dispatch<SetStateAction<number | null>>;
   totalReviews: number;
   setTotalReviews: Dispatch<SetStateAction<number>>;
+  subCategoryId: string;
 }
 
+const CircularProgress = ({
+  value,
+  size = 60,
+  strokeWidth = 4,
+  color = "#22c55e",
+}: {
+  value: number;
+  size?: number;
+  strokeWidth?: number;
+  color?: string;
+}) => {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const offset = circumference - (value / 5) * circumference;
+
+  return (
+    <div className="relative inline-flex items-center justify-center">
+      <svg width={size} height={size} className="transform -rotate-90">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="#e5e7eb"
+          strokeWidth={strokeWidth}
+          fill="transparent"
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke={color}
+          strokeWidth={strokeWidth}
+          fill="transparent"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          className="transition-all duration-300 ease-in-out"
+        />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-base font-bold text-gray-800">
+          {value.toFixed(1)}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+const getRatingColor = (rating: number) => {
+  if (rating >= 3.5) return "#22c55e"; // Green
+  if (rating >= 2) return "#f59e0b"; // Orange/Yellow
+  return "#ef4444"; // Red
+};
+
 export const ProductReviews = (props: ProductReviewsProps) => {
-  const { productId, avgRating, setAvgRating, totalReviews, setTotalReviews } =
-    props;
+  const {
+    productId,
+    avgRating,
+    setAvgRating,
+    totalReviews,
+    setTotalReviews,
+    subCategoryId,
+  } = props;
   const { data: session } = useSession();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,6 +101,10 @@ export const ProductReviews = (props: ProductReviewsProps) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [reviewToDelete, setReviewToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [categoryAverages, setCategoryAverages] = useState<
+    { categoryName: string; averageRating: number }[]
+  >([]);
+  const [subCategory, setSubCategory] = useState<any>(null);
 
   const isAdmin = session?.user?.email === "favoblis@gmail.com";
 
@@ -65,10 +132,45 @@ export const ProductReviews = (props: ProductReviewsProps) => {
         data.reduce((sum: number, review: Review) => sum + review.rating, 0) /
         data.length;
       setAvgRating(avg || null);
+
+      // Calculate category averages
+      const categoryRatingsMap: {
+        [key: string]: { total: number; count: number };
+      } = {};
+      sortedReviews.forEach((review: any) => {
+        review.categoryRatings?.forEach((cr: any) => {
+          if (!categoryRatingsMap[cr.categoryName]) {
+            categoryRatingsMap[cr.categoryName] = { total: 0, count: 0 };
+          }
+          categoryRatingsMap[cr.categoryName].total += cr.rating;
+          categoryRatingsMap[cr.categoryName].count += 1;
+        });
+      });
+      const averages = Object.keys(categoryRatingsMap).map((categoryName) => ({
+        categoryName,
+        averageRating: categoryRatingsMap[categoryName].count
+          ? Number(
+              (
+                categoryRatingsMap[categoryName].total /
+                categoryRatingsMap[categoryName].count
+              ).toFixed(2)
+            )
+          : 0,
+      }));
+      setCategoryAverages(averages);
     } catch (error) {
       console.error("[PRODUCT_REVIEWS]", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchSubCategory = async () => {
+    try {
+      const data = await getSubCategoryById(subCategoryId);
+      setSubCategory(data);
+    } catch (error) {
+      console.error("[FETCH_SUBCATEGORY]", error);
     }
   };
 
@@ -117,7 +219,8 @@ export const ProductReviews = (props: ProductReviewsProps) => {
 
   useEffect(() => {
     fetchReviews();
-  }, [productId]);
+    fetchSubCategory();
+  }, [productId, subCategoryId]);
 
   const openImageModal = (imageUrl: string) => {
     setSelectedImage(imageUrl);
@@ -195,6 +298,7 @@ export const ProductReviews = (props: ProductReviewsProps) => {
         <AddReviewForm
           productId={productId}
           onReviewSubmitted={refreshReviews}
+          subCategoryId={subCategoryId}
         />
       </div>
     );
@@ -209,9 +313,6 @@ export const ProductReviews = (props: ProductReviewsProps) => {
 
         {(allReviewImages.length > 0 || allReviewVideos.length > 0) && (
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-700 mb-3">
-              Customer Media
-            </h3>
             <div className="flex gap-2 overflow-x-auto pb-2">
               {allReviewImages.slice(0, 5).map((image, index) => (
                 <div
@@ -260,78 +361,90 @@ export const ProductReviews = (props: ProductReviewsProps) => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className="flex items-center gap-4">
-            <div className="text-center">
-              <div className="text-4xl font-bold text-gray-800 mb-1">
-                {avgRating.toFixed(1)}
+        <div className="flex md:flex-nowrap flex-wrap items-start w-full gap-[50px] md:gap-2 justify-between">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:w-1/2 w-full">
+            {/* Overall Rating */}
+            <div className="flex flex-col items-center">
+              <div className="mb-4">
+                <CircularProgress
+                  value={avgRating}
+                  size={80}
+                  strokeWidth={6}
+                  color={getRatingColor(avgRating)}
+                />
               </div>
-              <div className="flex items-center justify-center gap-1 mb-1">
-                {[...Array(5)].map((_, i) => (
-                  <FaStar
-                    key={i}
-                    className={`h-4 w-4 ${
-                      i < Math.floor(avgRating)
-                        ? avgRating >= 4
-                          ? "text-green-500"
-                          : avgRating >= 3
-                          ? "text-yellow-400"
-                          : "text-red-500"
-                        : "text-gray-300"
-                    }`}
-                  />
-                ))}
-              </div>
-              <div className="text-sm text-gray-500">
-                {totalReviews} reviews
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-800 mb-1">
+                  {avgRating.toFixed(1)} ★
+                </div>
+                <div className="text-sm text-gray-500">
+                  {totalReviews.toLocaleString()} Ratings &{" "}
+                  {reviews.length.toLocaleString()} Reviews
+                </div>
               </div>
             </div>
-          </div>
-          <div className="md:col-span-2">
+
+            {/* Rating Distribution */}
             <div className="space-y-2">
               {[5, 4, 3, 2, 1].map((star) => {
                 const count = reviews.filter((r) => r.rating === star).length;
-                const percentage = (count / totalReviews) * 100;
+                const percentage =
+                  totalReviews > 0 ? (count / totalReviews) * 100 : 0;
                 return (
                   <div key={star} className="flex items-center gap-3">
-                    <div className="flex items-center gap-1 w-12">
+                    <div className="flex items-center gap-1 w-8">
                       <span className="text-sm text-gray-600">{star}</span>
-                      <FaStar
-                        className={`h-3 w-3 ${
-                          star === 5
-                            ? "text-green-500"
-                            : star === 4
-                            ? "text-green-400"
-                            : star === 3
-                            ? "text-yellow-400"
-                            : star === 2
-                            ? "text-orange-400"
-                            : "text-red-400"
-                        }`}
-                      />
+                      <FaStar className="h-3 w-3 text-gray-400" />
                     </div>
                     <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                       <div
-                        className={`h-full rounded-full transition-all duration-300 ${
-                          star === 5
-                            ? "bg-green-500"
-                            : star === 4
-                            ? "bg-green-400"
-                            : star === 3
-                            ? "bg-yellow-400"
-                            : star === 2
-                            ? "bg-orange-400"
-                            : "bg-red-400"
-                        }`}
+                        className="h-full rounded-full transition-all duration-300 bg-green-500"
                         style={{ width: `${percentage}%` }}
                       ></div>
                     </div>
-                    <span className="text-sm text-gray-600 w-8">{count}</span>
+                    <span className="text-sm text-gray-600 w-12 text-right">
+                      {count.toLocaleString()}
+                    </span>
                   </div>
                 );
               })}
             </div>
           </div>
+          {subCategory?.reviewCategories?.length > 0 &&
+            categoryAverages.length > 0 && (
+              <div className="md:w-[40%] w-full">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  {categoryAverages.map((cat) => {
+                    const reviewCategories = subCategory.reviewCategories.map(
+                      (rc: { name: string }) => rc.name
+                    );
+                    if (!reviewCategories.includes(cat.categoryName))
+                      return null;
+
+                    const color = getRatingColor(cat.averageRating);
+
+                    return (
+                      <div
+                        key={cat.categoryName}
+                        className="flex flex-col items-center text-center"
+                      >
+                        <div className="mb-3">
+                          <CircularProgress
+                            value={cat.averageRating}
+                            size={80}
+                            strokeWidth={6}
+                            color={color}
+                          />
+                        </div>
+                        <div className="text-sm font-medium text-gray-700 capitalize">
+                          {cat.categoryName}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
         </div>
       </div>
 
@@ -339,6 +452,7 @@ export const ProductReviews = (props: ProductReviewsProps) => {
         <AddReviewForm
           productId={productId}
           onReviewSubmitted={refreshReviews}
+          subCategoryId={subCategoryId}
         />
       </div>
 
@@ -402,15 +516,6 @@ export const ProductReviews = (props: ProductReviewsProps) => {
                                   View
                                 </span>
                               </div>
-                              {/* <div className="absolute inset-0 flex items-center justify-center">
-                                <svg
-                                  className="h-6 w-6 text-white opacity-70"
-                                  fill="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path d="M8 5v14l11-7z" />
-                                </svg>
-                              </div> */}
                             </div>
                           ))}
                         </div>
