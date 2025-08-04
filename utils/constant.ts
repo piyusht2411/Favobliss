@@ -127,7 +127,7 @@ export const applianceItems: any[] = [
     title: "Air purifier",
     image:
       "https://img.freepik.com/premium-vector/air-purifier-realistic-poster-with-editable-text-modern-appliance-living-room-fresh-air-dust-removing-vector-illustration_1284-70567.jpg?ga=GA1.1.1292182921.1754325589&semt=ais_hybrid&w=740&q=80",
-    link: "/category/home-appliances?sub=air-coolers?page=1",
+    link: "/category/home-appliances?sub=air-purifier?page=1",
     backgroundColor: "#f8f9fa",
   },
   {
