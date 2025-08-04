@@ -96,6 +96,10 @@ export interface Product {
   averageRating: number;
   subCategory: SubCategory;
   productId: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string[];
+  openGraphImage?: string;
 }
 
 export interface Brand {

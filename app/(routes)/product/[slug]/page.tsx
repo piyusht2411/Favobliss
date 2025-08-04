@@ -25,13 +25,23 @@ export async function generateMetadata(
   const firstVariant = product.variants[0];
   const previousImages = (await parent).openGraph?.images || [];
 
+  const title =
+    product.metaTitle || `Buy ${product.name} ${product.about || ""}`;
+  const description = product.metaDescription || product.description;
+  const keywords = product.metaKeywords?.length ? product.metaKeywords : [];
+  const ogImage =
+    product.openGraphImage ||
+    firstVariant.images[0]?.url ||
+    "/placeholder-image.jpg";
+
   return {
-    title: `Buy ${product.name} ${product.about || ""}`,
-    description: product.description,
+    title,
+    description,
+    keywords,
     openGraph: {
       images: [
         {
-          url: firstVariant.images[0]?.url || "/placeholder-image.jpg",
+          url: ogImage,
           height: 1200,
           width: 900,
         },
@@ -41,11 +51,11 @@ export async function generateMetadata(
     },
     twitter: {
       card: "summary_large_image",
-      title: `Buy ${product.name} ${product.about || ""}`,
-      description: product.description,
+      title,
+      description,
       images: [
         {
-          url: firstVariant.images[0]?.url || "/placeholder-image.jpg",
+          url: ogImage,
           height: 1200,
           width: 900,
         },
