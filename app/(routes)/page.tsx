@@ -28,6 +28,9 @@ export const revalidate = 0;
 
 const LandingPage = async ({ params }: { params: { storeId: string } }) => {
   const products = await getProducts();
+  const homeApplicance = await getProducts({
+    categoryId: "6843219ac338ba8cc9db1e72",
+  });
   const deals = await getHotDeals({
     limit: "10",
     timeFrame: "30 days",
@@ -54,9 +57,9 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
     (product) => product.category?.name?.toLowerCase() === "kitchen appliances"
   );
 
-  const homeApplicance = products.filter(
-    (product) => product.category?.name?.toLowerCase() === "home appliances"
-  );
+  // const homeApplicance = products.filter(
+  //   (product) => product.category?.name?.toLowerCase() === "home appliances"
+  // );
 
   return (
     <div className="bg-[#f8f8f8]">
