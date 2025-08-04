@@ -15,6 +15,14 @@ import backtoSchoolImage from "@/public/assets/back-to-school.png";
 import Image from "next/image";
 import OfferImage from "@/components/store/OfferImage";
 import { getCategories } from "@/actions/get-categories";
+import LandingPageSection from "@/components/LandingPageSection";
+import { AnyAaaaRecord } from "node:dns";
+import {
+  applianceItems,
+  kitchenAppliance,
+  premiumProducts,
+} from "@/utils/constant";
+import PremiumProductsSection from "@/components/PremiumProductSection";
 
 export const revalidate = 0;
 
@@ -46,28 +54,9 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
     (product) => product.category?.name?.toLowerCase() === "kitchen appliances"
   );
 
-  const offerImages = [
-    {
-      imageSrc:
-        "https://www.vijaysales.com/event-pages/monsoon-offers/_jcr_content/root/container/container/vscontainer_18487384/vscontainer/teaser.coreimg.jpeg/1750078513023/hair-dryer-desktop-card.jpeg",
-      title: "Hair Dryers",
-    },
-    {
-      imageSrc:
-        "https://www.vijaysales.com/event-pages/monsoon-offers/_jcr_content/root/container/container/vscontainer_18487384/vscontainer_copy/teaser_copy.coreimg.jpeg/1750078573023/irons-desktop-card.jpeg",
-      title: "Hair Dryers",
-    },
-    {
-      imageSrc:
-        "https://www.vijaysales.com/event-pages/monsoon-offers/_jcr_content/root/container/container/vscontainer_18487384_443604993/vscontainer/teaser.coreimg.jpeg/1750078626700/air-fryers-desktop-card.jpeg",
-      title: "Hair Dryers",
-    },
-    {
-      imageSrc:
-        "https://www.vijaysales.com/event-pages/monsoon-offers/_jcr_content/root/container/container/vscontainer_18487384_443604993/vscontainer_copy/teaser_copy.coreimg.jpeg/1750078648770/microwaves-desktop-card.jpeg",
-      title: "Hair Dryers",
-    },
-  ];
+  const homeApplicance = products.filter(
+    (product) => product.category?.name?.toLowerCase() === "home appliances"
+  );
 
   return (
     <div className="bg-[#f8f8f8]">
@@ -83,7 +72,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
               data={products}
               locations={locations}
             />
-            <div className="space-y-4 md:space-y-16">
+            {/* <div className="space-y-4 md:space-y-16">
               <Image
                 src="/assets/banner.jpg"
                 alt="Image"
@@ -91,25 +80,42 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
                 height={300}
                 className="object-cover bg-blend-color-burn"
               />
-            </div>
+            </div> */}
+            <LandingPageSection
+              title="Home Appliances"
+              items={applianceItems}
+              viewAllLink="/category/home-appliances?page=1"
+              className="mx-auto bg-[#d8d8d8]"
+            />
             <ProductList
-              title="Hot Deals Products"
-              data={deals || []}
+              title=""
+              data={homeApplicance || []}
               locations={locations}
             />
-
+            <LandingPageSection
+              title="Kitchen Appliances"
+              items={kitchenAppliance}
+              viewAllLink="/category/kitchen-appliances?page=1"
+              className="mx-auto bg-[#b8e0ee]"
+            />
+            <ProductList title="" data={kitchen || []} locations={locations} />
             <BestOfProduct
               products={brandProducts || []}
               title="Best of Apple"
               subtitle="Save up to ₹10,000 instantly on eligible products using ICICI, Axis or Kotak Mahindra Bank Credit Cards | Exchange bonus upto ₹6,000 on iPhone"
               offer="Benefit with No Cost EMI schemes"
             />
+            <PremiumProductsSection
+              products={premiumProducts}
+              backgroundColor="#534747"
+              // className="mx-auto"
+            />
             <ProductList
               title="Favobliss's Choice"
               data={favoblissChoice || []}
               locations={locations}
             />
-            <div className="container mx-auto p-4">
+            {/* <div className="container mx-auto p-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
                 {offerImages.map((product, index) => (
                   <OfferImage
@@ -119,9 +125,9 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
                   />
                 ))}
               </div>
-            </div>
+            </div> */}
 
-            <div className="space-y-4 md:space-y-16">
+            {/* <div className="space-y-4 md:space-y-16">
               <Image
                 src="https://www.vijaysales.com/_jcr_content/root/container/container/vscontainer_92192583/vscontainer/productpromtioncardt.coreimg.jpeg/1750505071227/back-to-school-clp-desktop.jpeg"
                 alt="Image"
@@ -135,8 +141,8 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
               data={laptops || []}
               locations={locations}
               isSpaceTop={true}
-            />
-            <div className="space-y-4 md:space-y-16">
+            /> */}
+            {/* <div className="space-y-4 md:space-y-16">
               <Image
                 src="https://www.vijaysales.com/_jcr_content/root/container/container/vscontainer_318402664/vscontainer/productpromtioncardt.coreimg.jpeg/1753689025425/kitchen-appliances-desktop.jpeg"
                 alt="Image"
@@ -150,9 +156,9 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
               data={kitchen || []}
               locations={locations}
               isSpaceTop={true}
-            />
+            /> */}
 
-            <div className="space-y-4 md:space-y-16">
+            {/* <div className="space-y-4 md:space-y-16">
               <Image
                 src="/assets/washing.jpg"
                 alt="Image"
@@ -166,7 +172,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
               data={washingMachines || []}
               locations={locations}
               isSpaceTop={true}
-            />
+            /> */}
             <BrandList brands={Array.isArray(brands) ? brands : [brands]} />
             <LatestLaunches />
             {/* <div className="pt-8 ">
