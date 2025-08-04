@@ -137,6 +137,7 @@ export interface Size {
 export interface VariantImage {
   id: string;
   url: string;
+  mediaType: "IMAGE" | "VIDEO";
 }
 
 export interface Variant {
