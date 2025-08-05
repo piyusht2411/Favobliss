@@ -23,13 +23,17 @@ export const PaginationComponent = ({ lastPage }: PaginationComponentProps) => {
   const queries = qs.parse(searchParams.toString());
   const currentPage = searchParams.get("page");
 
+  // Default to page 1 if currentPage is null, undefined, or invalid
+  const pageNumber =
+    currentPage && !isNaN(Number(currentPage)) ? Number(currentPage) : 1;
+
   const currentHref = useOrigin();
 
   const previousPageHref = qs.stringifyUrl({
     url: currentHref,
     query: {
       ...queries,
-      page: (Number(currentPage) - 1).toString(),
+      page: Math.max(1, pageNumber - 1).toString(), // Ensure page is at least 1
     },
   });
 
@@ -37,7 +41,7 @@ export const PaginationComponent = ({ lastPage }: PaginationComponentProps) => {
     url: currentHref,
     query: {
       ...queries,
-      page: (Number(currentPage) + 1).toString(),
+      page: (pageNumber + 1).toString(),
     },
   });
 
@@ -46,23 +50,26 @@ export const PaginationComponent = ({ lastPage }: PaginationComponentProps) => {
       <PaginationContent>
         <PaginationItem>
           <PaginationPrevious
-            href={currentPage === "1" ? "#" : previousPageHref}
+            href={pageNumber === 1 ? "#" : previousPageHref}
+            className={pageNumber === 1 ? "pointer-events-none opacity-50" : ""}
           />
         </PaginationItem>
-        {currentPage !== "1" && (
+        {pageNumber > 1 && (
           <PaginationItem>
             <PaginationLink href={previousPageHref}>
-              {Number(currentPage) - 1}
+              {pageNumber - 1}
             </PaginationLink>
           </PaginationItem>
         )}
         <PaginationItem className="bg-zinc-100 rounded-md">
-          <PaginationLink href="#">{currentPage}</PaginationLink>
+          <PaginationLink href="#" isActive>
+            {pageNumber}
+          </PaginationLink>
         </PaginationItem>
         {!lastPage && (
           <PaginationItem>
             <PaginationLink href={nextPageHref}>
-              {Number(currentPage) + 1}
+              {pageNumber + 1}
             </PaginationLink>
           </PaginationItem>
         )}
@@ -72,7 +79,10 @@ export const PaginationComponent = ({ lastPage }: PaginationComponentProps) => {
           </PaginationItem>
         )}
         <PaginationItem>
-          <PaginationNext href={lastPage ? "#" : nextPageHref} />
+          <PaginationNext
+            href={lastPage ? "#" : nextPageHref}
+            className={lastPage ? "pointer-events-none opacity-50" : ""}
+          />
         </PaginationItem>
       </PaginationContent>
     </Pagination>
