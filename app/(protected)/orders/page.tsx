@@ -45,6 +45,7 @@ const OrdersPage = () => {
                     }}
                     date={order.createdAt}
                     paid={order.isPaid}
+                    completed={order.isCompleted}
                   />
                 ))
               )

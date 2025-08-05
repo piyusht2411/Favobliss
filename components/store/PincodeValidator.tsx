@@ -25,8 +25,6 @@ export const PincodeValidator = (props: Props) => {
   const router = useRouter();
 
   useEffect(() => {
-    console.log("Items:", items);
-    console.log("Address:", address);
     if (address && items.length > 0) {
       const mismatched = items.filter(
         (item) => String(item.pincode) !== String(address.zipCode)

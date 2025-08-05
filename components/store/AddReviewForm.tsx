@@ -233,7 +233,6 @@ export const AddReviewForm = ({
             rating: 0,
           }))
         );
-        console.log(data);
       } catch (error) {
         console.error("[FETCH_SUBCATEGORY]", error);
       }

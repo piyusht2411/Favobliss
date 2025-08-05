@@ -15,7 +15,9 @@ import { usePaymentSuccessErrorModal } from "@/hooks/use-payment-success-error-m
 import { useCart } from "@/hooks/use-cart";
 import { getCoupons } from "@/actions/get-coupons";
 import { Coupons } from "@/types";
-
+import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 interface Props {
   isAddressCorrect?: boolean;
 }
@@ -27,6 +29,11 @@ export const Summary = (props: Props) => {
   const searchParams = useSearchParams();
   const session = useSession();
   const { address } = useCheckoutAddress();
+  const { items } = useCart();
+  const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "cod">(
+    "razorpay"
+  );
+  const [gstNumber, setGstNumber] = useState<string>("");
   const { removeAll } = useCart();
   const {
     checkOutItems,
@@ -41,6 +48,29 @@ export const Summary = (props: Props) => {
   const [coupons, setCoupons] = useState<Coupons[]>([]);
   const [couponCode, setCouponCode] = useState("");
   const [loadingCoupons, setLoadingCoupons] = useState(true);
+  const [isCODAvailable, setIsCODAvailable] = useState(true);
+
+  useEffect(() => {
+    if (items.length === 0) {
+      setIsCODAvailable(false); // No items, COD not available
+      return;
+    }
+
+    const allItemsCodAvailable = items.every((item) => {
+      // Check if selectVariant and variantPrices exist
+      if (!item.selectedVariant || !item.selectedVariant.variantPrices) {
+        return false;
+      }
+      // Check if all variantPrices have a location with isCodAvailable: true
+      return item.selectedVariant.variantPrices.every(
+        (price) =>
+          //@ts-ignore
+          price.location?.isCodAvailable === true
+      );
+    });
+
+    setIsCODAvailable(allItemsCodAvailable);
+  }, [items]);
 
   useEffect(() => {
     const fetchCoupons = async () => {
@@ -107,7 +137,10 @@ export const Summary = (props: Props) => {
 
   const updateOrder = async (id: string) => {
     try {
-      await axios.patch(`/api/v1/order/${id}`, { isPaid: true });
+      await axios.patch(`/api/v1/order/${id}`, {
+        isPaid: true,
+        isCompleted: true,
+      });
     } catch (error) {
       console.error(error);
     }
@@ -147,95 +180,136 @@ export const Summary = (props: Props) => {
       }
 
       setLoading(true);
-      const order = await axios.post(`/api/v1/order`, {
-        products: checkOutItems.map((item) => ({
-          id: item.id,
-          variantId: item.variantId,
-          quantity: item.quantity,
-          price: item.price,
-          size: item.size || "",
-          color: item.color || "",
-          image: item.image,
-          name: item.name,
-          about: JSON.stringify({
-            variantId: item.variantId,
-            color: item.color,
-            price: item.price,
-            locationId: item.locationId,
-          }),
-        })),
-        address,
-        coupon: appliedCoupon
-          ? { code: appliedCoupon.code, value: discount }
-          : null,
-      });
-
-      const orderId = order.data.orderId;
-
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/checkout`,
-        {
+      if (paymentMethod === "razorpay") {
+        const order = await axios.post(`/api/v1/order`, {
           products: checkOutItems.map((item) => ({
-            id: item.variantId,
+            id: item.id,
+            variantId: item.variantId,
             quantity: item.quantity,
             price: item.price,
-            locationId: item.locationId,
+            size: item.size || "",
+            color: item.color || "",
+            image: item.image,
+            name: item.name,
+            about: JSON.stringify({
+              variantId: item.variantId,
+              color: item.color,
+              price: item.price,
+              locationId: item.locationId,
+            }),
           })),
-          orderId: orderId,
-          discount: discount,
+          address,
+          paymentMethod,
+          coupon: appliedCoupon
+            ? { code: appliedCoupon.code, value: discount }
+            : null,
+          gstNumber: gstNumber || undefined,
+        });
+
+        const { frontendOrderId, backendOrderId } = order.data;
+
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/checkout`,
+          {
+            products: checkOutItems.map((item) => ({
+              id: item.variantId,
+              quantity: item.quantity,
+              price: item.price,
+              locationId: item.locationId,
+            })),
+            orderId: backendOrderId, // Use backendOrderId for Razorpay
+            discount: discount,
+          }
+        );
+
+        const {
+          orderId: razorpayOrderId,
+          amount,
+          currency,
+          key,
+        } = response.data;
+
+        const addressForNotes = {
+          address: String(address.address || ""),
+          landmark: String(address.landmark || ""),
+          town: String(address.town || ""),
+          district: String(address.district || ""),
+          state: String(address.state || ""),
+          zipCode: String(address.zipCode || ""),
+        };
+
+        let addressJsonString;
+        try {
+          addressJsonString = JSON.stringify(addressForNotes);
+          JSON.parse(addressJsonString);
+        } catch (error) {
+          console.error("Failed to stringify address:", error);
+          throw new Error("Invalid address format");
         }
-      );
 
-      const { orderId: razorpayOrderId, amount, currency, key } = response.data;
+        const options = {
+          key,
+          amount: amount - discount * 100,
+          currency,
+          name: "Favobliss",
+          description: "Order Payment",
+          order_id: razorpayOrderId,
+          handler: function (response: any) {
+            router.push(`/checkout/cart?id=${frontendOrderId}`);
+          },
+          prefill: {
+            name: address.name || "",
+            email: session.data?.user?.email || "",
+            contact: address.phoneNumber || "",
+          },
+          notes: {
+            orderId: backendOrderId,
+            address: addressJsonString,
+          },
+          theme: {
+            color: "#3399cc",
+          },
+        };
 
-      const addressForNotes = {
-        address: String(address.address || ""),
-        landmark: String(address.landmark || ""),
-        town: String(address.town || ""),
-        district: String(address.district || ""),
-        state: String(address.state || ""),
-        zipCode: String(address.zipCode || ""),
-      };
+        //@ts-ignore
+        const razorpay = new window.Razorpay(options);
+        razorpay.on("payment.failed", function (response: any) {
+          router.push(`/checkout/cart?cancelled=true`);
+        });
+        razorpay.open();
+      } else {
+        // COD: Just create the order
+        const order = await axios.post(`/api/v1/order`, {
+          products: checkOutItems.map((item) => ({
+            id: item.id,
+            variantId: item.variantId,
+            quantity: item.quantity,
+            price: item.price,
+            size: item.size || "",
+            color: item.color || "",
+            image: item.image,
+            name: item.name,
+            about: JSON.stringify({
+              variantId: item.variantId,
+              color: item.color,
+              price: item.price,
+              locationId: item.locationId,
+            }),
+          })),
+          address,
+          paymentMethod,
+          coupon: appliedCoupon
+            ? { code: appliedCoupon.code, value: discount }
+            : null,
+          gstNumber: gstNumber || undefined,
+        });
 
-      let addressJsonString;
-      try {
-        addressJsonString = JSON.stringify(addressForNotes);
-        JSON.parse(addressJsonString);
-      } catch (error) {
-        console.error("Failed to stringify address:", error);
-        throw new Error("Invalid address format");
+        const { frontendOrderId } = order.data;
+        onOpen("success");
+        removeAll();
+        clearCheckOutItems();
+        router.push("/orders");
       }
-
-      const options = {
-        key,
-        amount: amount - discount, // Apply discount to final amount
-        currency,
-        name: "Favobliss",
-        description: "Order Payment",
-        order_id: razorpayOrderId,
-        handler: function (response: any) {
-          router.push(`/checkout/cart?id=${orderId}`);
-        },
-        prefill: {
-          name: address.name || "",
-          email: session.data?.user?.email || "",
-          contact: address.phoneNumber || "",
-        },
-        notes: {
-          orderId,
-          address: addressJsonString,
-        },
-        theme: {
-          color: "#3399cc",
-        },
-      };
-
-      //@ts-ignore
-      const razorpay = new window.Razorpay(options);
-      razorpay.on("payment.failed", function (response: any) {
-        router.push(`/checkout/cart?cancelled=true`);
-      });
-      razorpay.open();
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong");
@@ -250,6 +324,7 @@ export const Summary = (props: Props) => {
         Order Summary
       </h2>
       <div className="mt-6 space-y-4 border-t">
+        {/* Coupon Section */}
         {!appliedCoupon ? (
           <div className="relative flex items-stretch overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm focus-within:border-pink-400 focus-within:ring-2 focus-within:ring-pink-100 transition-all duration-200">
             <input
@@ -326,6 +401,44 @@ export const Summary = (props: Props) => {
           </div>
         )}
 
+        {/* GST Number Input */}
+        {pathname !== "/checkout/cart" && (
+          <div className="space-y-2">
+            <Label htmlFor="gstNumber">GST Number (Optional)</Label>
+            <Input
+              id="gstNumber"
+              placeholder="Enter GST number"
+              value={gstNumber}
+              onChange={(e) => setGstNumber(e.target.value)}
+              className="w-full"
+            />
+          </div>
+        )}
+
+        {/* Payment Method Selection */}
+        <div className="space-y-2">
+          <Label>Payment Method</Label>
+          <RadioGroup
+            value={paymentMethod}
+            onValueChange={(value: "razorpay" | "cod") =>
+              setPaymentMethod(value)
+            }
+            className="flex flex-col gap-2"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="razorpay" id="razorpay" />
+              <Label htmlFor="razorpay">Pay Online (Razorpay)</Label>
+            </div>
+            {isCODAvailable && (
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="cod" id="cod" />
+                <Label htmlFor="cod">Cash on Delivery</Label>
+              </div>
+            )}
+          </RadioGroup>
+        </div>
+
+        {/* Price Details */}
         <p className="text-zinc-600 text-base font-semibold mt-2">
           PRICE DETAILS ( {checkOutItems.length} Item )
         </p>

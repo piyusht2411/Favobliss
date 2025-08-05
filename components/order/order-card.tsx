@@ -17,14 +17,23 @@ interface OrderCardProps {
   };
   date: Date;
   paid: boolean;
+  completed: boolean;
 }
 
-export const OrderCard = ({ data, date, paid }: OrderCardProps) => {
+export const OrderCard = ({
+  data,
+  date,
+  paid,
+  completed = true,
+}: OrderCardProps) => {
   const router = useRouter();
 
   return (
     <div
-      className={cn("w-full flex gap-x-1 sm:gap-x-4", paid ? "h-64" : "h-52")}
+      className={cn(
+        "w-full flex gap-x-1 sm:gap-x-4",
+        completed ? "h-64" : "h-52"
+      )}
     >
       <div className="w-8 h-full flex flex-col items-center">
         <div className="w-8 h-8 bg-neutral-700 rounded-full text-white flex items-center justify-center">
@@ -33,7 +42,7 @@ export const OrderCard = ({ data, date, paid }: OrderCardProps) => {
         <div
           className={cn(
             "h-full w-1 rounded-lg flex-1",
-            paid ? "bg-emerald-400" : "bg-red-400"
+            completed ? "bg-emerald-400" : "bg-red-400"
           )}
         />
       </div>
@@ -42,10 +51,10 @@ export const OrderCard = ({ data, date, paid }: OrderCardProps) => {
           <h5
             className={cn(
               "font-bold",
-              paid ? "text-emerald-700" : "text-red-500"
+              completed ? "text-emerald-700" : "text-red-500"
             )}
           >
-            {paid ? "Order Confirmed" : "Payment Failed"}
+            {completed ? "Order Confirmed" : "Payment Failed"}
           </h5>
           <p className="text-sm font-medium text-zinc-600">
             0n {format(date, "EE, dd LLL yyyy")}
@@ -77,6 +86,11 @@ export const OrderCard = ({ data, date, paid }: OrderCardProps) => {
               <h6 className="text-zinc-600 font-semibold">
                 Color: {data.color}
               </h6>
+              {completed && (
+                <h6 className="text-zinc-600 font-semibold">
+                  Color: {paid ? "Paid" : "Not Paid"}
+                </h6>
+              )}
             </div>
           </div>
           {/* {paid && (
