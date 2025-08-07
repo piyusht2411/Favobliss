@@ -33,7 +33,7 @@ export const ModalProductDetails = ({
         checkOutQuantity: 1,
         selectedVariant,
         pincode: "247001",
-        deliveryDays: "",
+        deliveryDays: 0,
       });
     }
   };
