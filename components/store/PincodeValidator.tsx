@@ -80,7 +80,9 @@ export const PincodeValidator = (props: Props) => {
           updateItemPrice(
             item.selectedVariant.id,
             variantPrice.price,
-            String(address.zipCode)
+            String(address.zipCode),
+            //@ts-ignore
+            variantPrice.location?.deliveryDays
           );
 
           updateItemCheckoutPrice(
