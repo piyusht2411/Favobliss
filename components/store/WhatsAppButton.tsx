@@ -4,7 +4,7 @@ const WhatsAppButton = () => {
   return (
     <a
       href="https://wa.me/+918077335703?text=Hello%20Favobliss%20Team!"
-      className="fixed bottom-4 right-4 sm:bottom-10 sm:right-10 bg-green-500 text-white rounded-full p-3 sm:p-4 shadow-lg hover:bg-green-600 transition duration-300 z-50 flex items-center justify-center"
+      className="fixed bottom-4 right-4 sm:bottom-10 sm:right-10 bg-green-500 text-white rounded-full p-3 sm:p-4 shadow-lg hover:bg-green-600 transition duration-300 z-50 md:flex items-center justify-center hidden"
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Contact Favobliss on WhatsApp"

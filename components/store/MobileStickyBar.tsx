@@ -16,6 +16,10 @@ interface MobileStickyActionBarProps {
   locationPrice: { price: number; mrp: number };
   selectedLocationId: string | null;
   isProductAvailable: boolean;
+  deliveryInfo: {
+    location: string;
+    estimatedDelivery: number;
+  } | null;
 }
 
 export const MobileStickyActionBar = ({
@@ -27,6 +31,7 @@ export const MobileStickyActionBar = ({
   isProductAvailable,
   locationPrice,
   show,
+  deliveryInfo,
 }: MobileStickyActionBarProps) => {
   const discountPercentage = mrp ? Math.round(((mrp - price) / mrp) * 100) : 0;
 
@@ -39,7 +44,7 @@ export const MobileStickyActionBar = ({
     >
       <div className="flex items-center justify-between gap-4">
         {/* Price section */}
-        <div className="flex flex-col">
+        {/* <div className="flex flex-col">
           <div className="flex items-center gap-2">
             <span className="text-lg font-bold">{formatter.format(price)}</span>
             {mrp && mrp > price && (
@@ -56,7 +61,7 @@ export const MobileStickyActionBar = ({
           <span className="text-xs text-gray-500">
             EMI from ₹{(price / 24).toFixed(0)}/mo*
           </span>
-        </div>
+        </div> */}
 
         {/* Action buttons */}
         <ActionButtons
@@ -66,6 +71,7 @@ export const MobileStickyActionBar = ({
           selectedLocationId={selectedLocationId}
           isProductAvailable={isProductAvailable}
           className="w-full"
+          deliveryInfo={deliveryInfo}
         />
 
         {/* <div className="flex gap-2 flex-1 max-w-[200px]">

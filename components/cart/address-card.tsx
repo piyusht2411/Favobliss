@@ -60,7 +60,12 @@ export const AddressCard = ({ data, onSelect }: AddressCardProps) => {
   };
 
   return (
-    <Card className={cn("w-full pt-5 select-none", isSelected && "shadow-md")}>
+    <Card
+      className={cn(
+        "w-full pt-5 select-none bg-[#f6f4f4]",
+        isSelected && "shadow-md"
+      )}
+    >
       <CardContent className="flex w-full">
         <div className="w-10">
           <Checkbox checked={isSelected} onClick={handleSelect} />

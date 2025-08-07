@@ -1,13 +1,12 @@
 "use client";
 
 import { CartSelectedItem, Product } from "@/types";
-import { X } from "lucide-react";
+import { X, Heart } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { formatter } from "@/lib/utils";
+import { formatDeliveryDate, formatter } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import { QuantityModal } from "../modals/quantity-modal";
 import { useCart } from "@/hooks/use-cart";
 import { useCheckout } from "@/hooks/use-checkout";
 import { useRouter } from "next/navigation";
@@ -19,20 +18,15 @@ interface CartItemProps {
     price: number;
     locationId?: string | null;
   };
+  deliveryDays: number;
 }
 
-export const CartItem = ({ data }: CartItemProps) => {
-  const { items, removeItem, updateQuantity } = useCart();
+export const CartItem = ({ data, deliveryDays }: CartItemProps) => {
+  const { items, removeItem, increaseQuantity, decreaseQuantity } = useCart();
   const { checkOutItems, selectItem, removeSelectedItems, updateItem } =
     useCheckout();
-
   const [mounted, setMounted] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [quantity, setQuantity] = useState(
-    items.find((item) => item.selectedVariant.id === data.selectedVariant.id)
-      ?.checkOutQuantity || 1
-  );
-
+  const [isWishlisted, setIsWishlisted] = useState(false);
   const isChecked = !!checkOutItems.find(
     (item) => item.variantId === data.selectedVariant.id
   );
@@ -51,7 +45,7 @@ export const CartItem = ({ data }: CartItemProps) => {
       id: data.id,
       variantId: data.selectedVariant.id,
       price: data.price,
-      quantity,
+      quantity: data.checkOutQuantity,
       image: data.selectedVariant.images[0]?.url || "",
       about: data.about,
       name: data.name,
@@ -73,101 +67,110 @@ export const CartItem = ({ data }: CartItemProps) => {
     removeItem(data.selectedVariant.id);
   };
 
-  useEffect(() => {
-    if (mounted && quantity !== data.checkOutQuantity) {
-      updateQuantity(data.selectedVariant.id, quantity);
-
-      if (isChecked) {
-        updateItem(data.selectedVariant.id, quantity);
-      }
-    }
-  }, [
-    quantity,
-    data.selectedVariant.id,
-    data.checkOutQuantity,
-    updateQuantity,
-    updateItem,
-    isChecked,
-    mounted,
-  ]);
+  const handleWishlist = () => {
+    setIsWishlisted(!isWishlisted);
+    // Add your wishlist logic here
+  };
 
   if (!mounted) {
     return null;
   }
 
   return (
-    <>
-      <QuantityModal
-        open={open}
-        quantity={quantity}
-        setOpen={setOpen}
-        setQuantity={setQuantity}
-        stock={data.selectedVariant.stock}
-        productId={data.selectedVariant.id}
-      />
-      <li className="flex py-4 px-2 md:px-4 rounded-md border">
-        <div className="relative h-32 w-24 rounded-md overflow-hidden sm:h-48 sm:w-36">
-          {data.selectedVariant.images[0]?.url ? (
-            <Image
-              src={data.selectedVariant.images[0].url}
-              alt={data.name}
-              fill
-              className="object-cover cursor-pointer"
-              onClick={() => handleProductAnchor(data.slug)}
-            />
-          ) : (
-            <div className="bg-gray-200 w-full h-full" />
-          )}
-          <div className="absolute left-2 top-2">
-            <Checkbox checked={isChecked} onCheckedChange={handleSelectItem} />
-          </div>
+    <li className="flex items-start py-4 px-4 rounded-3xl border bg-[#f6f4f4]">
+      {/* Product Image */}
+      <div className="relative h-20 w-20 rounded-lg overflow-hidden bg-white mr-4 flex-shrink-0">
+        {data.selectedVariant.images[0]?.url ? (
+          <Image
+            src={data.selectedVariant.images[0].url}
+            alt={data.name}
+            fill
+            className="object-cover cursor-pointer"
+            onClick={() => handleProductAnchor(data.slug)}
+          />
+        ) : (
+          <div className="bg-gray-200 w-full h-full" />
+        )}
+      </div>
+
+      {/* Product Details */}
+      <div className="flex-1 min-w-0">
+        <h3
+          className="text-lg font-semibold text-gray-900 cursor-pointer hover:text-blue-600 line-clamp-2"
+          onClick={() => handleProductAnchor(data.slug)}
+        >
+          {data.name}
+        </h3>
+
+        <div className="mt-1 space-y-1">
+          <p className="text-green-600 font-medium text-sm">In Stock</p>
+          <p className="text-gray-700 text-sm">Free Shipping</p>
+          <p className="text-gray-700 text-sm">
+            Standard Delivery by {formatDeliveryDate(deliveryDays)}
+          </p>
         </div>
-        <div className="relative ml-4 flex flex-1 flex-col justify-between sm:ml-6">
-          <div className="absolute z-10 right-0 -top-2">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={onRemoveItem}
-            >
-              <X className="text-zinc-600" />
-            </Button>
-          </div>
-          <div className="relative pr-12 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:pr-0">
-            <div className="flex flex-col">
-              <p
-                className="md:text-lg font-bold text-zinc-700 max-w-36 md:max-w-sm truncate cursor-pointer"
-                onClick={() => handleProductAnchor(data.slug)}
-              >
-                {data.name}
-              </p>
-              <p className="text-sm font-semibold max-w-36 md:max-w-sm text-zinc-600 truncate">
-                {data.about}
-              </p>
-              <div className="md:my-3 md:space-y-2">
-                {data.selectedVariant.size?.value && (
-                  <p className="font-semibold">
-                    Size - {data.selectedVariant.size.value}
-                  </p>
-                )}
-                {data.selectedVariant.color?.name && (
-                  <p className="font-semibold">
-                    Color - {data.selectedVariant.color.name}
-                  </p>
-                )}
-                <p className="font-extrabold">{formatter.format(data.price)}</p>
-              </div>
-              <div
-                className="font-semibold text-zinc-700 cursor-default md:cursor-pointer"
-                role="button"
-                onClick={() => setOpen(true)}
-              >
-                Qty - {quantity}
-              </div>
-            </div>
-          </div>
+      </div>
+
+      {/* Quantity Controls */}
+      <div className="flex items-center gap-2 mx-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => decreaseQuantity(data.selectedVariant.id)}
+          disabled={data.checkOutQuantity <= 1}
+          className="h-8 w-8 p-0 bg-transparent border-0 text-lg"
+        >
+          -a
+        </Button>
+        <span className="text-sm font-semibold min-w-[20px] text-center">
+          {data.checkOutQuantity}
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => increaseQuantity(data.selectedVariant.id)}
+          disabled={data.checkOutQuantity >= data.selectedVariant.stock}
+          className="h-8 w-8 p-0 bg-transparent border-0 text-lg"
+        >
+          +
+        </Button>
+      </div>
+
+      {/* Price Section */}
+      {/* <div className="text-right mx-4">
+        <div className="text-2xl font-bold text-gray-900">
+          {formatter.format(data.price)}
         </div>
-      </li>
-    </>
+        <div className="text-xs text-gray-500 line-through">MRP ₹88,000</div>
+        <div className="text-xs text-red-600 font-medium">13% Off</div>
+      </div> */}
+
+      {/* Action Buttons */}
+      <div className="flex flex-col gap-2 ml-4">
+        {/* <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleWishlist}
+          className="flex items-center gap-1 text-gray-600 hover:text-red-500 h-8 px-2"
+        >
+          <Heart
+            className={`h-4 w-4 ${
+              isWishlisted ? "fill-red-500 text-red-500" : ""
+            }`}
+          />
+          <span className="text-xs">wishlist</span>
+        </Button> */}
+
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onRemoveItem}
+          className="flex items-center gap-1 text-gray-600 hover:text-red-500 h-8 px-2"
+        >
+          <X className="h-4 w-4" />
+          <span className="text-xs">Remove</span>
+        </Button>
+      </div>
+    </li>
   );
 };

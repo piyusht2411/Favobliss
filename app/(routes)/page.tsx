@@ -23,6 +23,8 @@ import {
   premiumProducts,
 } from "@/utils/constant";
 import PremiumProductsSection from "@/components/PremiumProductSection";
+import FourImageGrid from "@/components/store/FourImageGrid";
+import FeatureHighlights from "@/components/store/FeatureHighlights";
 
 export const revalidate = 0;
 
@@ -75,6 +77,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
               data={products}
               locations={locations}
             />
+            <FourImageGrid />
             {/* <div className="space-y-4 md:space-y-16">
               <Image
                 src="/assets/banner.jpg"
@@ -178,6 +181,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
             /> */}
             <BrandList brands={Array.isArray(brands) ? brands : [brands]} />
             <LatestLaunches />
+            <FeatureHighlights />
             {/* <div className="pt-8 ">
               <h3 className="text-3xl font-bold">Hot Deals</h3>
             </div> */}

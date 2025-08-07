@@ -8,7 +8,6 @@ import { useCheckoutAddress } from "@/hooks/use-checkout-address";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useState } from "react";
-import qs from "query-string";
 import { getProducts } from "@/actions/get-products";
 import { useCheckout } from "@/hooks/use-checkout";
 
@@ -37,7 +36,6 @@ const PricingDialog = ({
   if (!isOpen) return null;
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Only close if the click is on the overlay itself, not the dialog content
     if (e.target === e.currentTarget) {
       onClose();
     }
@@ -148,11 +146,9 @@ export const UserAddressCard = ({ data, label }: UserAddressCardProps) => {
 
     if (mismatched.length === 0) {
       addAddress(address);
-      // router.push("/checkout/payment");
       return;
     }
 
-    // Show custom dialog for price update confirmation
     setSelectedAddress(address);
     setMismatchedItems(mismatched);
     setShowPricingDialog(true);
@@ -162,7 +158,6 @@ export const UserAddressCard = ({ data, label }: UserAddressCardProps) => {
     if (!selectedAddress || mismatchedItems.length === 0) return;
 
     setIsUpdatingPrices(true);
-    // Get updateItem from useCheckout
 
     try {
       const response = await getProducts({
@@ -181,17 +176,9 @@ export const UserAddressCard = ({ data, label }: UserAddressCardProps) => {
         );
         const targetPincode = String(selectedAddress.zipCode).trim();
 
-        //@ts-ignore
         const variantPrice = variant?.variantPrices?.find((vp) => {
           //@ts-ignore
           const apiPincode = String(vp?.location?.pincode).trim();
-          console.log(
-            "Comparing pincodes:",
-            apiPincode,
-            "vs",
-            targetPincode,
-            apiPincode === targetPincode
-          );
           return apiPincode === targetPincode;
         });
 
@@ -199,7 +186,9 @@ export const UserAddressCard = ({ data, label }: UserAddressCardProps) => {
           updateItemPrice(
             item.selectedVariant.id,
             variantPrice.price,
-            String(selectedAddress.zipCode)
+            String(selectedAddress.zipCode),
+            //@ts-ignore
+            variantPrice.location?.deliveryDays || 0 // Add deliveryDays
           );
 
           updateItemCheckoutPrice(
@@ -213,6 +202,7 @@ export const UserAddressCard = ({ data, label }: UserAddressCardProps) => {
           toast.warning(
             `The product is unavailable at this location at ${selectedAddress.zipCode}`
           );
+          removeItem(item.selectedVariant.id); // Remove item if unavailable
         }
       });
       setShowPricingDialog(false);

@@ -47,6 +47,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
     products: any[];
     subCategories?: any[];
     brands?: any[];
+    isSuggested?: any;
     pagination: {
       page: number;
       limit: number;
@@ -75,7 +76,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
         !searchDropdownRef.current.contains(event.target as Node) &&
         !isSearchDropdownOpen
       ) {
-        setSearchResults(null);
+        // setSearchResults(null);
         setSearchQuery("");
         setShowSearchResults(false);
       }
@@ -86,6 +87,13 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isSearchDropdownOpen]);
+
+  useEffect(() => {
+    // Fetch suggested results when component mounts and searchQuery is empty
+    if (!searchQuery) {
+      debouncedSearch("");
+    }
+  }, []); // Empty dependency array to run on mounts
 
   useEffect(() => {
     return () => {
@@ -163,14 +171,6 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
   }, [session, addresses, isAddressLoading]);
 
   const debouncedSearch = useDebounce(async (query: string) => {
-    if (!query) {
-      if (isMounted.current) {
-        setSearchResults(null);
-        setIsSearching(false);
-      }
-      return;
-    }
-
     if (isMounted.current) {
       setIsSearching(true);
     }
@@ -186,13 +186,20 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
         throw new Error("Failed to fetch search results");
       }
       const data = await response.json();
-      setSearchResults(null);
+      console.log(data, isMounted.current);
       setSearchResults(data);
+      if (isMounted.current) {
+        setSearchResults(data);
+      }
     } catch (error) {
       console.error("[SEARCH_FETCH]", error);
-      setSearchResults(null);
+      if (isMounted.current) {
+        setSearchResults(null);
+      }
     } finally {
-      setIsSearching(false);
+      if (isMounted.current) {
+        setIsSearching(false);
+      }
     }
   }, 800);
 
@@ -203,8 +210,9 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
   };
 
   const handleResultClick = (href: string) => {
-    setSearchQuery("");
-    setSearchResults(null);
+    // setSearchQuery("");
+    // setSearchResults(null);
+    setShowSearchResults(false);
     router.push(href);
   };
 
@@ -384,176 +392,6 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
               />
             </Link>
           </div>
-
-          {/* <div
-            className="flex-1 mx-6 max-w-2xl relative"
-            ref={searchDropdownRef}
-          >
-            <div className="relative flex bg-white rounded-md overflow-hidden">
-              <div className="relative">
-                <button
-                  onClick={() => setIsSearchDropdownOpen(!isSearchDropdownOpen)}
-                  className="flex items-center gap-1 bg-[rgb(238,140,29)] text-white px-4 py-2.5 text-sm font-medium hover:bg-[rgb(238,140,29)] transition-colors min-w-max"
-                >
-                  <span>{selectedCategory}</span>
-                  <ChevronDown
-                    size={16}
-                    className={`transform transition-transform ${
-                      isSearchDropdownOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-              </div>
-
-              <div className="flex-1 relative">
-                <input
-                  type="text"
-                  placeholder="Search for Product Brand..."
-                  className="w-full py-2.5 px-4 text-black focus:outline-none text-sm"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                />
-                <button className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 rounded transition-colors">
-                  <Search size={24} className="text-black" />
-                </button>
-              </div>
-            </div>
-
-            {isSearchDropdownOpen && (
-              <div className="absolute top-full left-0 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-60 overflow-y-auto mt-1">
-                <div className="py-1">
-                  {searchCategories.map((category) => (
-                    <button
-                      key={category}
-                      onClick={() => {
-                        setSelectedCategory(category);
-                        setIsSearchDropdownOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-                    >
-                      {category}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {(isSearching ||
-              (searchResults &&
-                (searchResults.categories.length > 0 ||
-                  (searchResults?.subCategories ?? []).length > 0 ||
-                  searchResults.products.length > 0))) && (
-              <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-96 overflow-y-auto mt-1">
-                <div className="py-2">
-                  {isSearching ? (
-                    <div className="px-4 py-2 text-sm text-gray-700">
-                      Searching...
-                    </div>
-                  ) : (
-                    <>
-                      {(searchResults?.categories ?? []).length > 0 && (
-                        <div className="border-b border-gray-200 pb-2">
-                          <h3 className="px-4 py-2 text-sm font-semibold text-gray-900">
-                            Categories
-                          </h3>
-                          {searchResults?.categories.map((category) => (
-                            <button
-                              key={category.id}
-                              onClick={() =>
-                                handleResultClick(
-                                  `/category/${category.slug}?page=1`
-                                )
-                              }
-                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-                            >
-                              {category.name}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-
-                      {(searchResults?.subCategories ?? []).length > 0 && (
-                        <div className="border-b border-gray-200 pb-2">
-                          <h3 className="px-4 py-2 text-sm font-semibold text-gray-900">
-                            Subcategories
-                          </h3>
-                          {(searchResults?.subCategories ?? []).map(
-                            (subCategory) => (
-                              <button
-                                key={subCategory.id}
-                                onClick={() =>
-                                  handleResultClick(
-                                    `/category/${subCategory.slug}?page=1`
-                                  )
-                                }
-                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-                              >
-                                {subCategory.name}
-                              </button>
-                            )
-                          )}
-                        </div>
-                      )}
-                      {(searchResults?.brands ?? []).length > 0 && (
-                        <div className="border-b border-gray-200 pb-2">
-                          <h3 className="px-4 py-2 text-sm font-semibold text-gray-900">
-                            Brands
-                          </h3>
-                          {(searchResults?.brands ?? []).map((brand) => (
-                            <button
-                              key={brand.id}
-                              onClick={() =>
-                                handleResultClick(`/brand/${brand.slug}?page=1`)
-                              }
-                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-                            >
-                              {brand.name}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-
-                      {(searchResults?.products ?? []).length > 0 ? (
-                        <div className="pt-2">
-                          <h3 className="px-4 py-2 text-sm font-semibold text-gray-900">
-                            Products
-                          </h3>
-                          {(searchResults?.products ?? []).map((product) => (
-                            <button
-                              key={product.id}
-                              onClick={() =>
-                                handleResultClick(`/product/${product.slug}`)
-                              }
-                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors flex items-center gap-2"
-                            >
-                              {product.variants[0]?.images[0] && (
-                                <img
-                                  src={product.variants[0].images[0].url}
-                                  alt={product.name}
-                                  className="w-10 h-10 object-cover rounded"
-                                />
-                              )}
-                              <span>{product.name}</span>
-                            </button>
-                          ))}
-                        </div>
-                      ) : (
-                        !isSearching &&
-                        searchResults &&
-                        searchResults.categories.length === 0 &&
-                        (searchResults?.subCategories ?? []).length === 0 && (
-                          <div className="px-4 py-2 text-sm text-gray-700">
-                            No results found
-                          </div>
-                        )
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
-          </div> */}
-
           <div
             className="flex-1 mx-6 max-w-2xl relative"
             ref={searchDropdownRef}
@@ -589,7 +427,6 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
               </div>
             </div>
 
-            {/* Category Dropdown */}
             {isSearchDropdownOpen && (
               <div className="absolute top-full left-0 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-60 overflow-y-auto mt-1">
                 <div className="py-1">
@@ -608,7 +445,6 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
                 </div>
               </div>
             )}
-
             {/* Search Results Dropdown */}
             {showSearchResults && (
               <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-[9999] mt-1 overflow-hidden">
@@ -617,7 +453,9 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
                   <div className="w-1/2 border-r border-gray-200">
                     <div className="p-4 bg-gray-50 border-b border-gray-200">
                       <h3 className="text-lg font-semibold text-gray-900">
-                        Suggestions
+                        {searchQuery || !searchResults?.isSuggested
+                          ? "Suggestions"
+                          : "Explore These Categories"}
                       </h3>
                     </div>
                     <div className="overflow-y-auto max-h-[450px]">
@@ -649,13 +487,16 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
                           {/* Subcategories */}
                           {(searchResults?.subCategories ?? []).length > 0 && (
                             <>
-                              {(searchResults?.subCategories ?? []).map(
+                              {searchResults?.subCategories?.map(
                                 (subCategory) => (
                                   <button
                                     key={subCategory.id}
                                     onClick={() =>
                                       handleResultClick(
-                                        `/category/${subCategory.slug}?page=1`
+                                        `/category/${
+                                          subCategory.category?.slug ||
+                                          "unknown"
+                                        }?sub=${subCategory.slug}?page=1`
                                       )
                                     }
                                     className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors border-b border-gray-100 last:border-b-0"
@@ -670,7 +511,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
                           {/* Brands */}
                           {(searchResults?.brands ?? []).length > 0 && (
                             <>
-                              {(searchResults?.brands ?? []).map((brand) => (
+                              {searchResults?.brands?.map((brand) => (
                                 <button
                                   key={brand.id}
                                   onClick={() =>
@@ -684,30 +525,6 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
                                 </button>
                               ))}
                             </>
-                          )}
-
-                          {/* Show default suggestions when no search results */}
-                          {!searchQuery && (
-                            <div className="py-2">
-                              <button className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors border-b border-gray-100">
-                                Air Purifiers
-                              </button>
-                              <button className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors border-b border-gray-100">
-                                Qubo Air Purifiers
-                              </button>
-                              <button className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors border-b border-gray-100">
-                                Philips Air Purifiers
-                              </button>
-                              <button className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors border-b border-gray-100">
-                                Kent Air Purifiers
-                              </button>
-                              <button className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors border-b border-gray-100">
-                                Honeywell Air Purifiers
-                              </button>
-                              <button className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors">
-                                Home Air Purifiers
-                              </button>
-                            </div>
                           )}
 
                           {/* No results message */}
@@ -730,7 +547,9 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
                   <div className="w-1/2">
                     <div className="p-4 bg-gray-50 border-b border-gray-200">
                       <h3 className="text-lg font-semibold text-gray-900">
-                        Products
+                        {searchQuery || !searchResults?.isSuggested
+                          ? "Products"
+                          : "Popular Products"}
                       </h3>
                     </div>
                     <div className="overflow-y-auto max-h-[450px]">
@@ -742,99 +561,43 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
                         <div className="py-2">
                           {(searchResults?.products ?? []).length > 0 ? (
                             <>
-                              {(searchResults?.products ?? []).map(
-                                (product) => (
-                                  <button
-                                    key={product.id}
-                                    onClick={() =>
-                                      handleResultClick(
-                                        `/product/${product.slug}`
-                                      )
-                                    }
-                                    className="w-full text-left px-4 py-3 hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0"
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      {product.variants[0]?.images[0] && (
-                                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                          <img
-                                            src={
-                                              product.variants[0].images[0].url
-                                            }
-                                            alt={product.name}
-                                            className="w-10 h-10 object-contain rounded"
-                                          />
-                                        </div>
-                                      )}
-                                      <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium text-gray-900 line-clamp-2">
-                                          {product.name}
-                                        </p>
+                              {searchResults?.products.map((product) => (
+                                <button
+                                  key={product.id}
+                                  onClick={() =>
+                                    handleResultClick(
+                                      `/product/${product.slug}`
+                                    )
+                                  }
+                                  className="w-full text-left px-4 py-3 hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0"
+                                >
+                                  <div className="flex items-center gap-3">
+                                    {product.variants[0]?.images[0] ? (
+                                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <img
+                                          src={
+                                            product.variants[0].images[0].url
+                                          }
+                                          alt={product.name}
+                                          className="w-10 h-10 object-contain rounded"
+                                        />
                                       </div>
+                                    ) : (
+                                      <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <div className="w-8 h-8 bg-gray-300 rounded"></div>
+                                      </div>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-medium text-gray-900 line-clamp-2">
+                                        {product.name}
+                                      </p>
                                     </div>
-                                  </button>
-                                )
-                              )}
+                                  </div>
+                                </button>
+                              ))}
                             </>
                           ) : (
                             <>
-                              {/* Show default products when no search results */}
-                              {!searchQuery && (
-                                <div className="py-2">
-                                  <div className="px-4 py-3 border-b border-gray-100">
-                                    <div className="flex items-center gap-3">
-                                      <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <div className="w-8 h-8 bg-gray-300 rounded"></div>
-                                      </div>
-                                      <div className="flex-1">
-                                        <p className="text-sm font-medium text-gray-900">
-                                          Philips AC4221/61 Real Time AQI
-                                          Display | Ideal for Living room
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div className="px-4 py-3 border-b border-gray-100">
-                                    <div className="flex items-center gap-3">
-                                      <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <div className="w-8 h-8 bg-gray-300 rounded"></div>
-                                      </div>
-                                      <div className="flex-1">
-                                        <p className="text-sm font-medium text-gray-900">
-                                          Dyson TP07 Air Purifier Technology
-                                          Pure Cool Tower Air Purifier
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div className="px-4 py-3 border-b border-gray-100">
-                                    <div className="flex items-center gap-3">
-                                      <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <div className="w-8 h-8 bg-gray-300 rounded"></div>
-                                      </div>
-                                      <div className="flex-1">
-                                        <p className="text-sm font-medium text-gray-900">
-                                          SHARP DW-J27FM-S Air Purifier with
-                                          dehumidifier
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div className="px-4 py-3">
-                                    <div className="flex items-center gap-3">
-                                      <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <div className="w-8 h-8 bg-gray-300 rounded"></div>
-                                      </div>
-                                      <div className="flex-1">
-                                        <p className="text-sm font-medium text-gray-900">
-                                          Honeywell Air Touch V4 Air Purifier
-                                          Activated Carbon filter
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
-
                               {/* No products message */}
                               {searchQuery &&
                                 !isSearching &&

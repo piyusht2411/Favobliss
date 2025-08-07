@@ -16,6 +16,10 @@ interface ActionButtonsProps {
   locationPrice: { price: number; mrp: number };
   selectedLocationId: string | null;
   isProductAvailable: boolean;
+  deliveryInfo: {
+    location: string;
+    estimatedDelivery: number;
+  } | null;
 }
 
 export const ActionButtons = ({
@@ -26,6 +30,7 @@ export const ActionButtons = ({
   locationPrice,
   selectedLocationId,
   isProductAvailable,
+  deliveryInfo,
 }: ActionButtonsProps) => {
   const { addItem } = useCart();
   const router = useRouter();
@@ -41,6 +46,7 @@ export const ActionButtons = ({
         selectedVariant,
         checkOutQuantity: 1,
         pincode: itemPincode,
+        deliveryDays: deliveryInfo?.estimatedDelivery || 0, // Add deliveryDays
       });
     } catch (error) {
       console.error("Error adding to cart:", error);
@@ -58,6 +64,7 @@ export const ActionButtons = ({
         selectedVariant,
         checkOutQuantity: 1,
         pincode: itemPincode,
+        deliveryDays: deliveryInfo?.estimatedDelivery || 0, // Add deliveryDays
       });
       router.push("/checkout/cart");
     } catch (error) {

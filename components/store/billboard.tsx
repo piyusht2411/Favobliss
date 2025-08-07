@@ -4,10 +4,8 @@ import React from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-// Custom Arrow Components
 const NextArrow = (props: any) => {
   const { onClick } = props;
   return (
@@ -60,13 +58,12 @@ const HeroSlider: React.FC = () => {
     ],
   };
 
-  // Define banners using the same approach as favobliss.com
   const slides = [
     {
       id: 1,
-      src: "https://www.favobliss.com/image/cache/catalog/best-telivestion-india-1000x340.png",
+      src: "http://res.cloudinary.com/dgcksrb1n/image/upload/v1754562139/qhrfdtirzly3wpkikylr.png",
       srcSet:
-        "https://www.favobliss.com/image/cache/catalog/best-telivestion-india-1000x340.png 1x, https://www.favobliss.com/image/cache/catalog/best-telivestion-india-2000x680.png 2x",
+        "http://res.cloudinary.com/dgcksrb1n/image/upload/v1754562139/qhrfdtirzly3wpkikylr.png",
       alt: "Best Television India",
       width: 1000,
       height: 340,
@@ -77,6 +74,15 @@ const HeroSlider: React.FC = () => {
       srcSet:
         "https://www.favobliss.com/image/cache/catalog/lg%20-washingmachine-1000x340.png 1x, https://www.favobliss.com/image/cache/catalog/lg%20-washingmachine-2000x680.png 2x",
       alt: "LG Washing Machine",
+      width: 1000,
+      height: 340,
+    },
+    {
+      id: 3,
+      src: "https://www.favobliss.com/image/cache/catalog/best-telivestion-india-1000x340.png",
+      srcSet:
+        "https://www.favobliss.com/image/cache/catalog/best-telivestion-india-1000x340.png 1x, https://www.favobliss.com/image/cache/catalog/best-telivestion-india-2000x680.png 2x",
+      alt: "Best Television India",
       width: 1000,
       height: 340,
     },

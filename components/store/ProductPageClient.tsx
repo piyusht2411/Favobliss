@@ -34,6 +34,10 @@ export const ProductPageContent = ({
     price: product.variants[0].price,
     mrp: product.variants[0].mrp || product.variants[0].price,
   });
+  const [deliveryInfo, setDeliveryInfo] = useState<{
+    location: string;
+    estimatedDelivery: number;
+  } | null>(null);
   const [isProductAvailable, setIsProductAvailable] = useState(true);
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
     null
@@ -68,6 +72,7 @@ export const ProductPageContent = ({
                 locationPrice={locationPrice}
                 selectedLocationId={selectedLocationId}
                 isProductAvailable={isProductAvailable}
+                deliveryInfo={deliveryInfo}
               />
             </div>
             <div className="mt-10 sm:mt-16 lg:mt-0 md:px-24 lg:px-0 flex flex-col gap-y-5">
@@ -86,6 +91,8 @@ export const ProductPageContent = ({
                 isProductAvailable={isProductAvailable}
                 setIsProductAvailable={setIsProductAvailable}
                 setSelectedLocationId={setSelectedLocationId}
+                deliveryInfo={deliveryInfo}
+                setDeliveryInfo={setDeliveryInfo}
               />
             </div>
           </div>
@@ -114,6 +121,7 @@ export const ProductPageContent = ({
             locationPrice={locationPrice}
             selectedLocationId={selectedLocationId}
             isProductAvailable={isProductAvailable}
+            deliveryInfo={deliveryInfo}
           />
         </div>
       </Container>

@@ -97,6 +97,7 @@ export const ProductCard = ({ data, locations }: ProductCardProps) => {
       addItem({
         ...data,
         price: locationPrice.price, // Use location-based price
+        deliveryDays: "",
         selectedVariant: {
           id: selectedVariant.id,
           price: locationPrice.price, // Use location-based price

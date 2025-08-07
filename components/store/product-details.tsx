@@ -48,6 +48,16 @@ interface ProductDetailsProps {
   setIsProductAvailable: Dispatch<SetStateAction<boolean>>;
   selectedLocationId: string | null;
   setSelectedLocationId: Dispatch<SetStateAction<string | null>>;
+  deliveryInfo: {
+    location: string;
+    estimatedDelivery: number;
+  } | null;
+  setDeliveryInfo: Dispatch<
+    SetStateAction<{
+      location: string;
+      estimatedDelivery: number;
+    } | null>
+  >;
 }
 
 const formatDeliveryDate = (deliveryDays: number | null): string => {
@@ -87,6 +97,8 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     setIsProductAvailable,
     selectedLocationId,
     setSelectedLocationId,
+    deliveryInfo,
+    setDeliveryInfo,
   } = props;
 
   const [selectedSize, setSelectedSize] = useState<string | undefined>(
@@ -103,10 +115,6 @@ export const ProductDetails = (props: ProductDetailsProps) => {
   const { data: addresses, isLoading: isAddressLoading } = useAddress();
   const [defaultLocationData, setDefaultLocationData] =
     useState<Location | null>(null);
-  const [deliveryInfo, setDeliveryInfo] = useState<{
-    location: string;
-    estimatedDelivery: string;
-  } | null>(null);
   const [isCodAvailableForPincode, setIsCodAvailableForPincode] = useState<
     boolean | null
   >(null);
@@ -174,7 +182,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         setIsCodAvailableForPincode(isCodAvailable(sessionPincode, locations));
         setDeliveryInfo({
           location: `${activeLocation.city}, ${activeLocation.pincode}`,
-          estimatedDelivery: formatDeliveryDate(activeLocation.deliveryDays),
+          estimatedDelivery: activeLocation.deliveryDays,
         });
       }
     }
@@ -198,9 +206,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
               );
               setDeliveryInfo({
                 location: `${activeLocation.city}, ${activeLocation.pincode}`,
-                estimatedDelivery: formatDeliveryDate(
-                  activeLocation.deliveryDays
-                ),
+                estimatedDelivery: activeLocation.deliveryDays,
               });
             }
           }
@@ -228,7 +234,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         setIsCodAvailableForPincode(isCodAvailable(fallbackPincode, locations));
         setDeliveryInfo({
           location: `${activeLocation.city}, ${activeLocation.pincode}`,
-          estimatedDelivery: formatDeliveryDate(activeLocation.deliveryDays),
+          estimatedDelivery: activeLocation.deliveryDays,
         });
       }
     }
@@ -273,7 +279,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         });
         setDeliveryInfo({
           location: `${location.city}, ${location.pincode}`,
-          estimatedDelivery: formatDeliveryDate(location.deliveryDays),
+          estimatedDelivery: location.deliveryDays,
         });
         setIsCodAvailableForPincode(isCodAvailable(pincode.trim(), locations));
         const locationData = {
@@ -290,7 +296,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         setSelectedLocationId(null);
         setDeliveryInfo({
           location: `Pincode ${pincode.trim()}`,
-          estimatedDelivery: "Not available",
+          estimatedDelivery: 0,
         });
         setIsCodAvailableForPincode(false);
         const defaultLocationDataUpdated = {
@@ -449,6 +455,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         selectedVariant,
         checkOutQuantity: 1,
         pincode: itemPincode,
+        deliveryDays: deliveryInfo?.estimatedDelivery || 0,
       });
     } catch (error) {
       console.error("Error adding to cart:", error);
@@ -476,6 +483,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         selectedVariant,
         checkOutQuantity: 1,
         pincode: itemPincode,
+        deliveryDays: deliveryInfo?.estimatedDelivery || 0,
       });
       router.push("/checkout/cart");
     } catch (error) {
@@ -733,31 +741,33 @@ export const ProductDetails = (props: ProductDetailsProps) => {
             </div>
           </div>
 
-          <div className="mt-4 border rounded-lg p-4 bg-gray-50">
-            <div className="flex items-center gap-2 mb-3">
-              <svg
-                className="w-5 h-5 text-gray-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-              <span className="text-sm font-medium text-gray-700">
-                Delivery Options
-              </span>
-            </div>
+          <div className="mt-4 border rounded-3xl p-4 bg-[#f6f4f4] ">
+            {!isPincodeChecked && (
+              <div className="flex items-center gap-2 mb-3">
+                <svg
+                  className="w-5 h-5 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+                <span className="text-sm font-medium text-gray-700">
+                  Delivery Options
+                </span>
+              </div>
+            )}
 
             {!isPincodeChecked ? (
               <div className="space-y-3">
@@ -767,12 +777,12 @@ export const ProductDetails = (props: ProductDetailsProps) => {
                     value={pincode}
                     onChange={(e) => setPincode(e.target.value)}
                     placeholder="Enter pincode"
-                    className="flex-1 h-9 text-sm border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                    className="flex-1 h-9 text-sm border-gray-300 focus:border-[#ee8c1d] "
                     maxLength={6}
                   />
                   <Button
                     variant="outline"
-                    className="h-9 px-4 text-sm font-medium text-blue-600 border-blue-600 hover:bg-blue-50"
+                    className="h-9 px-4 text-sm font-medium text-[#ee8c1d] border-[#ee8c1d] hover:bg-[#ee8c1d]"
                     onClick={handlePincodeCheck}
                     disabled={!pincode.trim() || pincode.length < 6}
                   >
@@ -788,7 +798,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <svg
+                    {/* <svg
                       className={cn(
                         "w-4 h-4",
                         isProductAvailable ? "text-green-600" : "text-red-600"
@@ -809,7 +819,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
                           clipRule="evenodd"
                         />
                       )}
-                    </svg>
+                    </svg> */}
                     <span
                       className={cn(
                         "text-sm font-medium",
@@ -817,90 +827,61 @@ export const ProductDetails = (props: ProductDetailsProps) => {
                       )}
                     >
                       {isProductAvailable
-                        ? `Deliver to ${deliveryInfo?.location}`
+                        ? `Deliver options ${deliveryInfo?.location}`
                         : `Product not available at ${pincode.trim()}`}
                     </span>
                   </div>
                   <button
                     onClick={handleChangePincode}
-                    className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                    className="text-sm font-medium text-[#ee8c1d] hover:text-[#ee8c1d]"
                   >
                     Change
                   </button>
                 </div>
 
                 {deliveryInfo && isProductAvailable && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <svg
-                        className="w-4 h-4 text-green-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                      <span className="text-sm text-gray-700">
-                        Estimated Delivery: {deliveryInfo.estimatedDelivery}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <svg
-                        className="w-4 h-4 text-green-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
-                        />
-                      </svg>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <svg
-                        className={cn(
-                          "w-4 h-4",
-                          isCodAvailableForPincode
-                            ? "text-green-600"
-                            : "text-red-600"
-                        )}
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        {isCodAvailableForPincode ? (
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clipRule="evenodd"
-                          />
-                        ) : (
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                            clipRule="evenodd"
-                          />
-                        )}
-                      </svg>
-                      <span
-                        className={cn(
-                          "text-sm",
-                          isCodAvailableForPincode
-                            ? "text-gray-700"
-                            : "text-red-700"
-                        )}
-                      >
-                        {isCodAvailableForPincode
-                          ? "Cash on Delivery Available"
-                          : "Cash on Delivery Not Available"}
-                      </span>
+                  <div>
+                    <div className="space-y-2">
+                      {/* Express Delivery */}
+                      <div className="text-sm text-gray-800">
+                        <span className="font-medium">
+                          Express Delivery{" "}
+                          {formatDeliveryDate(deliveryInfo.estimatedDelivery)}
+                        </span>
+                      </div>
+
+                      {/* Cash on Delivery */}
+                      <div className="flex items-center gap-2">
+                        {/* <svg
+                          className={cn(
+                            "w-4 h-4",
+                            isCodAvailableForPincode
+                              ? "text-green-600"
+                              : "text-red-600"
+                          )}
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          {isCodAvailableForPincode ? (
+                            <path
+                              fillRule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                              clipRule="evenodd"
+                            />
+                          ) : (
+                            <path
+                              fillRule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                              clipRule="evenodd"
+                            />
+                          )}
+                        </svg> */}
+                        <span className="text-sm">
+                          {isCodAvailableForPincode
+                            ? "Cash on Delivery Available"
+                            : "Cash on Delivery Not Available"}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 )}

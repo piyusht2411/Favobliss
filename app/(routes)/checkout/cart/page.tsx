@@ -32,6 +32,7 @@ const CartPage = () => {
     setCheckOutItems(checkoutItems);
   }, [items, setCheckOutItems]);
 
+  console.log("item", items);
   return (
     <div
       className={cn("bg-white min-h-full", items.length === 0 && "h-[90vh]")}
@@ -45,7 +46,11 @@ const CartPage = () => {
               <div className="lg:col-span-7">
                 <ul className="space-y-4">
                   {items.map((item) => (
-                    <CartItem key={item.selectedVariant.id} data={item} />
+                    <CartItem
+                      key={item.selectedVariant.id}
+                      data={item}
+                      deliveryDays={item.deliveryDays}
+                    />
                   ))}
                 </ul>
               </div>

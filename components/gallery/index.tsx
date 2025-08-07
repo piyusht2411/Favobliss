@@ -26,6 +26,10 @@ interface GalleryProps {
   };
   isProductAvailable: boolean;
   selectedLocationId: string | null;
+  deliveryInfo: {
+    location: string;
+    estimatedDelivery: number;
+  } | null;
 }
 
 interface VideoState {
@@ -41,6 +45,7 @@ export const Gallery = ({
   selectedVariant,
   isProductAvailable,
   locationPrice,
+  deliveryInfo,
 }: GalleryProps) => {
   const { onOpen } = useShareModal();
   const [activeTab, setActiveTab] = useState(images[0]?.id || "");
@@ -409,6 +414,7 @@ export const Gallery = ({
           selectedLocationId={selectedLocationId}
           isProductAvailable={isProductAvailable}
           className="w-full"
+          deliveryInfo={deliveryInfo}
         />
       </div>
     </div>
