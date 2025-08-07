@@ -25,6 +25,7 @@ import {
 import PremiumProductsSection from "@/components/PremiumProductSection";
 import FourImageGrid from "@/components/store/FourImageGrid";
 import FeatureHighlights from "@/components/store/FeatureHighlights";
+import PromotionalBanner from "@/components/store/PromotionalBanner";
 
 export const revalidate = 0;
 
@@ -59,10 +60,6 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
     (product) => product.category?.name?.toLowerCase() === "kitchen appliances"
   );
 
-  // const homeApplicance = products.filter(
-  //   (product) => product.category?.name?.toLowerCase() === "home appliances"
-  // );
-
   return (
     <div className="bg-[#f8f8f8]">
       <HeroSlider />
@@ -77,6 +74,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
               data={products}
               locations={locations}
             />
+            <PromotionalBanner data={favoblissChoice} locations={locations} />
             <FourImageGrid />
             {/* <div className="space-y-4 md:space-y-16">
               <Image

@@ -42,9 +42,7 @@ export const HotDealBanner = () => {
               size="lg"
               asChild
             >
-              <Link href="/product/apple-iphone-13-512gb-mlqg3hna-blue">
-                Shop Now
-              </Link>
+              <Link href="/brand/apple?page=1">Shop Now</Link>
             </Button>
           </div>
         </div>
