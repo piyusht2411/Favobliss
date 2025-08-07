@@ -44,37 +44,35 @@ const PremiumProductCard: React.FC<PremiumProductCardProps> = ({ product }) => {
   return (
     <Link href={product.link}>
       <div className="group cursor-pointer">
-        <div className="bg-white rounded-2xl p-6 transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1 relative h-full flex flex-col">
+        <div className="">
           {/* Badge */}
-          {product.badge && (
+          {/* {product.badge && (
             <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded z-10">
               {product.badge}
             </div>
-          )}
+          )} */}
 
           {/* Image Container */}
-          <div className="relative h-48 mb-6 flex items-center justify-center bg-gray-50 rounded-xl">
-            <Image
+          <div>
+            <img
               src={product.image || "/placeholder.svg"}
               alt={product.title}
-              width={200}
-              height={200}
-              className="object-contain max-w-full max-h-full"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              // width={200}
+              // height={200}
+              className="object-cover max-w-full max-h-full"
+              // sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             />
           </div>
 
           {/* Content */}
-          <div className="text-center mt-auto">
-            {/* Premium Label */}
+          {/* <div className="text-center mt-auto">
             <div className="text-xs font-bold text-gray-500 tracking-[0.3em] mb-2 uppercase">
               PREMIUM
             </div>
-            {/* Title */}
             <h3 className="text-lg font-semibold text-gray-900 leading-tight">
               {product.title}
             </h3>
-          </div>
+          </div> */}
         </div>
       </div>
     </Link>

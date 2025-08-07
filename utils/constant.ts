@@ -57,31 +57,31 @@ export const offerImages = [
 export const premiumProducts: any[] = [
   {
     id: "1",
-    title: "Mobiles",
+    title: "Soundbars",
     image:
-      "https://img.freepik.com/premium-psd/realistic-premium-smartphone-app-presentation-screen-mockup-template-with-transparent-background_349001-473.jpg?ga=GA1.1.848270097.1752087718&semt=ais_hybrid&w=740&q=80",
-    link: "/category/electronics?sub=mobile?page=1",
+      "http://res.cloudinary.com/dgcksrb1n/image/upload/v1754591877/lsvwpa783e1i79vmkg8c.png",
+    link: "/category/electronics?sub=soundbars?page=1",
   },
   {
     id: "2",
-    title: "Printers",
+    title: "Smart Watches",
     image:
-      "https://img.freepik.com/premium-vector/realistic-inkjet-printer-isoalted-white-background_208593-71.jpg?ga=GA1.1.848270097.1752087718&semt=ais_hybrid&w=740&q=80",
-    link: "/category/printers?sub=mobile?page=1",
+      "http://res.cloudinary.com/dgcksrb1n/image/upload/v1754591933/ehtqn18xo292atf80zze.png",
+    link: "/category/electronics?sub=smartwatches?page=1",
   },
   {
     id: "3",
-    title: "Laptops",
+    title: "Speakers",
     image:
-      "https://img.freepik.com/free-photo/still-life-books-versus-technology_23-2150062920.jpg?ga=GA1.1.848270097.1752087718&semt=ais_hybrid&w=740&q=80",
-    link: "/category/laptops?sub=mobile?page=1",
+      "http://res.cloudinary.com/dgcksrb1n/image/upload/v1754591974/ta6bjci2imkmv0dqxzwc.png",
+    link: "/category/electronics?sub=speakers?page=1",
   },
   {
     id: "4",
     title: "TVs",
     image:
-      "https://img.freepik.com/premium-photo/tv-cabinet-modern-living-room-white-wall_41470-1767.jpg?ga=GA1.1.848270097.1752087718&semt=ais_hybrid&w=740&q=80",
-    link: "/category/television?page=1",
+      "http://res.cloudinary.com/dgcksrb1n/image/upload/v1754592010/cp5ilmyukabjlstax3hr.png",
+    link: "/category/computer-and-printer?sub=gaming-laptops?page=1",
     badge: "NEW",
   },
 ];
