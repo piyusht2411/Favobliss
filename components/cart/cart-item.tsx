@@ -120,7 +120,7 @@ export const CartItem = ({ data, deliveryDays }: CartItemProps) => {
           disabled={data.checkOutQuantity <= 1}
           className="h-8 w-8 p-0 bg-transparent border-0 text-lg"
         >
-          -a
+          -
         </Button>
         <span className="text-sm font-semibold min-w-[20px] text-center">
           {data.checkOutQuantity}

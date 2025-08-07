@@ -186,7 +186,6 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
         throw new Error("Failed to fetch search results");
       }
       const data = await response.json();
-      console.log(data, isMounted.current);
       setSearchResults(data);
       if (isMounted.current) {
         setSearchResults(data);

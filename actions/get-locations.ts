@@ -18,3 +18,12 @@ export const getLocations = async (
   }
   return res.json();
 };
+
+export const getLocationById = async (id: string): Promise<Location> => {
+  const res = await fetch(`${URL}/${id}`);
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch locations");
+  }
+  return res.json();
+};

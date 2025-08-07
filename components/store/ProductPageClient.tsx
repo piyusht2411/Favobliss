@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Product, Variant, Location } from "@/types";
 import { Gallery } from "@/components/gallery";
 import { ProductDetails } from "@/components/store/product-details";
@@ -11,6 +11,7 @@ import { ProductTabs } from "@/components/store/prodcutTabs";
 import Breadcrumb from "./Breadcrumbs";
 import { ActionButtons } from "./ActionButton";
 import { MobileStickyActionBar } from "./MobileStickyBar";
+import { getLocationById } from "@/actions/get-locations";
 
 interface ProductPageContentProps {
   product: Product;
@@ -43,6 +44,8 @@ export const ProductPageContent = ({
     null
   );
 
+  const [locationPinCode, setLocationPinCode] = useState<string | null>(null);
+
   const handleVariantChange = (variant: Variant) => {
     setCurrentVariant(variant);
   };
@@ -57,6 +60,20 @@ export const ProductPageContent = ({
       href: `/product/${product?.slug}`,
     },
   ];
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        if (selectedLocationId) {
+          const response = await getLocationById(selectedLocationId);
+          setLocationPinCode(response.pincode);
+        }
+      } catch (error) {
+        console.error("Failed to fetch locations:", error);
+      }
+    };
+    getData();
+  }, [selectedLocationId]);
 
   return (
     <div className="bg-white text-black mb-16">
@@ -73,6 +90,7 @@ export const ProductPageContent = ({
                 selectedLocationId={selectedLocationId}
                 isProductAvailable={isProductAvailable}
                 deliveryInfo={deliveryInfo}
+                locationPinCode={locationPinCode}
               />
             </div>
             <div className="mt-10 sm:mt-16 lg:mt-0 md:px-24 lg:px-0 flex flex-col gap-y-5">
@@ -122,6 +140,7 @@ export const ProductPageContent = ({
             selectedLocationId={selectedLocationId}
             isProductAvailable={isProductAvailable}
             deliveryInfo={deliveryInfo}
+            locationPinCode={locationPinCode}
           />
         </div>
       </Container>

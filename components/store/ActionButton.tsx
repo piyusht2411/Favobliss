@@ -16,6 +16,8 @@ interface ActionButtonsProps {
   locationPrice: { price: number; mrp: number };
   selectedLocationId: string | null;
   isProductAvailable: boolean;
+  locationPinCode: string | null;
+
   deliveryInfo: {
     location: string;
     estimatedDelivery: number;
@@ -31,13 +33,14 @@ export const ActionButtons = ({
   selectedLocationId,
   isProductAvailable,
   deliveryInfo,
+  locationPinCode,
 }: ActionButtonsProps) => {
   const { addItem } = useCart();
   const router = useRouter();
 
   const onHandleCart = () => {
     if (!isProductAvailable) return;
-    const itemPincode = selectedLocationId || "";
+    const itemPincode = locationPinCode || "";
 
     try {
       addItem({
@@ -55,7 +58,7 @@ export const ActionButtons = ({
 
   const onHandleBuyNow = () => {
     if (!isProductAvailable) return;
-    const itemPincode = selectedLocationId || "";
+    const itemPincode = locationPinCode || "";
 
     try {
       addItem({

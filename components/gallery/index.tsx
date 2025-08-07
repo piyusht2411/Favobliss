@@ -4,9 +4,8 @@ import Image from "next/image";
 import { Product, Variant, VariantImage } from "@/types";
 import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import { GalleryTab } from "./gallery-tab";
-import { PiShareFatFill } from "react-icons/pi";
 import { useShareModal } from "@/hooks/use-share-modal";
-import { useState, useEffect, Dispatch, SetStateAction, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
@@ -26,6 +25,7 @@ interface GalleryProps {
   };
   isProductAvailable: boolean;
   selectedLocationId: string | null;
+  locationPinCode: string | null;
   deliveryInfo: {
     location: string;
     estimatedDelivery: number;
@@ -46,6 +46,7 @@ export const Gallery = ({
   isProductAvailable,
   locationPrice,
   deliveryInfo,
+  locationPinCode,
 }: GalleryProps) => {
   const { onOpen } = useShareModal();
   const [activeTab, setActiveTab] = useState(images[0]?.id || "");
@@ -415,6 +416,7 @@ export const Gallery = ({
           isProductAvailable={isProductAvailable}
           className="w-full"
           deliveryInfo={deliveryInfo}
+          locationPinCode={locationPinCode}
         />
       </div>
     </div>

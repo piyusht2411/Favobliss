@@ -16,6 +16,7 @@ interface MobileStickyActionBarProps {
   locationPrice: { price: number; mrp: number };
   selectedLocationId: string | null;
   isProductAvailable: boolean;
+  locationPinCode: string | null;
   deliveryInfo: {
     location: string;
     estimatedDelivery: number;
@@ -32,6 +33,7 @@ export const MobileStickyActionBar = ({
   locationPrice,
   show,
   deliveryInfo,
+  locationPinCode
 }: MobileStickyActionBarProps) => {
   const discountPercentage = mrp ? Math.round(((mrp - price) / mrp) * 100) : 0;
 
@@ -72,6 +74,7 @@ export const MobileStickyActionBar = ({
           isProductAvailable={isProductAvailable}
           className="w-full"
           deliveryInfo={deliveryInfo}
+          locationPinCode={locationPinCode}
         />
 
         {/* <div className="flex gap-2 flex-1 max-w-[200px]">

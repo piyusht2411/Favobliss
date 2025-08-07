@@ -32,7 +32,6 @@ const CartPage = () => {
     setCheckOutItems(checkoutItems);
   }, [items, setCheckOutItems]);
 
-  console.log("item", items);
   return (
     <div
       className={cn("bg-white min-h-full", items.length === 0 && "h-[90vh]")}
