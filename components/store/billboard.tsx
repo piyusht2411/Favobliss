@@ -61,9 +61,8 @@ const HeroSlider: React.FC = () => {
   const slides = [
     {
       id: 1,
-      src: "http://res.cloudinary.com/dgcksrb1n/image/upload/v1754562139/qhrfdtirzly3wpkikylr.png",
-      srcSet:
-        "http://res.cloudinary.com/dgcksrb1n/image/upload/v1754562139/qhrfdtirzly3wpkikylr.png 1x, http://res.cloudinary.com/dgcksrb1n/image/upload/v1754562139/qhrfdtirzly3wpkikylr.png 2x",
+      src: "/assets/hero/banner-1.png",
+      srcSet: "/assets/hero/banner-1.png",
       alt: "Best Television India",
       width: 1000,
       height: 340,
