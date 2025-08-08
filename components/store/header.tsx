@@ -377,8 +377,8 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
 
   return (
     <div className="bg-black">
-      <div className="max-w-[1400px] m-auto pb-5">
-        <header className="bg-black text-white py-4 px-6 flex items-center justify-between shadow-md">
+      <div className="max-w-[1400px] m-auto ">
+        <header className="bg-black text-white py-2 px-6 flex items-center justify-between shadow-md">
           <div className="flex items-center space-x-4">
             <Link href="/">
               <img
@@ -646,7 +646,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
             onClick={() => setIsSearchDropdownOpen(false)}
           />
         )}
-        <nav className="bg-black text-white py-2 px-6 flex justify-between items-center shadow-md flex-wrap gap-2 gap-y-5 max-w-7xl mx-auto">
+        {/* <nav className="bg-black text-white py-2 px-6 flex justify-between items-center shadow-md flex-wrap gap-2 gap-y-5 max-w-7xl mx-auto">
           {menuCategories.map((category) => (
             <Popover key={category.name} className="relative">
               {({ open, close }) => (
@@ -777,7 +777,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
               )}
             </Popover>
           ))}
-        </nav>
+        </nav> */}
       </div>
     </div>
   );

@@ -103,12 +103,12 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
               className="mx-auto bg-[#b8e0ee]"
             />
             <ProductList title="" data={kitchen || []} locations={locations} />
-            <BestOfProduct
+            {/* <BestOfProduct
               products={brandProducts || []}
               title="Best of Apple"
               subtitle="Save up to ₹10,000 instantly on eligible products using ICICI, Axis or Kotak Mahindra Bank Credit Cards | Exchange bonus upto ₹6,000 on iPhone"
               offer="Benefit with No Cost EMI schemes"
-            />
+            /> */}
             <PremiumProductsSection
               products={premiumProducts}
               backgroundColor="#534747"
