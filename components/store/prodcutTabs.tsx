@@ -207,7 +207,7 @@ export const ProductTabs = ({ product, productId }: ProductTabsProps) => {
           }}
         >
           <div className="max-w-none">
-            <div className="space-y-0 border overflow-hidden rid grid-cols-2 gap-x-[50px] gap-y-[50px] border-transparent">
+            <div className="space-y-0 border overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-x-[50px] gap-y-[50px] border-transparent">
               {sortedGroupNames.map((groupName) => (
                 <div
                   key={groupName}
