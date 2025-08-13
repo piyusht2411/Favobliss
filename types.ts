@@ -168,6 +168,7 @@ export interface CartSelectedItem {
   id: string;
   quantity: number;
   price: number;
+  mrp: number;
   image: string;
   name: string;
   about: string;

@@ -15,6 +15,7 @@ interface UseCheckOutProps {
   updateItemCheckoutPrice: (
     variantId: string,
     price: number,
+    mrp: number, // Added
     locationId: string
   ) => void;
   applyCoupon: (coupon: Coupons) => void;
@@ -44,7 +45,10 @@ export const useCheckout = create(
           });
         } else {
           set({
-            checkOutItems: [...currentItems, data],
+            checkOutItems: [
+              ...currentItems,
+              { ...data, mrp: data.mrp || data.price }, // Fallback to price
+            ],
           });
         }
       },
@@ -56,7 +60,10 @@ export const useCheckout = create(
 
         if (!isAlreadyExist) {
           set({
-            checkOutItems: [...currentItems, data],
+            checkOutItems: [
+              ...currentItems,
+              { ...data, mrp: data.mrp || data.price }, // Fallback to price
+            ],
           });
         }
       },
@@ -82,6 +89,7 @@ export const useCheckout = create(
       updateItemCheckoutPrice: (
         variantId: string,
         price: number,
+        mrp: number,
         locationId: string
       ) => {
         const currentItems = get().checkOutItems;
@@ -94,6 +102,7 @@ export const useCheckout = create(
           updatedItems[itemIndex] = {
             ...updatedItems[itemIndex],
             price,
+            mrp, // Added
             locationId,
           };
           set({ checkOutItems: updatedItems });
@@ -108,8 +117,10 @@ export const useCheckout = create(
           ],
         }),
       setCheckOutItems: (items) => set({ checkOutItems: items }),
-      clearCheckOutItems: () => set({ checkOutItems: [], appliedCoupon: null, discount: 0 }),
-      applyCoupon: (coupon: Coupons) => set({ appliedCoupon: coupon, discount: coupon.value }),
+      clearCheckOutItems: () =>
+        set({ checkOutItems: [], appliedCoupon: null, discount: 0 }),
+      applyCoupon: (coupon: Coupons) =>
+        set({ appliedCoupon: coupon, discount: coupon.value }),
       removeCoupon: () => set({ appliedCoupon: null, discount: 0 }),
       setDiscount: (discount: number) => set({ discount }),
     }),

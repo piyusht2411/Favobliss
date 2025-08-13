@@ -1,3 +1,4 @@
+// frontend: pages/cart.tsx
 "use client";
 
 import { cn } from "@/lib/utils";
@@ -19,7 +20,8 @@ const CartPage = () => {
     const checkoutItems = items.map((item) => ({
       id: item.id,
       variantId: item.selectedVariant.id,
-      price: item.price, // Location-based price
+      price: item.price,
+      mrp: item.mrp, // Added
       quantity: item.checkOutQuantity,
       image: item.selectedVariant.images[0]?.url || "",
       about: item.about,
@@ -27,7 +29,7 @@ const CartPage = () => {
       size: item.selectedVariant.size?.value,
       color: item.selectedVariant.color?.name,
       selectedVariant: item.selectedVariant,
-      // locationId: item.locationId, // Include locationId
+      // locationId: item.locationId,
     }));
     setCheckOutItems(checkoutItems);
   }, [items, setCheckOutItems]);

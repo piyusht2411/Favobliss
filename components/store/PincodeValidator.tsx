@@ -80,6 +80,7 @@ export const PincodeValidator = (props: Props) => {
           updateItemPrice(
             item.selectedVariant.id,
             variantPrice.price,
+            variantPrice.mrp,
             String(address.zipCode),
             //@ts-ignore
             variantPrice.location?.deliveryDays
@@ -89,6 +90,7 @@ export const PincodeValidator = (props: Props) => {
             // From useCheckout
             item.selectedVariant.id,
             variantPrice.price,
+            variantPrice.mrp,
             String(address.zipCode) // Or address.zipCode
           );
           toast.success(`Updated price for ${item.name}`);

@@ -1,3 +1,4 @@
+// frontend: hooks/use-cart.ts
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { toast } from "sonner";
@@ -7,8 +8,9 @@ interface CartItem extends Product {
   checkOutQuantity: number;
   selectedVariant: Variant;
   price: number;
+  mrp: number; // Added
   pincode: string;
-  deliveryDays: number; // Added deliveryDays to CartItem
+  deliveryDays: number;
 }
 
 interface UseCart {
@@ -20,13 +22,15 @@ interface UseCart {
   updateItemPrice: (
     variantId: string,
     newPrice: number,
+    newMrp: number, // Added
     newPincode: string,
-    newDeliveryDays: number // Added newDeliveryDays parameter
+    newDeliveryDays: number
   ) => void;
   removeItem: (variantId: string) => void;
   removeAll: () => void;
   getItemCount: () => number;
   getTotalAmount: () => number;
+  getTotalMrp: () => number; // Added
 }
 
 export const useCart = create(
@@ -41,7 +45,16 @@ export const useCart = create(
         if (existingItem) {
           toast.info("Item already in cart");
         } else {
-          set({ items: [...currentItems, { ...data, checkOutQuantity: 1 }] });
+          set({
+            items: [
+              ...currentItems,
+              {
+                ...data,
+                checkOutQuantity: 1,
+                mrp: data.mrp || data.price, // Fallback to price if mrp is missing
+              },
+            ],
+          });
           toast.success("Item added to cart");
         }
       },
@@ -93,6 +106,7 @@ export const useCart = create(
       updateItemPrice: (
         variantId: string,
         newPrice: number,
+        newMrp: number,
         newPincode: string,
         newDeliveryDays: number
       ) => {
@@ -102,6 +116,7 @@ export const useCart = create(
               ? {
                   ...item,
                   price: newPrice,
+                  mrp: newMrp, // Added
                   pincode: newPincode,
                   deliveryDays: newDeliveryDays,
                 }
@@ -127,6 +142,12 @@ export const useCart = create(
       getTotalAmount: () => {
         return get().items.reduce(
           (total, item) => total + item.price * item.checkOutQuantity,
+          0
+        );
+      },
+      getTotalMrp: () => {
+        return get().items.reduce(
+          (total, item) => total + item.mrp * item.checkOutQuantity,
           0
         );
       },

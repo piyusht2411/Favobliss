@@ -186,6 +186,7 @@ export const UserAddressCard = ({ data, label }: UserAddressCardProps) => {
           updateItemPrice(
             item.selectedVariant.id,
             variantPrice.price,
+            variantPrice.mrp,
             String(selectedAddress.zipCode),
             //@ts-ignore
             variantPrice.location?.deliveryDays || 0 // Add deliveryDays
@@ -194,6 +195,7 @@ export const UserAddressCard = ({ data, label }: UserAddressCardProps) => {
           updateItemCheckoutPrice(
             item.selectedVariant.id,
             variantPrice.price,
+            variantPrice.mrp,
             String(selectedAddress.zipCode)
           );
           toast.success(`Updated price for ${item.name}`);

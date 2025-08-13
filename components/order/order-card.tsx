@@ -4,112 +4,274 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Comment, OrderProduct } from "@prisma/client";
 import { format } from "date-fns";
-
-import { cn } from "@/lib/utils";
-import { Package } from "lucide-react";
+import { formatter } from "@/lib/utils";
+import axios from "axios";
+import { cn, formatDeliveryDate } from "@/lib/utils";
+import {
+  Package,
+  Calendar,
+  CreditCard,
+  Truck,
+  CheckCircle,
+  XCircle,
+  Clock,
+  ArrowRight,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Rating } from "./rating";
 import { Review } from "./review";
+import { toast } from "sonner";
+import { CancelOrderButton } from "../store/CancelOrderButton";
 
 interface OrderCardProps {
   data: OrderProduct & {
-    color: string; // Add this line
+    color: string;
     comment: Comment | null;
   };
   date: Date;
   paid: boolean;
-  completed: boolean;
+  status: string;
+  orderNumber: string | null;
+  estimatedDeliveryDays: number | null;
+  orderId: string;
+  mrp: number | null; // Added
+  price: number | null; // Added
+  paymentMethod: string | null; // Already included
+  onCancel: () => void;
 }
 
 export const OrderCard = ({
   data,
   date,
   paid,
-  completed = true,
+  status,
+  orderNumber,
+  estimatedDeliveryDays,
+  orderId,
+  mrp,
+  price,
+  paymentMethod,
+  onCancel,
 }: OrderCardProps) => {
   const router = useRouter();
 
+  const getStatusInfo = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return {
+          color: "text-amber-600",
+          bgColor: "bg-amber-50",
+          borderColor: "border-amber-200",
+          icon: Clock,
+          label: "Pending",
+        };
+      case "PROCESSING":
+        return {
+          color: "text-blue-600",
+          bgColor: "bg-blue-50",
+          borderColor: "border-blue-200",
+          icon: Package,
+          label: "Processing",
+        };
+      case "SHIPPED":
+        return {
+          color: "text-purple-600",
+          bgColor: "bg-purple-50",
+          borderColor: "border-purple-200",
+          icon: Truck,
+          label: "Shipped",
+        };
+      case "DELIVERED":
+        return {
+          color: "text-emerald-600",
+          bgColor: "bg-emerald-50",
+          borderColor: "border-emerald-200",
+          icon: CheckCircle,
+          label: "Delivered",
+        };
+      case "CANCELLED":
+      case "RETURNED":
+      case "REFUNDED":
+        return {
+          color: "text-red-600",
+          bgColor: "bg-red-50",
+          borderColor: "border-red-200",
+          icon: XCircle,
+          label:
+            status === "CANCELLED"
+              ? "Cancelled"
+              : status === "RETURNED"
+              ? "Returned"
+              : "Refunded",
+        };
+      default:
+        return {
+          color: "text-gray-600",
+          bgColor: "bg-gray-50",
+          borderColor: "border-gray-200",
+          icon: Package,
+          label: "Unknown",
+        };
+    }
+  };
+
+  const statusInfo = getStatusInfo(status);
+  const StatusIcon = statusInfo.icon;
+
   return (
-    <div
-      className={cn(
-        "w-full flex gap-x-1 sm:gap-x-4",
-        completed ? "h-64" : "h-52"
-      )}
-    >
-      <div className="w-8 h-full flex flex-col items-center">
-        <div className="w-8 h-8 bg-neutral-700 rounded-full text-white flex items-center justify-center">
-          <Package />
-        </div>
-        <div
-          className={cn(
-            "h-full w-1 rounded-lg flex-1",
-            completed ? "bg-emerald-400" : "bg-red-400"
+    <div className="w-full bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+      {/* Header */}
+      <div
+        className={cn("px-6 py-4 border-b border-gray-100", statusInfo.bgColor)}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div
+              className={cn(
+                "w-10 h-10 rounded-full flex items-center justify-center",
+                statusInfo.bgColor,
+                statusInfo.borderColor,
+                "border-2"
+              )}
+            >
+              <StatusIcon className={cn("w-5 h-5", statusInfo.color)} />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900">
+                Order #{orderNumber || "Pending"}
+              </h3>
+              <div
+                className={cn(
+                  "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                  statusInfo.bgColor,
+                  statusInfo.color,
+                  statusInfo.borderColor,
+                  "border"
+                )}
+              >
+                {statusInfo.label}
+              </div>
+            </div>
+          </div>
+
+          {["PENDING", "PROCESSING"].includes(status) && (
+            <CancelOrderButton
+              orderId={orderId}
+              onCancel={onCancel}
+              variant="outline"
+              size="sm"
+              showFullWidth={false}
+              className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+            />
           )}
-        />
-      </div>
-      <div className="w-full h-full p-4 pt-1 space-y-2">
-        <div>
-          <h5
-            className={cn(
-              "font-bold",
-              completed ? "text-emerald-700" : "text-red-500"
-            )}
-          >
-            {completed ? "Order Confirmed" : "Payment Failed"}
-          </h5>
-          <p className="text-sm font-medium text-zinc-600">
-            0n {format(date, "EE, dd LLL yyyy")}
-          </p>
         </div>
-        <div className="w-full bg-gray-100 rounded-lg p-4 flex flex-col gap-y-3">
-          <div
-            className="flex items-start gap-x-4 sm:gap-x-8 md:gap-x-12 md:cursor-pointer"
-            onClick={() => router.push(`/orders/${data.id}`)}
-          >
-            <div className="h-24 aspect-[3/4] relative rounded-md">
+      </div>
+
+      {/* Content */}
+      <div className="p-6">
+        {/* Order Info */}
+        <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-gray-600">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            <span>Placed {format(date, "MMM dd, yyyy")}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <CreditCard className="w-4 h-4" />
+            <span className={paid ? "text-emerald-600" : "text-amber-600"}>
+              {paid ? "Paid" : "Payment Pending"}
+            </span>
+          </div>
+          {estimatedDeliveryDays &&
+            ["PENDING", "PROCESSING", "SHIPPED"].includes(status) && (
+              <div className="flex items-center gap-2">
+                <Truck className="w-4 h-4" />
+                <span>
+                  Delivery by {formatDeliveryDate(estimatedDeliveryDays)}
+                </span>
+              </div>
+            )}
+        </div>
+
+        {/* Product Details */}
+        <div
+          className="flex gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer group"
+          onClick={() => router.push(`/orders/${data.id}`)}
+        >
+          <div className="relative flex-shrink-0">
+            <div className="w-20 h-24 rounded-lg overflow-hidden bg-white shadow-sm">
               <Image
                 src={data.productImage}
                 alt="Product"
                 fill
-                className="object-fill"
+                className="object-cover"
               />
-            </div>
-            <div className="space-y-1">
-              <h4 className="text-base font-semibold text-zinc-700">
-                {data.name}
-              </h4>
-              {!data.about.startsWith("{") && (
-                <p className="max-w-60 text-sm text-zinc-600 line-clamp-2">
-                  {data.about}
-                </p>
-              )}
-              <h6 className="text-zinc-600 font-semibold">Size: {data.size}</h6>
-              <h6 className="text-zinc-600 font-semibold">
-                Color: {data.color}
-              </h6>
-              {completed && (
-                <h6 className="text-zinc-600 font-semibold">
-                  Color: {paid ? "Paid" : "Not Paid"}
-                </h6>
-              )}
             </div>
           </div>
-          {/* {paid && (
-            <div className="flex items-center justify-between mt-2">
-              <Rating
-                comment={data.comment}
-                orderProductId={data.id}
-                productId={data.productId}
-              />
-              <Review
-                comment={data.comment}
-                orderProductId={data.id}
-                productId={data.productId}
-                productImage={data.productImage}
-                productName={data.about}
-              />
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between">
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+                  {data.name}
+                </h4>
+                {!data.about.startsWith("{") && (
+                  <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                    {data.about}
+                  </p>
+                )}
+
+                <div className="flex flex-wrap gap-4 mt-3 text-sm">
+                  <div className="flex items-center gap-1">
+                    <span className="text-gray-500">Size:</span>
+                    <span className="font-medium text-gray-700">
+                      {data.size}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-gray-500">Color:</span>
+                    <span className="font-medium text-gray-700">
+                      {data.color}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-gray-500">Price:</span>
+                    <span className="font-medium text-gray-900">
+                      {formatter.format(price || 0)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-gray-500">Payment Method:</span>
+                    <span className="font-medium text-gray-900">
+                      {paymentMethod === "cod"
+                        ? "Cash On Delivery"
+                        : "Payment Online"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors ml-4 flex-shrink-0" />
             </div>
-          )} */}
+          </div>
         </div>
+
+        {/* Rating/Review Section - Currently Commented Out */}
+        {/* {paid && (
+          <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
+            <Rating
+              comment={data.comment}
+              orderProductId={data.id}
+              productId={data.productId}
+            />
+            <Review
+              comment={data.comment}
+              orderProductId={data.id}
+              productId={data.productId}
+              productImage={data.productImage}
+              productName={data.about}
+            />
+          </div>
+        )} */}
       </div>
     </div>
   );

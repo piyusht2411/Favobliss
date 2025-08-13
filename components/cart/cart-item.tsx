@@ -16,6 +16,7 @@ interface CartItemProps {
     checkOutQuantity: number;
     selectedVariant: any;
     price: number;
+    mrp: number;
     locationId?: string | null;
   };
   deliveryDays: number;
@@ -45,6 +46,7 @@ export const CartItem = ({ data, deliveryDays }: CartItemProps) => {
       id: data.id,
       variantId: data.selectedVariant.id,
       price: data.price,
+      mrp: data?.mrp || 0,
       quantity: data.checkOutQuantity,
       image: data.selectedVariant.images[0]?.url || "",
       about: data.about,

@@ -452,6 +452,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
       addItem({
         ...data,
         price: locationPrice.price,
+        mrp: locationPrice.mrp,
         selectedVariant,
         checkOutQuantity: 1,
         pincode: itemPincode,
@@ -480,6 +481,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
       addItem({
         ...data,
         price: locationPrice.price,
+        mrp: locationPrice.mrp,
         selectedVariant,
         checkOutQuantity: 1,
         pincode: itemPincode,

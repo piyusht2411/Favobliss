@@ -28,13 +28,13 @@ export const ModalProductDetails = ({
 
   const onHandleCart = async () => {
     if (selectedVariant) {
-      addItem({
-        ...data,
-        checkOutQuantity: 1,
-        selectedVariant,
-        pincode: "247001",
-        deliveryDays: 0,
-      });
+      // addItem({
+      //   ...data,
+      //   checkOutQuantity: 1,
+      //   selectedVariant,
+      //   pincode: "247001",
+      //   deliveryDays: 0,
+      // });
     }
   };
 

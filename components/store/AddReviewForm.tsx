@@ -35,17 +35,7 @@ export const AddReviewForm = ({
   const [categoryRatings, setCategoryRatings] = useState<
     { categoryName: string; rating: number }[]
   >([]);
-  const {
-    data: orders,
-    isLoading: isOrderLoading,
-  }: {
-    data: (Order & {
-      orderProduct: (OrderProduct & {
-        comment: Comment | null;
-      })[];
-    })[];
-    isLoading: boolean;
-  } = useOrder();
+  const { data: orders, isLoading: isOrderLoading } = useOrder();
 
   const isAuthenticated = status === "authenticated";
   const userId = session?.user?.id;
