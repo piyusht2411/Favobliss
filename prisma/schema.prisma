@@ -99,16 +99,22 @@ model Product {
 }
 
 model Order {
-  id           String         @id @default(auto()) @map("_id") @db.ObjectId
-  isPaid       Boolean        @default(false)
-  isCompleted  Boolean        @default(false)
-  userId       String         @db.ObjectId
-  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  couponId     String?        @db.ObjectId
-  orderProduct OrderProduct[]
-  shippingId   String         @db.ObjectId
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  isPaid          Boolean         @default(false)
+  isCompleted     Boolean         @default(false)
+  userId          String          @db.ObjectId
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  couponId        String?         @db.ObjectId
+  orderProduct    OrderProduct[]
+  shippingId      String          @db.ObjectId
+  shippingAddress ShippingAddress @relation(fields: [shippingId], references: [id], onDelete: Cascade)
+  backendOrderId  String?
+  orderNumber     String?
+  mrp             Float? // Maximum Retail Price (optional)
+  price           Float? // Final price after discounts (optional)
+  paymentMethod   String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 
   @@index([userId])
 }
@@ -161,4 +167,6 @@ model ShippingAddress {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  Order Order[]
 }

@@ -1,3 +1,4 @@
+// frontend: components/cart/summary.tsx
 "use client";
 
 import axios from "axios";
@@ -32,7 +33,7 @@ export const Summary = (props: Props) => {
   const searchParams = useSearchParams();
   const session = useSession();
   const { address } = useCheckoutAddress();
-  const { items, removeAll } = useCart();
+  const { items, removeAll, getTotalMrp } = useCart(); // Added getTotalMrp
   const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "cod">(
     "razorpay"
   );
@@ -65,9 +66,8 @@ export const Summary = (props: Props) => {
         return false;
       }
       return item.selectedVariant.variantPrices.every(
-        (price) =>
-          //@ts-ignore
-          price.location?.isCodAvailable === true
+        //@ts-ignore
+        (price) => price.location?.isCodAvailable === true
       );
     });
 
@@ -90,11 +90,16 @@ export const Summary = (props: Props) => {
   }, []);
 
   const getTotalAmount = () => {
-    const amount = checkOutItems.reduce((total, item) => {
+    return checkOutItems.reduce((total, item) => {
       return total + (item.price || 0) * item.quantity;
     }, 0);
-    return amount;
   };
+
+  // const getTotalMrp = () => {
+  //   return checkOutItems.reduce((total, item) => {
+  //     return total + (item.mrp || item.price) * item.quantity;
+  //   }, 0);
+  // };
 
   const handleApplyCoupon = () => {
     const coupon = coupons.find((c) => c.code === couponCode);
@@ -189,6 +194,7 @@ export const Summary = (props: Props) => {
             variantId: item.variantId,
             quantity: item.quantity,
             price: item.price,
+            mrp: item.mrp, // Added
             size: item.size || "",
             color: item.color || "",
             image: item.image,
@@ -197,6 +203,7 @@ export const Summary = (props: Props) => {
               variantId: item.variantId,
               color: item.color,
               price: item.price,
+              mrp: item.mrp, // Added
               locationId: item.locationId,
             }),
           })),
@@ -286,6 +293,7 @@ export const Summary = (props: Props) => {
             variantId: item.variantId,
             quantity: item.quantity,
             price: item.price,
+            mrp: item.mrp, // Added
             size: item.size || "",
             color: item.color || "",
             image: item.image,
@@ -294,6 +302,7 @@ export const Summary = (props: Props) => {
               variantId: item.variantId,
               color: item.color,
               price: item.price,
+              mrp: item.mrp, // Added
               locationId: item.locationId,
             }),
           })),
@@ -327,7 +336,7 @@ export const Summary = (props: Props) => {
       {!appliedCoupon ? (
         <div className="mb-4">
           <div className="flex border rounded-full overflow-hidden bg-white">
-            <input
+            <Input
               type="text"
               placeholder="Enter Coupon Code"
               value={couponCode}
@@ -407,22 +416,27 @@ export const Summary = (props: Props) => {
       {/* Price Breakdown */}
       <div className="space-y-3 mb-6">
         <div className="flex justify-between items-center">
-          <span className="text-gray-700 text-sm">Item</span>
+          <span className="text-gray-700 text-sm">MRP</span>
           <span className="text-gray-900 font-medium">
-            {formatter.format(getTotalAmount()).replace("₹", "")}
+            {formatter.format(getTotalMrp()).replace("₹", "")}
           </span>
         </div>
-
+        <div className="flex justify-between items-center">
+          <span className="text-gray-700 text-sm">Discount on MRP</span>
+          <span className="text-green-600 font-medium">
+            -
+            {formatter
+              .format(getTotalMrp() - getTotalAmount())
+              .replace("₹", "")}
+          </span>
+        </div>
         <div className="flex justify-between items-center">
           <span className="text-gray-700 text-sm">Shipping Charge</span>
           <span className="text-gray-900 font-medium">00.00</span>
         </div>
-
         {discount > 0 && (
           <div className="flex justify-between items-center">
-            <span className="text-gray-700 text-sm">
-              Your Savings Estimated
-            </span>
+            <span className="text-gray-700 text-sm">Coupon Discount</span>
             <span className="text-green-600 font-medium">
               -{formatter.format(discount).replace("₹", "")}
             </span>
@@ -477,7 +491,7 @@ export const Summary = (props: Props) => {
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="razorpay" id="razorpay" />
               <Label htmlFor="razorpay" className="text-sm">
-                Pay Online (Razorpay)
+                Pay Online
               </Label>
             </div>
             {isCODAvailable && (
