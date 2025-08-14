@@ -41,20 +41,20 @@ const images = [
 
 const Gallery = () => {
   return (
-    <div className="w-full max-w-full mx-auto p-4">
+    <div className="w-full max-w-full mx-auto p-4 pb-0">
       <div className="sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-4 flex overflow-x-auto snap-x snap-mandatory scrollbar-hide">
         {images.map((img, index) => (
           <a
             key={index}
             href={img.href}
-            className="block overflow-hidden rounded-lg shadow-md bg-white transition-transform duration-300 flex-shrink-0 w-[45%] sm:w-auto snap-start mr-4 sm:mr-0"
+            className="block overflow-hidden rounded-lg shadow-md bg-white transition-transform duration-300 flex-shrink-0 w-[36%] sm:w-auto snap-start mr-3 sm:mr-0"
           >
             <div className="relative aspect-[3/4] w-full">
               <Image
                 src={img.src}
                 alt={img.alt}
                 fill
-                sizes="(max-width: 640px) 45vw, (max-width: 1024px) 50vw, 25vw"
+                sizes="(max-width: 640px) 36vw, (max-width: 1024px) 50vw, 25vw"
                 className="object-cover"
               />
             </div>

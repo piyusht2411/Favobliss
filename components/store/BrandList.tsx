@@ -26,7 +26,7 @@ const BrandList = ({ brands }: Props) => {
   return (
     <div className="bg-white py-12 px-4 text-center">
       <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8">
-        Discover Leading Brands
+        Explore Official Brand Stores
       </h2>
       <Carousel
         opts={{
@@ -41,7 +41,7 @@ const BrandList = ({ brands }: Props) => {
               className="pl-2 md:pl-4 basis-1/3 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-[12.5%]"
             >
               <div
-                className="w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 flex items-center justify-center bg-gray-100 rounded-full overflow-hidden cursor-pointer"
+                className="w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 flex items-center justify-center bg-transparent rounded-full overflow-hidden cursor-pointer"
                 onClick={() => handleClick(item?.slug)}
               >
                 <Image

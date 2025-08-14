@@ -556,7 +556,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
           <h1 className="text-xl md:text-xl font-bold">{data.name}</h1>
           <Link
             href={`/brand/${data?.brand?.slug}?page=1`}
-            className="text-sm text-black underline my-2"
+            className="text-sm text-blue-600 hover:text-blue-700 underline my-2"
           >
             Brand store
           </Link>
