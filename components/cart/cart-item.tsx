@@ -73,6 +73,9 @@ export const CartItem = ({ data, deliveryDays }: CartItemProps) => {
     setIsWishlisted(!isWishlisted);
     // Add your wishlist logic here
   };
+  const discountPercentage = data.mrp
+    ? Math.round(((data.mrp - data.price) / data.mrp) * 100)
+    : 0;
 
   if (!mounted) {
     return null;
@@ -80,7 +83,6 @@ export const CartItem = ({ data, deliveryDays }: CartItemProps) => {
 
   return (
     <li className="flex items-start py-4 px-4 rounded-3xl border bg-[#f6f4f4]">
-      {/* Product Image */}
       <div className="relative h-20 w-20 rounded-lg overflow-hidden bg-white mr-4 flex-shrink-0">
         {data.selectedVariant.images[0]?.url ? (
           <Image
@@ -95,7 +97,6 @@ export const CartItem = ({ data, deliveryDays }: CartItemProps) => {
         )}
       </div>
 
-      {/* Product Details */}
       <div className="flex-1 min-w-0">
         <h3
           className="text-lg font-semibold text-gray-900 cursor-pointer hover:text-blue-600 line-clamp-2"
@@ -138,40 +139,32 @@ export const CartItem = ({ data, deliveryDays }: CartItemProps) => {
         </Button>
       </div>
 
-      {/* Price Section */}
-      {/* <div className="text-right mx-4">
-        <div className="text-2xl font-bold text-gray-900">
-          {formatter.format(data.price)}
+      <div className="flex flex-col justify-end items-end gap-8">
+        <div className="text-right mx-4 flex gap-2 items-end">
+          <div className="text-xs text-gray-500 line-through">
+            MRP ₹{data.mrp}
+          </div>
+          <div className="flex flex-col gap-1">
+            <div className="text-sm font-bold text-gray-900">
+              {formatter.format(data.price)}
+            </div>
+
+            <div className="text-xs text-white bg-red-600 rounded-full border border-transparent font-normal text-center px-2">
+              {discountPercentage}% Off
+            </div>
+          </div>
         </div>
-        <div className="text-xs text-gray-500 line-through">MRP ₹88,000</div>
-        <div className="text-xs text-red-600 font-medium">13% Off</div>
-      </div> */}
-
-      {/* Action Buttons */}
-      <div className="flex flex-col gap-2 ml-4">
-        {/* <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleWishlist}
-          className="flex items-center gap-1 text-gray-600 hover:text-red-500 h-8 px-2"
-        >
-          <Heart
-            className={`h-4 w-4 ${
-              isWishlisted ? "fill-red-500 text-red-500" : ""
-            }`}
-          />
-          <span className="text-xs">wishlist</span>
-        </Button> */}
-
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onRemoveItem}
-          className="flex items-center gap-1 text-gray-600 hover:text-red-500 h-8 px-2"
-        >
-          <X className="h-4 w-4" />
-          <span className="text-xs">Remove</span>
-        </Button>
+        <div className="flex flex-col gap-2 ml-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onRemoveItem}
+            className="flex items-center gap-1 text-gray-600 hover:text-red-500 h-8 px-2"
+          >
+            <X className="h-4 w-4" />
+            <span className="text-xs">Remove</span>
+          </Button>
+        </div>
       </div>
     </li>
   );

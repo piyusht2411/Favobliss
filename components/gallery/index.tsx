@@ -237,7 +237,7 @@ export const Gallery = ({
                     />
                   ) : (
                     <div
-                      className="relative w-full h-full flex items-center justify-center bg-black cursor-pointer"
+                      className="relative w-full h-full flex items-start justify-center bg-black cursor-pointer"
                       onTouchStart={() => handleVideoMouseEnter(media.id)}
                       onClick={() => handleVideoClick(index, media.id)}
                     >
@@ -259,7 +259,7 @@ export const Gallery = ({
 
                       {/* Video Controls Overlay */}
                       <div
-                        className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${
+                        className={`absolute inset-0 flex items-start justify-center transition-all duration-300 ${
                           videoStates[media.id]?.showControls
                             ? "bg-black bg-opacity-30 opacity-100"
                             : "bg-transparent opacity-0"
@@ -327,20 +327,21 @@ export const Gallery = ({
             <TabsContent
               key={media.id}
               value={media.id}
-              className="aspect-[3/4] relative overflow-hidden bg-white"
+              className="relative overflow-hidden bg-[#f6f4f4] h-auto min-h-[500px] max-h-[600px]"
             >
               {media.mediaType === "IMAGE" ? (
                 <Image
                   src={media.url}
                   alt="Variant Image"
-                  fill
-                  className="object-contain aspect-[3/4]"
+                  width={600}
+                  height={600}
+                  className="w-full h-auto object-contain object-top max-h-full"
                   onLoad={() => handleMediaLoad(media.id)}
                   onError={() => handleMediaError(media.id)}
                 />
               ) : (
                 <div
-                  className="relative w-full h-full flex items-center justify-center bg-black cursor-pointer"
+                  className="relative w-full h-full flex items-start justify-center bg-black cursor-pointer min-h-[500px]"
                   onMouseEnter={() => handleVideoMouseEnter(media.id)}
                   onMouseLeave={() => handleVideoMouseLeave(media.id)}
                   onClick={() => handleVideoClick(index, media.id)}
@@ -348,7 +349,7 @@ export const Gallery = ({
                   <video
                     ref={(el) => (videoRefs.current[index] = el)}
                     src={media.url}
-                    className="object-contain aspect-[3/4] max-h-full w-full"
+                    className="object-contain max-h-full w-full h-auto"
                     muted
                     loop
                     playsInline
@@ -363,7 +364,7 @@ export const Gallery = ({
 
                   {/* Video Controls Overlay */}
                   <div
-                    className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${
+                    className={`absolute inset-0 flex items-start justify-center transition-all duration-300 ${
                       videoStates[media.id]?.showControls
                         ? "bg-black bg-opacity-30 opacity-100"
                         : "bg-transparent opacity-0"
