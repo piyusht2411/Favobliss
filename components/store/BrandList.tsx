@@ -35,7 +35,7 @@ const BrandList = ({ brands }: Props) => {
         className="w-full max-w-7xl mx-auto px-4"
       >
         <CarouselContent className="-ml-2 md:-ml-4">
-          {brands?.slice(0, 8).map((item) => (
+          {brands?.map((item) => (
             <CarouselItem
               key={item.id}
               className="pl-2 md:pl-4 basis-1/3 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-[12.5%]"

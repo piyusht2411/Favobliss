@@ -115,6 +115,8 @@ export const ProductDetails = (props: ProductDetailsProps) => {
   const { data: addresses, isLoading: isAddressLoading } = useAddress();
   const [defaultLocationData, setDefaultLocationData] =
     useState<Location | null>(null);
+  const [currentLocationData, setcurrentLocationData] =
+    useState<Location | null>(null);
   const [isCodAvailableForPincode, setIsCodAvailableForPincode] = useState<
     boolean | null
   >(null);
@@ -154,9 +156,10 @@ export const ProductDetails = (props: ProductDetailsProps) => {
       : true
   );
 
-  const isCodAvailable = (pincode: string, locations: Location[]) => {
+  const codAvailable = (pincode: string, locations: Location[]) => {
     const currentLocation = locations.find((item) => item.pincode === pincode);
-    return currentLocation?.codAvailable || false;
+    setcurrentLocationData(currentLocation ?? null);
+    return currentLocation?.isCodAvailable || false;
   };
 
   const initializeDefaultPrice = useCallback(() => {
@@ -179,7 +182,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
 
         localStorage.setItem("locationData", JSON.stringify(sessionLocation));
         window.dispatchEvent(new Event("locationDataUpdated"));
-        setIsCodAvailableForPincode(isCodAvailable(sessionPincode, locations));
+        setIsCodAvailableForPincode(codAvailable(sessionPincode, locations));
         setDeliveryInfo({
           location: `${activeLocation.city}, ${activeLocation.pincode}`,
           estimatedDelivery: activeLocation.deliveryDays,
@@ -202,7 +205,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
             );
             if (activeLocation) {
               setIsCodAvailableForPincode(
-                isCodAvailable(storedPincode, locations)
+                codAvailable(storedPincode, locations)
               );
               setDeliveryInfo({
                 location: `${activeLocation.city}, ${activeLocation.pincode}`,
@@ -231,7 +234,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         };
         localStorage.setItem("locationData", JSON.stringify(fallbackLocation));
         window.dispatchEvent(new Event("locationDataUpdated"));
-        setIsCodAvailableForPincode(isCodAvailable(fallbackPincode, locations));
+        setIsCodAvailableForPincode(codAvailable(fallbackPincode, locations));
         setDeliveryInfo({
           location: `${activeLocation.city}, ${activeLocation.pincode}`,
           estimatedDelivery: activeLocation.deliveryDays,
@@ -281,7 +284,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
           location: `${location.city}, ${location.pincode}`,
           estimatedDelivery: location.deliveryDays,
         });
-        setIsCodAvailableForPincode(isCodAvailable(pincode.trim(), locations));
+        setIsCodAvailableForPincode(codAvailable(pincode.trim(), locations));
         const locationData = {
           city: location.city,
           state: location.state,
@@ -743,159 +746,304 @@ export const ProductDetails = (props: ProductDetailsProps) => {
             </div>
           </div>
 
-          <div className="mt-4 border rounded-3xl p-4 bg-[#f6f4f4] ">
+          <div className="mt-4 border-0 rounded-2xl py-6 bg-gradient-to-br from-white to-gray-50 shadow-lg shadow-gray-200/50 border-gray-100">
             {!isPincodeChecked && (
-              <div className="flex items-center gap-2 mb-3">
-                <svg
-                  className="w-5 h-5 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-                <span className="text-sm font-medium text-gray-700">
-                  Delivery Options
-                </span>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-gradient-to-br from-orange-100 to-orange-200 rounded-full">
+                  <svg
+                    className="w-5 h-5 text-orange-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <span className="text-lg font-semibold text-gray-800">
+                    Delivery Options
+                  </span>
+                  <p className="text-sm text-gray-500 mt-0.5">
+                    Check availability in your area
+                  </p>
+                </div>
               </div>
             )}
 
             {!isPincodeChecked ? (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="text"
-                    value={pincode}
-                    onChange={(e) => setPincode(e.target.value)}
-                    placeholder="Enter pincode"
-                    className="flex-1 h-9 text-sm border-gray-300 focus:border-[#ee8c1d] "
-                    maxLength={6}
-                  />
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 relative">
+                    <Input
+                      type="text"
+                      value={pincode}
+                      onChange={(e) => setPincode(e.target.value)}
+                      placeholder="Enter your 6-digit pincode"
+                      className="h-12 text-sm pl-4 pr-12 rounded-xl border-2 border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 transition-all duration-200 bg-white shadow-sm"
+                      maxLength={6}
+                    />
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      <svg
+                        className="w-5 h-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        />
+                      </svg>
+                    </div>
+                  </div>
                   <Button
                     variant="outline"
-                    className="h-9 px-4 text-sm font-medium text-[#ee8c1d] border-[#ee8c1d] hover:bg-[#ee8c1d]"
+                    className="h-12 px-6 text-sm font-semibold text-white bg-gradient-to-r from-orange-500 to-orange-600 border-0 hover:from-orange-600 hover:to-orange-700 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={handlePincodeCheck}
                     disabled={!pincode.trim() || pincode.length < 6}
                   >
                     Check
                   </Button>
                 </div>
-                <p className="text-xs text-gray-500">
-                  Please enter PIN code to check delivery time & pay on delivery
-                  availability
-                </p>
+                <div className="bg-orange-100 border border-orange-200 rounded-xl p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="p-1 bg-orange-100 rounded-full mt-0.5">
+                      <svg
+                        className="w-4 h-4 text-[#ee8c1d]"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </div>
+                    <p className="text-sm text-[#ee8c1d] leading-relaxed">
+                      Enter your PIN code to check delivery time & cash on
+                      delivery availability in your area
+                    </p>
+                  </div>
+                </div>
               </div>
             ) : (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {/* <svg
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div
                       className={cn(
-                        "w-4 h-4",
-                        isProductAvailable ? "text-green-600" : "text-red-600"
+                        "p-2 rounded-full",
+                        isProductAvailable ? "bg-green-100" : "bg-red-100"
                       )}
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
                     >
                       {isProductAvailable ? (
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                          clipRule="evenodd"
-                        />
+                        <svg
+                          className="w-5 h-5 text-green-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
                       ) : (
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                          clipRule="evenodd"
-                        />
+                        <svg
+                          className="w-5 h-5 text-red-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
                       )}
-                    </svg> */}
-                    <span
-                      className={cn(
-                        "text-sm font-medium",
-                        isProductAvailable ? "text-gray-900" : "text-red-700"
-                      )}
-                    >
-                      {isProductAvailable
-                        ? `Deliver options ${deliveryInfo?.location}`
-                        : `Product not available at ${pincode.trim()}`}
-                    </span>
+                    </div>
+                    <div>
+                      <span
+                        className={cn(
+                          "text-sm font-semibold",
+                          isProductAvailable ? "text-green-800" : "text-red-800"
+                        )}
+                      >
+                        {isProductAvailable
+                          ? `Available in ${deliveryInfo?.location}`
+                          : `Not available in ${pincode.trim()}`}
+                      </span>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Pincode: {pincode.trim()}
+                      </p>
+                    </div>
                   </div>
                   <button
                     onClick={handleChangePincode}
-                    className="text-sm font-medium text-[#ee8c1d] hover:text-[#ee8c1d]"
+                    className="px-4 py-2 text-sm font-semibold text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded-lg transition-colors duration-200"
                   >
                     Change
                   </button>
                 </div>
 
                 {deliveryInfo && isProductAvailable && (
-                  <div>
-                    <div className="space-y-2">
-                      {/* Express Delivery */}
-                      <div className="text-sm text-gray-800">
-                        <span className="font-medium">
-                          Express Delivery{" "}
-                          {formatDeliveryDate(deliveryInfo.estimatedDelivery)}
-                        </span>
+                  <div className="space-y-3">
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 bg-green-100 rounded-full">
+                          <svg
+                            className="w-5 h-5 text-green-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M13 10V3L4 14h7v7l9-11h-7z"
+                            />
+                          </svg>
+                        </div>
+                        <div>
+                          <span className="text-sm font-semibold text-green-800">
+                            Express Delivery
+                          </span>
+                          <p className="text-lg font-bold text-green-700 mt-1">
+                            {formatDeliveryDate(deliveryInfo.estimatedDelivery)}
+                          </p>
+                        </div>
                       </div>
+                    </div>
 
-                      {/* Cash on Delivery */}
-                      <div className="flex items-center gap-2">
-                        {/* <svg
+                    <div
+                      className={cn(
+                        "border rounded-xl p-4",
+                        isCodAvailableForPincode
+                          ? "bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200"
+                          : "bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200"
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
                           className={cn(
-                            "w-4 h-4",
+                            "p-2 rounded-full",
                             isCodAvailableForPincode
-                              ? "text-green-600"
-                              : "text-red-600"
+                              ? "bg-blue-100"
+                              : "bg-amber-100"
                           )}
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
                         >
                           {isCodAvailableForPincode ? (
-                            <path
-                              fillRule="evenodd"
-                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                              clipRule="evenodd"
-                            />
+                            <svg
+                              className="w-5 h-5 text-blue-600"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                              />
+                            </svg>
                           ) : (
-                            <path
-                              fillRule="evenodd"
-                              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                              clipRule="evenodd"
-                            />
+                            <svg
+                              className="w-5 h-5 text-amber-600"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                              />
+                            </svg>
                           )}
-                        </svg> */}
-                        <span className="text-sm">
-                          {isCodAvailableForPincode
-                            ? "Cash on Delivery Available"
-                            : "Cash on Delivery Not Available"}
-                        </span>
+                        </div>
+                        <div>
+                          <span
+                            className={cn(
+                              "text-sm font-semibold",
+                              isCodAvailableForPincode
+                                ? "text-blue-800"
+                                : "text-amber-800"
+                            )}
+                          >
+                            Cash on Delivery
+                          </span>
+                          <p
+                            className={cn(
+                              "text-sm mt-0.5",
+                              isCodAvailableForPincode
+                                ? "text-blue-600"
+                                : "text-amber-600"
+                            )}
+                          >
+                            {isCodAvailableForPincode
+                              ? "Available"
+                              : "Not Available"}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 )}
 
                 {!isProductAvailable && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-2">
-                    <p className="text-sm text-red-700">
-                      Sorry, this product is not available for delivery to your
-                      location{" "}
-                      <span className="font-bold">{pincode.trim()}</span>.
-                      Please try a different pincode.
-                    </p>
+                  <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-red-100 rounded-full mt-0.5">
+                        <svg
+                          className="w-5 h-5 text-red-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-semibold text-red-800 mb-1">
+                          Delivery Not Available
+                        </h4>
+                        <p className="text-sm text-red-700 leading-relaxed">
+                          Sorry, this product is not available for delivery to
+                          <span className="font-semibold mx-1">
+                            {pincode.trim()}
+                          </span>
+                          Please try a different pincode or contact customer
+                          support for assistance.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -904,9 +1052,11 @@ export const ProductDetails = (props: ProductDetailsProps) => {
 
           <ProductFeatures data={data} />
 
-          {data.expressDelivery && (
+          {data.expressDelivery && currentLocationData?.isExpressDelivery && (
             <p className="font-bold text-orange-500 text-2xl pt-6">
-              Express Delivery | Delhi NCR Only | Call Now +91-9540717161
+              {currentLocationData.expressDeliveryText.length > 0
+                ? currentLocationData.expressDeliveryText
+                : "Express Delivery | Delhi NCR Only | Call Now +91-9540717161"}
             </p>
           )}
         </div>

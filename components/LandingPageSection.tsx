@@ -38,10 +38,15 @@ const LandingPageSection: React.FC<HomeAppliancesSectionProps> = ({
         )}
       </div>
 
-      {/* Grid Container */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
+      {/* Flex Container with Scroll */}
+      <div className="flex overflow-x-auto space-x-6 md:space-x-12 pb-4 scrollbar-hide snap-x snap-mandatory">
         {items.map((item) => (
-          <ApplianceCard key={item.id} item={item} />
+          <div
+            key={item.id}
+            className="flex-none w-[45vw] md:w-[22%] snap-start"
+          >
+            <ApplianceCard item={item} />
+          </div>
         ))}
       </div>
     </div>
@@ -77,45 +82,3 @@ const ApplianceCard: React.FC<ApplianceCardProps> = ({ item }) => {
 };
 
 export default LandingPageSection;
-
-// Example usage:
-/*
-const applianceItems: ApplianceItem[] = [
-  {
-    id: '1',
-    title: 'Air purifier',
-    image: '/images/air-purifier.jpg',
-    link: '/appliances/air-purifier',
-    backgroundColor: '#f8f9fa'
-  },
-  {
-    id: '2',
-    title: 'Dishwasher',
-    image: '/images/dishwasher.jpg',
-    link: '/appliances/dishwasher',
-    backgroundColor: '#fff5f5'
-  },
-  {
-    id: '3',
-    title: 'Refrigerators',
-    image: '/images/refrigerator.jpg',
-    link: '/appliances/refrigerators',
-    backgroundColor: '#f0fdf4'
-  },
-  {
-    id: '4',
-    title: 'Fan',
-    image: '/images/fan.jpg',
-    link: '/appliances/fan',
-    backgroundColor: '#fefce8'
-  }
-];
-
-// In your component:
-<HomeAppliancesSection
-  title="Home Appliances"
-  items={applianceItems}
-  viewAllLink="/appliances"
-  className="max-w-6xl mx-auto"
-/>
-*/

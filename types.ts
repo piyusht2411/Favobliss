@@ -28,10 +28,12 @@ export interface Location {
   id: string;
   pincode: string;
   city: string;
-  codAvailable: boolean;
+  isCodAvailable: boolean;
   state: string;
   country: string;
   deliveryDays: number;
+  isExpressDelivery: boolean;
+  expressDeliveryText: string;
 }
 
 export enum CategoryType {

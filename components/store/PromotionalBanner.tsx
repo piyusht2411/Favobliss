@@ -69,7 +69,12 @@ const PromotionalBanner = (props: Props) => {
             </div>
           </div>
 
-          <ProductList title="" data={data} locations={locations} />
+          <ProductList
+            title=""
+            data={data}
+            locations={locations}
+            isBannerProduct={true}
+          />
         </div>
       </div>
     </div>

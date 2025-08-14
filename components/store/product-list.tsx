@@ -9,6 +9,7 @@ interface ProductListProps {
   data: Product[];
   locations: Location[];
   isSpaceTop?: boolean;
+  isBannerProduct?: boolean;
 }
 
 export const ProductList = ({
@@ -16,19 +17,27 @@ export const ProductList = ({
   data,
   locations,
   isSpaceTop = true,
+  isBannerProduct = false,
 }: ProductListProps) => {
   return (
     <div className="space-y-2 md:space-y-8">
       <h3 className="text-3xl font-bold mb-5">{title}</h3>
       {data.length === 0 && <NoResults />}
       <div
-        className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 mb-2 ${
+        className={`flex flex-row overflow-x-auto gap-4 md:gap-4 mb-2 snap-x snap-mandatory py-3 scrollbar-hide ${
           isSpaceTop ? "mt-0!" : ""
         }`}
         style={isSpaceTop ? { marginTop: "0px" } : {}}
       >
         {data.slice(0, 5).map((product) => (
-          <ProductCard key={product.id} data={product} locations={locations} />
+          <div
+            key={product.id}
+            className={`flex-none w-[45vw] sm:w-[30vw] md:w-[18vw] lg:w-[18vw] ${
+              isBannerProduct ? "xl:w-[16vw]" : "xl:w-[17vw]"
+            } snap-start`}
+          >
+            <ProductCard data={product} locations={locations} />
+          </div>
         ))}
       </div>
     </div>

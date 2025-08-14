@@ -172,15 +172,13 @@ export const ProductCard = ({ data, locations }: ProductCardProps) => {
 
   return (
     <div onClick={onClick} className="w-full cursor-pointer">
-      <div className="relative bg-gray-100 rounded-xl p-3 md:p-4 hover:shadow-lg transition-shadow duration-200 h-full">
-        {/* Discount badge */}
+      <div className="relative bg-gray-100 rounded-xl p-3 md:p-4 shadow-lg hover:shadow-2xl transition-shadow duration-200 h-full">
         {discount > 0 && (
           <div className="absolute top-2 left-2 bg-orange-400 text-white text-xs px-2 py-1 rounded-full font-medium z-[10]">
             {discount}% off
           </div>
         )}
 
-        {/* Product Image */}
         <div className="aspect-square mb-3 md:mb-4 flex items-center justify-center bg-white rounded-lg relative overflow-hidden">
           <Image
             src={imageUrl}
@@ -190,7 +188,6 @@ export const ProductCard = ({ data, locations }: ProductCardProps) => {
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
 
-          {/* Stock status badge */}
           {selectedVariant && selectedVariant.stock === 0 && (
             <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
               Out of Stock
@@ -198,18 +195,13 @@ export const ProductCard = ({ data, locations }: ProductCardProps) => {
           )}
         </div>
 
-        {/* Product Details */}
         <div className="space-y-2">
           <h3 className="font-medium text-gray-900 text-xs md:text-sm leading-tight line-clamp-2 min-h-[2rem] md:min-h-[2.5rem]">
             {data.name}
           </h3>
-
-          {/* Rating */}
           <div className="flex items-center space-x-1">
             {renderStars(data.averageRating || 0)}
           </div>
-
-          {/* Price Section */}
           <div className="space-y-1">
             <div className="flex flex-col md:flex-row md:items-center space-y-1 md:space-y-0 md:space-x-2 flex-wrap">
               <span className="text-sm md:text-lg font-bold text-gray-900">
