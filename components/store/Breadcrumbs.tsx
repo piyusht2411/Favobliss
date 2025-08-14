@@ -21,7 +21,7 @@ const Breadcrumb = ({ items }: BreadcrumbProps) => {
   }
 
   return (
-    <nav className="flex items-center space-x-2 text-sm text-gray-600 py-4 px-4 bg-gray-50 border-b justify-center">
+    <nav className="flex items-center space-x-2 text-sm text-gray-600 py-4 px-10 bg-gray-50 border-b justify-start">
       <Link
         href="/"
         className="flex items-center hover:text-gray-800 transition-colors"

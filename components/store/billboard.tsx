@@ -89,30 +89,28 @@ const HeroSlider: React.FC = () => {
 
   return (
     <section className="relative w-full">
-      {/* Container with proper aspect ratio based on image dimensions (1000x340 = ~3:1) */}
-      <div className="relative w-full aspect-[3/1] max-h-[600px] overflow-hidden">
+      <div className="relative w-full aspect-[3/1] max-h-[600px] overflow-hidden px-4 md:px-6 border-0">
         <Slider {...settings} className="h-full">
           {slides.map((slide) => (
             <div key={slide.id} className="relative w-full h-full">
               <div className="relative w-full h-full">
-                {/* Using regular img tag like favobliss.com for better control */}
                 <img
                   src={slide.src}
                   srcSet={slide.srcSet}
                   alt={slide.alt}
                   width={slide.width}
                   height={slide.height}
-                  className="w-full h-full object-cover object-center"
-                  style={{
-                    display: "block",
-                    maxWidth: "100%",
-                    height: "auto",
-                  }}
+                  className="w-full h-full object-cover object-center rounded-2xl"
+                  // style={{
+                  //   display: "block",
+                  //   maxWidth: "100%",
+                  //   height: "auto",
+                  // }}
                   loading={slide.id === 1 ? "eager" : "lazy"}
                 />
 
                 {/* Optional overlay */}
-                <div className="absolute inset-0 bg-black/5 z-[1]" />
+                <div className="absolute inset-0 bg-black/5 z-[1] border border-transparent rounded-2xl" />
               </div>
             </div>
           ))}

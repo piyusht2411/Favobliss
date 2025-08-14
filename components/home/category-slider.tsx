@@ -51,7 +51,7 @@ export function CategorySlider(props: Props) {
       <Carousel
         opts={{
           align: "start",
-          loop: true,
+          loop: false,
         }}
         className="w-full max-w-7xl mx-auto px-4"
       >
@@ -64,7 +64,7 @@ export function CategorySlider(props: Props) {
             return (
               <CarouselItem
                 key={category.id}
-                className="pl-1 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-[12.5%] 2xl:basis-[10%]"
+                className="pl-1 basis-1/4 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-[12.5%] 2xl:basis-[10%]"
               >
                 <div
                   className="group cursor-pointer"
@@ -75,7 +75,6 @@ export function CategorySlider(props: Props) {
                       className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white group-hover:text-orange-300 transition-colors duration-300"
                       strokeWidth={1.5}
                     />
-
                     {/* <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 to-orange-600/0 group-hover:from-orange-500/10 group-hover:to-orange-600/20 transition-all duration-300 rounded-full"></div> */}
                   </div>
 

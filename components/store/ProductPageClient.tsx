@@ -55,10 +55,6 @@ export const ProductPageContent = ({
       label: product.category.name,
       href: `/category/${product?.category?.slug}?page=1`,
     },
-    {
-      label: product.name,
-      href: `/product/${product?.slug}`,
-    },
   ];
 
   useEffect(() => {
@@ -134,6 +130,7 @@ export const ProductPageContent = ({
           <MobileStickyActionBar
             show={true}
             price={locationPrice.price}
+            mrp={locationPrice.mrp}
             product={product}
             selectedVariant={selectedVariant}
             locationPrice={locationPrice}

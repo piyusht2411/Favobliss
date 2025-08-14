@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { Search, MapPin, ShoppingCart, ChevronDown } from "lucide-react";
+import { Search, MapPin, ShoppingCart, ChevronDown, Plus } from "lucide-react";
 import { MdArrowRight, MdArrowDropUp, MdArrowDropDown } from "react-icons/md";
 import Link from "next/link";
 import useMediaQuery from "@/hooks/use-mediaquery";
@@ -376,9 +376,9 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
   };
 
   return (
-    <div className="bg-black">
-      <div className="max-w-[1400px] m-auto ">
-        <header className="bg-black text-white py-2 px-6 flex items-center justify-between shadow-md">
+    <div className="bg-white">
+      <div className="max-w-[1480px] m-auto pt-[18px] pb-[12px]">
+        <header className="bg-black text-white py-2 px-6 flex items-center justify-between shadow-md border border-transparent rounded-2xl">
           <div className="flex items-center space-x-4">
             <Link href="/">
               <img
@@ -426,7 +426,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
               </div>
             </div>
 
-            {isSearchDropdownOpen && (
+            {/* {isSearchDropdownOpen && (
               <div className="absolute top-full left-0 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-60 overflow-y-auto mt-1">
                 <div className="py-1">
                   {searchCategories.map((category) => (
@@ -441,6 +441,110 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
                       {category}
                     </button>
                   ))}
+                </div>
+              </div>
+            )} */}
+            {isSearchDropdownOpen && (
+              <div className="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-96 overflow-y-auto mt-1">
+                <div className="p-4">
+                  {/* All Categories Option */}
+                  <div className="mb-4">
+                    <button
+                      onClick={() => {
+                        setSelectedCategory("All");
+                        setIsSearchDropdownOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors border-b border-gray-200"
+                    >
+                      All Categories
+                    </button>
+                  </div>
+
+                  {/* Categories Grid */}
+                  <div className="space-y-6">
+                    {categories.map((category) => (
+                      <div key={category.id} className="space-y-3">
+                        {/* Category Header */}
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => {
+                              setSelectedCategory(category.name);
+                              setIsSearchDropdownOpen(false);
+                            }}
+                            className="text-sm font-semibold text-gray-900 hover:text-orange-600 transition-colors"
+                          >
+                            {category.name}
+                          </button>
+                        </div>
+
+                        {/* Subcategories Grid */}
+                        {category.subCategories &&
+                          category.subCategories.length > 0 && (
+                            <div className="grid grid-cols-4 gap-3">
+                              {category.subCategories
+                                .slice(0, 8)
+                                .map((subCategory: any) => (
+                                  <button
+                                    key={subCategory.id}
+                                    onClick={() => {
+                                      setSelectedCategory(subCategory.name);
+                                      setIsSearchDropdownOpen(false);
+                                      router.push(
+                                        `/category/${category.slug}?sub=${subCategory.slug}&page=1`
+                                      );
+                                    }}
+                                    className="flex flex-col items-center p-2 rounded-lg hover:bg-gray-50 transition-colors group"
+                                  >
+                                    {/* Subcategory Icon/Image */}
+                                    <div className="w-12 h-12 mb-2 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+                                      {subCategory.icon ? (
+                                        <img
+                                          src={subCategory.icon}
+                                          alt={subCategory.name}
+                                          className="w-full h-full object-cover"
+                                        />
+                                      ) : (
+                                        <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-orange-600 rounded-md flex items-center justify-center">
+                                          <span className="text-white text-xs font-bold">
+                                            {subCategory.name
+                                              .charAt(0)
+                                              .toUpperCase()}
+                                          </span>
+                                        </div>
+                                      )}
+                                    </div>
+                                    {/* Subcategory Name */}
+                                    <span className="text-xs text-gray-700 text-center leading-tight group-hover:text-gray-900">
+                                      {subCategory.name}
+                                    </span>
+                                  </button>
+                                ))}
+
+                              {/* Show more button if there are more than 8 subcategories */}
+                              {category.subCategories.length > 8 && (
+                                <button
+                                  onClick={() => {
+                                    setSelectedCategory(category.name);
+                                    setIsSearchDropdownOpen(false);
+                                    router.push(
+                                      `/category/${category.slug}?page=1`
+                                    );
+                                  }}
+                                  className="flex flex-col items-center p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                                >
+                                  <div className="w-12 h-12 mb-2 rounded-lg bg-gray-100 flex items-center justify-center">
+                                    <Plus size={20} className="text-gray-500" />
+                                  </div>
+                                  <span className="text-xs text-gray-700 text-center leading-tight">
+                                    View All
+                                  </span>
+                                </button>
+                              )}
+                            </div>
+                          )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}

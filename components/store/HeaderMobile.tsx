@@ -244,7 +244,7 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
   };
 
   return (
-    <header className="bg-black text-white py-4 px-4 shadow-md">
+    <header className="bg-black text-white py-4 px-4 shadow-md border border-transparent rounded-2xl">
       {/* Top Row: Menu Icon, Logo, Profile, Cart */}
       <div className="flex items-center justify-between">
         {/* Left: Menu Icon and Logo */}

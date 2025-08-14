@@ -38,7 +38,7 @@ export const Navbar = async () => {
   // const wishlistItems = await getWishlistItems();
 
   return (
-    <header className="shadow-neutral-100 shadow-lg border-b">
+    <header className="shadow-neutral-100 shadow-lg p-[15px] md:p-0">
       <HeaderMobile categories={data} />
       <Header categories={data} />
     </header>
