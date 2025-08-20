@@ -568,6 +568,14 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
                         </span>
                       </div>
                     )}
+                  {order.discount && order.discount > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Coupon Discount</span>
+                      <span className="font-medium text-green-600">
+                        -{formatter.format(order.discount)}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Subtotal</span>
                     <span className="font-medium">

@@ -110,8 +110,9 @@ model Order {
   shippingAddress ShippingAddress @relation(fields: [shippingId], references: [id], onDelete: Cascade)
   backendOrderId  String?
   orderNumber     String?
-  mrp             Float? // Maximum Retail Price (optional)
-  price           Float? // Final price after discounts (optional)
+  mrp             Float?
+  price           Float?
+  discount        Float?          @default(0)
   paymentMethod   String?
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt

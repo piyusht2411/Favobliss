@@ -59,7 +59,7 @@ const OrdersPage = () => {
                       orderId={order.id}
                       onCancel={() => mutate()}
                       mrp={order.mrp}
-                      price={order.mrp}
+                      price={order.price}
                       paymentMethod={order.paymentMethod}
                     />
                   ))}

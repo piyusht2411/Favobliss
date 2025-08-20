@@ -33,7 +33,7 @@ export const Summary = (props: Props) => {
   const searchParams = useSearchParams();
   const session = useSession();
   const { address } = useCheckoutAddress();
-  const { items, removeAll, getTotalMrp } = useCart(); // Added getTotalMrp
+  const { items, removeAll, getTotalMrp } = useCart();
   const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "cod">(
     "razorpay"
   );
@@ -94,12 +94,6 @@ export const Summary = (props: Props) => {
       return total + (item.price || 0) * item.quantity;
     }, 0);
   };
-
-  // const getTotalMrp = () => {
-  //   return checkOutItems.reduce((total, item) => {
-  //     return total + (item.mrp || item.price) * item.quantity;
-  //   }, 0);
-  // };
 
   const handleApplyCoupon = () => {
     const coupon = coupons.find((c) => c.code === couponCode);
@@ -194,7 +188,7 @@ export const Summary = (props: Props) => {
             variantId: item.variantId,
             quantity: item.quantity,
             price: item.price,
-            mrp: item.mrp, // Added
+            mrp: item.mrp,
             size: item.size || "",
             color: item.color || "",
             image: item.image,
@@ -209,6 +203,7 @@ export const Summary = (props: Props) => {
           })),
           address,
           paymentMethod,
+          discount,
           coupon: appliedCoupon
             ? { code: appliedCoupon.code, value: discount }
             : null,
@@ -293,7 +288,7 @@ export const Summary = (props: Props) => {
             variantId: item.variantId,
             quantity: item.quantity,
             price: item.price,
-            mrp: item.mrp, // Added
+            mrp: item.mrp,
             size: item.size || "",
             color: item.color || "",
             image: item.image,
@@ -308,6 +303,7 @@ export const Summary = (props: Props) => {
           })),
           address,
           paymentMethod,
+          discount,
           coupon: appliedCoupon
             ? { code: appliedCoupon.code, value: discount }
             : null,

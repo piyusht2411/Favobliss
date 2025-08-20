@@ -12,11 +12,13 @@ export async function POST(request: Request) {
       address,
       paymentMethod,
       gstNumber,
+      discount,
     }: {
       products: CartSelectedItem[];
       address: Address;
       paymentMethod: "razorpay" | "cod";
       gstNumber?: string;
+      discount?: number;
     } = await request.json();
 
     const session = await auth();
@@ -49,7 +51,6 @@ export async function POST(request: Request) {
       },
     });
 
-    // Calculate mrp and price from products
     const mrp = products.reduce(
       (total, product) =>
         total + (product.mrp || product.price) * product.quantity,
@@ -67,7 +68,8 @@ export async function POST(request: Request) {
         isPaid: paymentMethod === "cod" ? false : undefined,
         isCompleted: false,
         mrp,
-        price,
+        price: discount && discount > 0 ? price - discount : price,
+        discount: discount || 0,
         paymentMethod,
       },
     });
@@ -81,7 +83,8 @@ export async function POST(request: Request) {
       about: JSON.stringify({
         variantId: product.variantId,
         color: product.color || "",
-        price: product.price,
+        price:
+          discount && discount > 0 ? product.price - discount : product.price,
         about: product.about,
         locationId: product.locationId,
       }),
@@ -99,6 +102,9 @@ export async function POST(request: Request) {
           orderItems: products.map((product) => ({
             variantId: product.variantId,
             quantity: product.quantity,
+            price: product.price,
+            mrp: product.mrp,
+            name: product.name,
           })),
           phone: address.phoneNumber,
           address: [
@@ -114,6 +120,7 @@ export async function POST(request: Request) {
           zipCode: address.zipCode.toString(),
           isPaid: paymentMethod === "cod" ? false : false,
           gstNumber: gstNumber || undefined,
+          discount: discount || 0,
           customerId: session.user.id,
           customerName: session.user.name || "",
           customerEmail: session.user.email || "",
