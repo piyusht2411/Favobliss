@@ -77,6 +77,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
               data={products}
               locations={locations}
               showViewAll={true}
+              link="/latest-launches?page=1"
             />
             <PromotionalBanner
               data={favoblissChoice}
@@ -126,6 +127,8 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
               title="Favobliss's Choice"
               data={favoblissChoice || []}
               locations={locations}
+              showViewAll={true}
+              link="/favobliss-choice?page=1"
             />
             {/* <div className="container mx-auto p-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">

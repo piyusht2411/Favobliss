@@ -12,6 +12,7 @@ interface ProductListProps {
   isSpaceTop?: boolean;
   isBannerProduct?: boolean;
   showViewAll?: boolean;
+  link?: string;
 }
 
 export const ProductList = ({
@@ -21,16 +22,14 @@ export const ProductList = ({
   isSpaceTop = true,
   isBannerProduct = false,
   showViewAll = false,
+  link = "/latest-launches?page=1",
 }: ProductListProps) => {
   return (
     <div className="space-y-2 md:space-y-8">
       <div className="flex items-center justify-between">
         <h3 className="text-3xl font-bold mb-5">{title}</h3>
         {showViewAll && (
-          <Link
-            href="/latest-launch?page=1"
-            className="text-gray-500 underline text-sm"
-          >
+          <Link href={link} className="text-gray-500 underline text-sm">
             View All
           </Link>
         )}
