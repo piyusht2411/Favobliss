@@ -59,6 +59,7 @@ interface ProductDetailsProps {
     } | null>
   >;
   divRef?: React.RefObject<HTMLDivElement>;
+  reviewsRef?: React.RefObject<HTMLDivElement>;
 }
 
 const formatDeliveryDate = (deliveryDays: number | null): string => {
@@ -101,6 +102,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     deliveryInfo,
     setDeliveryInfo,
     divRef,
+    reviewsRef,
   } = props;
 
   const [selectedSize, setSelectedSize] = useState<string | undefined>(
@@ -512,6 +514,12 @@ export const ProductDetails = (props: ProductDetailsProps) => {
       )
     : 0;
 
+  const handleRatingClick = () => {
+    if (reviewsRef?.current) {
+      reviewsRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const ActionButtons = ({
     className = "",
     isSticky = false,
@@ -586,7 +594,10 @@ export const ProductDetails = (props: ProductDetailsProps) => {
                   <span className="ml-1 font-bold text-gray-600 text-sm">
                     {avgRating.toFixed(1)}{" "}
                   </span>
-                  <span className="text-gray-600 text-sm">
+                  <span
+                    className="text-gray-600 text-sm cursor-pointer hover:underline"
+                    onClick={handleRatingClick}
+                  >
                     ({totalReviews} Ratings & {totalReviews} Reviews)
                   </span>
                 </span>

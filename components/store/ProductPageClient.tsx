@@ -47,6 +47,7 @@ export const ProductPageContent = ({
   const [showStickyBar, setShowStickyBar] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const reviewsRef = useRef<HTMLDivElement>(null);
 
   const handleVariantChange = (variant: Variant) => {
     setCurrentVariant(variant);
@@ -181,6 +182,7 @@ export const ProductPageContent = ({
                 deliveryInfo={deliveryInfo}
                 setDeliveryInfo={setDeliveryInfo}
                 divRef={containerRef}
+                reviewsRef={reviewsRef}
               />
             </div>
           </div>
@@ -195,6 +197,7 @@ export const ProductPageContent = ({
             setAvgRating={setAvgRating}
             setTotalReviews={setTotalReviews}
             subCategoryId={product?.subCategory?.id || ""}
+            reviewsRef={reviewsRef}
           />
           <ProductList
             title="Similar Products"

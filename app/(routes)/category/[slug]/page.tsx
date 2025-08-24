@@ -196,8 +196,6 @@ const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
     subCategory?.bannerImage ||
     category.bannerImage;
 
-    console.log("bannerImage", category);
-
   return (
     <div className="bg-white">
       <Breadcrumb items={breadcrumbItems} />
@@ -247,11 +245,10 @@ const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
               </div>
               <p className="mt-10 text-gray-700 text-sm">
                 {childSubCategory
-                  ? childSubCategory.descripition
+                  ? childSubCategory.description
                   : subCategory
-                  ? subCategory.descripition
-                  : category.descripition}
-                {category.descripition}
+                  ? subCategory.description
+                  : category.description}
               </p>
             </div>
           </div>

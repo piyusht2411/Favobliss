@@ -26,6 +26,7 @@ interface ProductReviewsProps {
   totalReviews: number;
   setTotalReviews: Dispatch<SetStateAction<number>>;
   subCategoryId: string;
+  reviewsRef?: React.RefObject<HTMLDivElement>;
 }
 
 const CircularProgress = ({
@@ -90,6 +91,7 @@ export const ProductReviews = (props: ProductReviewsProps) => {
     totalReviews,
     setTotalReviews,
     subCategoryId,
+    reviewsRef,
   } = props;
   const { data: session } = useSession();
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -305,7 +307,10 @@ export const ProductReviews = (props: ProductReviewsProps) => {
   }
 
   return (
-    <div className="w-full bg-white rounded-lg shadow-sm border">
+    <div
+      className="w-full bg-white rounded-lg shadow-sm border"
+      ref={reviewsRef}
+    >
       <div className="p-6 border-b">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">
           Customer Reviews
