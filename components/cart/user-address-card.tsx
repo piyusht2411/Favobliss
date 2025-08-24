@@ -160,7 +160,7 @@ export const UserAddressCard = ({ data, label }: UserAddressCardProps) => {
     setIsUpdatingPrices(true);
 
     try {
-      const response = await getProducts({
+      const { products: response } = await getProducts({
         variantIds: mismatchedItems
           .map((item) => item.selectedVariant.id)
           .join(","),

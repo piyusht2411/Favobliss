@@ -26,24 +26,27 @@ import PremiumProductsSection from "@/components/PremiumProductSection";
 import FourImageGrid from "@/components/store/FourImageGrid";
 import FeatureHighlights from "@/components/store/FeatureHighlights";
 import PromotionalBanner from "@/components/store/PromotionalBanner";
+import { getSubCategories } from "@/actions/get-subcategory";
+import RecentlyViewed from "@/components/store/RecentlyViewed";
 
 export const revalidate = 0;
 
 const LandingPage = async ({ params }: { params: { storeId: string } }) => {
-  const products = await getProducts();
-  const homeApplicance = await getProducts({
+  const { products } = await getProducts();
+  const { products: homeApplicance } = await getProducts({
     categoryId: "6843219ac338ba8cc9db1e72",
   });
+  const brandCategory = await getSubCategories("68431da0c338ba8cc9db1e6d");
   const deals = await getHotDeals({
     limit: "10",
     timeFrame: "30 days",
   });
 
-  const favoblissChoice = await getProducts({ isFeatured: true });
+  const { products: favoblissChoice } = await getProducts({ isFeatured: true });
   const categories = await getCategories();
   const locations = await getLocations(params.storeId);
   const brands = await getBrands();
-  const brandProducts = await getProducts({
+  const { products: brandProducts } = await getProducts({
     brandId: "687247fbfefe791c5521f384",
   });
 
@@ -68,12 +71,18 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
       <Container>
         <div className="space-y-10 pb-20 mt-20">
           <div className="flex flex-col gap-y-8 md:gap-y-12 px-4 sm:px-6 lg:px-8">
+            <RecentlyViewed locations={locations} />
             <ProductList
               title="Latest Launches"
               data={products}
               locations={locations}
+              showViewAll={true}
             />
-            <PromotionalBanner data={favoblissChoice} locations={locations} />
+            <PromotionalBanner
+              data={favoblissChoice}
+              locations={locations}
+              categories={brandCategory}
+            />
             <FourImageGrid />
             {/* <div className="space-y-4 md:space-y-16">
               <Image

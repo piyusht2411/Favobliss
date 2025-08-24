@@ -2,11 +2,6 @@
 
 import { useSearchParams } from "next/navigation";
 import qs from "query-string";
-
-interface PaginationComponentProps {
-  lastPage: boolean;
-}
-
 import {
   Pagination,
   PaginationContent,
@@ -18,70 +13,97 @@ import {
 } from "@/components/ui/pagination";
 import { useOrigin } from "@/hooks/use-origin";
 
-export const PaginationComponent = ({ lastPage }: PaginationComponentProps) => {
+interface PaginationComponentProps {
+  currentPage: number;
+  totalPages: number;
+}
+
+export const PaginationComponent = ({
+  currentPage,
+  totalPages,
+}: PaginationComponentProps) => {
   const searchParams = useSearchParams();
   const queries = qs.parse(searchParams.toString());
-  const currentPage = searchParams.get("page");
-
-  // Default to page 1 if currentPage is null, undefined, or invalid
-  const pageNumber =
-    currentPage && !isNaN(Number(currentPage)) ? Number(currentPage) : 1;
-
   const currentHref = useOrigin();
 
-  const previousPageHref = qs.stringifyUrl({
-    url: currentHref,
-    query: {
-      ...queries,
-      page: Math.max(1, pageNumber - 1).toString(), // Ensure page is at least 1
-    },
-  });
+  const getPageHref = (page: number) =>
+    qs.stringifyUrl({
+      url: currentHref,
+      query: {
+        ...queries,
+        page: page.toString(),
+      },
+    });
 
-  const nextPageHref = qs.stringifyUrl({
-    url: currentHref,
-    query: {
-      ...queries,
-      page: (pageNumber + 1).toString(),
-    },
-  });
+  const renderPageLinks = () => {
+    const maxPagesToShow = 5; // Define maxPagesToShow here
+    const pages = [];
+    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+    if (endPage - startPage + 1 < maxPagesToShow) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <PaginationItem key={i}>
+          <PaginationLink
+            href={getPageHref(i)}
+            isActive={i === currentPage}
+            className={i === currentPage ? "bg-zinc-100 rounded-md" : ""}
+          >
+            {i}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+
+    return pages;
+  };
 
   return (
     <Pagination>
       <PaginationContent>
         <PaginationItem>
           <PaginationPrevious
-            href={pageNumber === 1 ? "#" : previousPageHref}
-            className={pageNumber === 1 ? "pointer-events-none opacity-50" : ""}
+            href={currentPage === 1 ? "#" : getPageHref(currentPage - 1)}
+            className={
+              currentPage === 1 ? "pointer-events-none opacity-50" : ""
+            }
           />
         </PaginationItem>
-        {pageNumber > 1 && (
-          <PaginationItem>
-            <PaginationLink href={previousPageHref}>
-              {pageNumber - 1}
-            </PaginationLink>
-          </PaginationItem>
+        {currentPage > 3 && totalPages > 5 && (
+          <>
+            <PaginationItem>
+              <PaginationLink href={getPageHref(1)}>1</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+          </>
         )}
-        <PaginationItem className="bg-zinc-100 rounded-md">
-          <PaginationLink href="#" isActive>
-            {pageNumber}
-          </PaginationLink>
-        </PaginationItem>
-        {!lastPage && (
-          <PaginationItem>
-            <PaginationLink href={nextPageHref}>
-              {pageNumber + 1}
-            </PaginationLink>
-          </PaginationItem>
-        )}
-        {!lastPage && (
-          <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem>
+        {renderPageLinks()}
+        {currentPage < totalPages - 2 && totalPages > 5 && (
+          <>
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink href={getPageHref(totalPages)}>
+                {totalPages}
+              </PaginationLink>
+            </PaginationItem>
+          </>
         )}
         <PaginationItem>
           <PaginationNext
-            href={lastPage ? "#" : nextPageHref}
-            className={lastPage ? "pointer-events-none opacity-50" : ""}
+            href={
+              currentPage === totalPages ? "#" : getPageHref(currentPage + 1)
+            }
+            className={
+              currentPage === totalPages ? "pointer-events-none opacity-50" : ""
+            }
           />
         </PaginationItem>
       </PaginationContent>

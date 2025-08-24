@@ -23,7 +23,9 @@ interface HotDealsQuery extends Query {
   timeFrame?: "7 days" | "30 days" | "90 days" | "all time";
 }
 
-export const getProducts = async (query?: Query): Promise<Product[]> => {
+export const getProducts = async (
+  query?: Query
+): Promise<{ products: Product[]; totalCount: number }> => {
   const url = qs.stringifyUrl({
     url: URL,
     query: {
@@ -49,21 +51,24 @@ export const getProducts = async (query?: Query): Promise<Product[]> => {
 
     if (!res.ok) {
       console.error("getProducts fetch error:", res.status, res.statusText);
-      return [];
+      return { products: [], totalCount: 0 };
     }
 
     const text = await res.text();
 
     if (!text) {
       console.warn("getProducts: empty response");
-      return [];
+      return { products: [], totalCount: 0 };
     }
 
     const data = JSON.parse(text);
-    return data;
+    return {
+      products: data.products,
+      totalCount: data.totalCount,
+    };
   } catch (error) {
     console.error("getProducts JSON parse or network error:", error);
-    return [];
+    return { products: [], totalCount: 0 };
   }
 };
 

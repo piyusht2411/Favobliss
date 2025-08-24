@@ -1,20 +1,34 @@
-import { getBrandBySlug } from "@/actions/get-brand";
-import { getProducts } from "@/actions/get-products";
 import { getColors } from "@/actions/get-colors";
+import { getProducts } from "@/actions/get-products";
 import { getSizes } from "@/actions/get-sizes";
 import { getLocations } from "@/actions/get-locations";
 import { Container } from "@/components/ui/container";
-import { Filter } from "./[_components]/filter";
+import { Filter } from "./_components/filter";
 import { NoResults } from "@/components/store/no-results";
 import { ProductCard } from "@/components/store/product-card";
-import { MobileFilters } from "./[_components]/mobile-filters";
-import { PaginationComponent } from "./[_components]/pagination";
+import { MobileFilters } from "./_components/mobile-filters";
+import { PaginationComponent } from "./_components/pagination";
 import { Metadata, ResolvingMetadata } from "next";
 import { PriceRange, Location } from "@/types";
 import Image from "next/image";
 import Breadcrumb from "@/components/store/Breadcrumbs";
+import { getSubCategoryBySlug } from "@/actions/get-subcategory";
 
-interface BrandPageProps {
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  retries = 3,
+  delay = 100
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    if (retries <= 1) throw error;
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    return withRetry(fn, retries - 1, delay * 2);
+  }
+}
+
+interface CategoryPageProps {
   params: {
     storeId: string;
     slug: string;
@@ -26,82 +40,72 @@ interface BrandPageProps {
     category?: "MEN" | "WOMEN";
     page?: string;
     price?: string;
-    locationId?: string;
+    sub?: string;
+    childsub?: string;
   };
 }
 
-export async function generateMetadata(
-  { params, searchParams }: BrandPageProps,
-  parent: ResolvingMetadata
-): Promise<Metadata> {
-  const brand = await getBrandBySlug(params.slug);
-  const previousImages = (await parent).openGraph?.images || [];
-  //   const location = await getLocations()
+// export async function generateMetadata(
+//   { params, searchParams }: CategoryPageProps,
+//   parent: ResolvingMetadata
+// ): Promise<Metadata> {
+//   // Fetch data with retry
+//   const category = await withRetry(() => getCategoryBySlug(params.slug));
+//   const subCategory = searchParams.sub
+//     ? await withRetry(() => getSubCategoryBySlug(searchParams.sub as string))
+//     : null;
+//   const childSubCategory = searchParams.childsub
+//     ? await withRetry(() =>
+//         getSubCategoryBySlug(searchParams.childsub as string)
+//       )
+//     : null;
 
-  if (!brand) {
-    return {
-      title: "Brand Not Found",
-      description: "The requested brand does not exist.",
-    };
-  }
+//   const previousImages = (await parent).openGraph?.images || [];
 
-  const categoryName = searchParams.category
-    ? `${
-        searchParams.category[0].toUpperCase() +
-        searchParams.category.slice(1).toLowerCase()
-      }'s`
-    : "";
+//   const currentEntity = childSubCategory || subCategory || category;
+//   if (!currentEntity) {
+//     return {
+//       title: "Category Not Found",
+//       description: "The requested category does not exist.",
+//     };
+//   }
 
-  return {
-    metadataBase: new URL(
-      process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3001"
-    ),
-    title: `Buy ${brand.name} Products Online | Get Deals, Shop Now!`,
-    description: `Discover the latest styles & trends from ${brand.name}. Shop ${brand.name} products.`,
-    openGraph: {
-      images: [brand.cardImage || "/placeholder-image.jpg", ...previousImages],
-      type: "website",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `Buy ${brand.name} Products Online | Get Deals, Shop Now!`,
-      description: `Discover the latest styles & trends from ${brand.name}. Shop ${categoryName} ${brand.name} products.`,
-      images: [brand.cardImage || "/placeholder-image.jpg"],
-    },
-    category: "ecommerce",
-  };
-}
+//   const categoryName = searchParams.category
+//     ? `${searchParams.category[0].toUpperCase()}${searchParams.category
+//         .slice(1)
+//         .toLowerCase()}'s`
+//     : "";
 
-const BrandPage = async ({ params, searchParams }: BrandPageProps) => {
-  const brand = await getBrandBySlug(params.slug);
+//   return {
+//     title: `Buy ${categoryName} ${currentEntity.name} Online | Get Deals, Shop Now!`,
+//     description: `Dress to impress: Latest styles & trends for every occasion. Shop ${categoryName} ${currentEntity.name}`,
+//     openGraph: {
+//       type: "website",
+//     },
+//     twitter: {
+//       card: "summary_large_image",
+//       title: `Buy ${categoryName} ${currentEntity.name} Online | Get Deals, Shop Now!`,
+//       description: `Dress to impress: Latest styles & trends for every occasion. Shop ${categoryName} ${currentEntity.name}`,
+//     },
+//     category: "ecommerce",
+//   };
+// }
+
+const LatestLaunches = async ({ params, searchParams }: CategoryPageProps) => {
   const page = searchParams.page || "1";
-
-  if (!brand) {
-    return (
-      <div className="bg-white">
-        <Container>
-          <div className="px-4 sm:px-6 lg:px-8 pt-5 pb-24">
-            <NoResults />
-          </div>
-        </Container>
-      </div>
-    );
-  }
-
-  const { products, totalCount } = await getProducts({
-    brandId: brand.id,
-    type: searchParams.category,
+  const limit = "12";
+  const query = {
     colorId: searchParams.colorId,
     sizeId: searchParams.sizeId,
-    page,
     price: searchParams.price,
-    limit: "12",
-    // locationId: searchParams.locationId,
-  });
+    page,
+    limit,
+  };
+  const { products, totalCount } = await withRetry(() => getProducts(query));
 
-  const sizes = await getSizes();
-  const colors = await getColors();
-  const locations = await getLocations(params.storeId);
+  const sizes = await withRetry(() => getSizes());
+  const colors = await withRetry(() => getColors());
+  const locations = await withRetry(() => getLocations(params.storeId));
 
   const sizeMap: { [key: string]: string[] } = {
     TOPWEAR: ["S", "M", "L", "XL", "XXL"],
@@ -115,11 +119,6 @@ const BrandPage = async ({ params, searchParams }: BrandPageProps) => {
     TELEVISION: [],
   };
 
-  // Use first product's category classification or default to TOPWEAR
-  const classification = products[0]?.category?.classification || "TOPWEAR";
-  const validSizes = sizeMap[classification] || [];
-  const filteredSizes = sizes.filter((size) => validSizes.includes(size.name));
-
   const priceRange: PriceRange[] = [
     { id: "0-500", name: "Rs. 0 to Rs. 500", value: "0-500" },
     { id: "500-1500", name: "Rs. 500 to Rs. 1500", value: "500-1500" },
@@ -128,39 +127,32 @@ const BrandPage = async ({ params, searchParams }: BrandPageProps) => {
     { id: "5000", name: "Above Rs. 5000", value: "5000" },
   ];
 
-  const breadcrumbItems = [
-    {
-      label: brand.name,
-      href: `/brand/${brand.slug}?page=1`,
-    },
-  ];
-
-  const totalPages = Math.ceil(totalCount / 12);
+  const totalPages = Math.ceil(totalCount / parseInt(limit));
 
   return (
     <div className="bg-white">
-      <Breadcrumb items={breadcrumbItems} />
+      {/* <Breadcrumb items={breadcrumbItems} /> */}
       <div className="relative w-full h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden">
         <Image
-          src={brand.bannerImage || "/placeholder-image.jpg"}
-          alt={`${brand.name} Banner`}
-          fill
-          style={{ objectFit: "cover" }}
+          src="https://res.cloudinary.com/dgcksrb1n/image/upload/v1749465423/qoujpnmfjabip1yrllvs.jpg"
+          alt={`Banner`}
+          layout="fill"
+          objectFit="cover"
           priority
         />
         <div className="absolute inset-0 flex items-center justify-center bg-black/40">
           <h1 className="text-white text-3xl md:text-5xl font-bold drop-shadow-md">
-            {brand.name || "Explore Brand"}
+            Latest Launches
           </h1>
         </div>
       </div>
       <Container>
         <div className="px-4 sm:px-6 lg:px-8 pt-5 pb-24">
           <div className="lg:grid lg:grid-cols-5 lg:gap-x-8 mt-14">
-            <MobileFilters sizes={filteredSizes} colors={colors} />
+            <MobileFilters sizes={sizes} colors={colors} />
             <div className="hidden lg:block lg:border-r">
               <h3 className="mb-5 text-lg font-bold">Filters</h3>
-              <Filter valueKey="sizeId" name="Sizes" data={filteredSizes} />
+              <Filter valueKey="sizeId" name="Sizes" data={sizes} />
               <Filter valueKey="colorId" name="Colors" data={colors} />
               <Filter valueKey="price" name="Price" data={priceRange} />
             </div>
@@ -192,4 +184,4 @@ const BrandPage = async ({ params, searchParams }: BrandPageProps) => {
   );
 };
 
-export default BrandPage;
+export default LatestLaunches;

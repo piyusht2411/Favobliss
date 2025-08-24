@@ -12,6 +12,7 @@ import Breadcrumb from "./Breadcrumbs";
 import { ActionButtons } from "./ActionButton";
 import { MobileStickyActionBar } from "./MobileStickyBar";
 import { getLocationById } from "@/actions/get-locations";
+import { addToRecentlyViewed } from "@/lib/utils";
 
 interface ProductPageContentProps {
   product: Product;
@@ -56,6 +57,12 @@ export const ProductPageContent = ({
       href: `/category/${product?.category?.slug}?page=1`,
     },
   ];
+
+  useEffect(() => {
+    if (product?.id) {
+      addToRecentlyViewed(product.id);
+    }
+  }, [product?.id]);
 
   useEffect(() => {
     const getData = async () => {

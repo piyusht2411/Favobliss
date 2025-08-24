@@ -53,7 +53,7 @@ export const PincodeValidator = (props: Props) => {
     setLoading(true);
 
     try {
-      const response = await getProducts({
+      const { products: response } = await getProducts({
         variantIds: items.map((item) => item.selectedVariant.id).join(","),
         pincode: address.zipCode,
       });

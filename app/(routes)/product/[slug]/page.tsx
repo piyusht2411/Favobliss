@@ -72,12 +72,13 @@ const ProductPage = async ({ params }: ProductPageProps) => {
     redirect("/");
   }
 
-  const suggestProducts = (
-    await getProducts({
-      categoryId: product?.category?.id,
-      limit: "10",
-    })
-  ).filter((item) => item.id !== product.id);
+  const productsData = await getProducts({
+    categoryId: product?.category?.id,
+    limit: "10",
+  });
+  const suggestProducts = productsData.products.filter(
+    (item) => item.id !== product.id
+  );
 
   const locations = await getLocations(params.storeId);
 

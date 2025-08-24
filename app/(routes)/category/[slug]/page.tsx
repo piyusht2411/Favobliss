@@ -97,6 +97,7 @@ export async function generateMetadata(
 const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
   // Fetch data with retry
   const category = await withRetry(() => getCategoryBySlug(params.slug));
+  const page = searchParams.page || "1";
 
   if (!category) {
     return (
@@ -125,14 +126,14 @@ const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
   const subCategoryId = childSubCategory?.id || subCategory?.id || undefined;
 
   // Fetch products with retry
-  const products = await withRetry(() =>
+  const { products, totalCount } = await withRetry(() =>
     getProducts({
       type: searchParams.category,
       categoryId: category.id,
       subCategoryId,
       colorId: searchParams.colorId,
       sizeId: searchParams.sizeId,
-      page: searchParams.page || "1",
+      page,
       price: searchParams.price,
       limit: "12",
     })
@@ -187,6 +188,8 @@ const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
     });
   }
 
+  const totalPages = Math.ceil(totalCount / 12);
+
   // Select banner image based on priority
   const bannerImage =
     childSubCategory?.bannerImage ||
@@ -235,7 +238,10 @@ const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
                 </div>
               )}
               <div className="w-full flex items-center justify-center pt-12">
-                <PaginationComponent lastPage={products.length < 12} />
+                <PaginationComponent
+                  currentPage={parseInt(page)}
+                  totalPages={totalPages}
+                />
               </div>
             </div>
           </div>

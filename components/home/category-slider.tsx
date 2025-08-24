@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
@@ -9,33 +10,29 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import {
-  Smartphone,
-  Wind,
-  Tv,
-  WashingMachine,
-  Lightbulb,
-  ChefHat,
-  Printer,
-  Sparkles,
-  Home,
-} from "lucide-react";
+import { Home } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-// Category icon mapping with unique icons and fallbacks
-const categoryIcons = {
-  ELECTRONICS: Smartphone,
-  "AIR CONDITIONERS": Wind,
-  TELEVISION: Tv,
-  "WASHING MACHINE": WashingMachine,
-  "HOME APPLIANCES": Lightbulb,
-  "KITCHEN APPLIANCES": ChefHat,
-  "COMPUTER & PRINTER": Printer,
-  "PERSONAL CARE": Sparkles,
+const defaultCategoryImages = {
+  electronics: "/assets/category/air-conditioner.png",
+  "air conditioners": "/assets/category/air-conditioner.png",
+  television: "/assets/category/television.png",
+  "washing machine": "/assets/category/air-conditioner.png",
+  "home appliances": "/assets/category/air-conditioner.png",
+  "kitchen appliances": "/assets/category/kitchen-appliance.png",
+  "computer & printer": "/assets/category/computer-printer.png",
+  "personal care": "/assets/category/personal-care.png",
+  "air purifier": "/assets/category/air-purifier.png",
 };
 
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 interface Props {
-  categories: any[];
+  categories: Category[];
 }
 
 export function CategorySlider(props: Props) {
@@ -44,6 +41,22 @@ export function CategorySlider(props: Props) {
 
   const handleCategoryClick = (slug: string) => {
     router.push(`/category/${slug}?page=1`);
+  };
+
+  const getImageSrc = (category: Category) => {
+    // First try to use the category's own image if available
+    // if (category.image) return category.image;
+
+    // Then try to match by lowercase category name
+    const lowerCaseName = category.name.toLowerCase();
+    if (defaultCategoryImages.hasOwnProperty(lowerCaseName)) {
+      return defaultCategoryImages[
+        lowerCaseName as keyof typeof defaultCategoryImages
+      ];
+    }
+
+    // Fallback to default image
+    return "/assets/category/air-conditioner.png";
   };
 
   return (
@@ -57,9 +70,10 @@ export function CategorySlider(props: Props) {
       >
         <CarouselContent className="-ml-1 justify-between">
           {categories.map((category, index) => {
-            const IconComponent =
-              categoryIcons[category.name as keyof typeof categoryIcons] ||
-              Home;
+            // const imageSrc =
+            //   categoryImages[category.name as keyof typeof categoryImages] ||
+            //   "/assets/category/air-conditioner.png";
+            const imageSrc = getImageSrc(category);
 
             return (
               <CarouselItem
@@ -70,28 +84,30 @@ export function CategorySlider(props: Props) {
                   className="group cursor-pointer"
                   onClick={() => handleCategoryClick(category.slug)}
                 >
-                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-3 rounded-full bg-gradient-to-br from-gray-800 to-black border-2 border-orange-500 overflow-hidden transition-all duration-300 hover:scale-105 hover:border-orange-400 hover:shadow-lg hover:shadow-orange-500/25 flex items-center justify-center">
-                    <IconComponent
-                      className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white group-hover:text-orange-300 transition-colors duration-300"
-                      strokeWidth={1.5}
+                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-32 md:h-32 mx-auto mb-3 overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-orange-500/25">
+                    <Image
+                      src={imageSrc}
+                      alt={category.name}
+                      fill
+                      className="object-cover p-2 group-hover:opacity-90 transition-opacity duration-300"
+                      sizes="(max-width: 640px) 64px, (max-width: 768px) 80px, 96px"
+                      onError={(e) => {
+                        e.currentTarget.src =
+                          "/assets/category/air-conditioner.png";
+                      }}
                     />
-                    {/* <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 to-orange-600/0 group-hover:from-orange-500/10 group-hover:to-orange-600/20 transition-all duration-300 rounded-full"></div> */}
                   </div>
 
-                  <div className="text-center px-1">
+                  {/* <div className="text-center px-1">
                     <h3 className="text-xs sm:text-sm font-semibold text-gray-800 uppercase tracking-wide leading-tight group-hover:text-orange-600 transition-colors duration-300 line-clamp-2">
                       {category.name}
                     </h3>
-                  </div>
+                  </div> */}
                 </div>
               </CarouselItem>
             );
           })}
         </CarouselContent>
-
-        {/* 
-        <CarouselPrevious className="hidden md:flex -left-12 bg-white border-2 border-gray-200 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 transition-all duration-300" />
-        <CarouselNext className="hidden md:flex -right-12 bg-white border-2 border-gray-200 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 transition-all duration-300" /> */}
       </Carousel>
     </div>
   );

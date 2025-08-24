@@ -47,3 +47,24 @@ export const formatDeliveryDate = (deliveryDays: number | null): string => {
     day: "numeric",
   });
 };
+
+// utils/recentlyViewed.ts
+export const addToRecentlyViewed = (productId: string) => {
+  if (typeof window === "undefined") return;
+  const recentlyViewed = JSON.parse(
+    localStorage.getItem("recentlyViewed") || "[]"
+  );
+  const updatedList = [
+    productId,
+    ...recentlyViewed.filter((id: string) => id !== productId),
+  ];
+  if (updatedList.length > 5) {
+    updatedList.pop();
+  }
+  localStorage.setItem("recentlyViewed", JSON.stringify(updatedList));
+};
+
+export const getRecentlyViewed = (): string[] => {
+  if (typeof window === "undefined") return [];
+  return JSON.parse(localStorage.getItem("recentlyViewed") || "[]");
+};
