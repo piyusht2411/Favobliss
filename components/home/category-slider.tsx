@@ -84,7 +84,7 @@ export function CategorySlider(props: Props) {
                   className="group cursor-pointer"
                   onClick={() => handleCategoryClick(category.slug)}
                 >
-                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-32 md:h-32 mx-auto mb-3 overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-orange-500/25">
+                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-32 md:h-32 mx-auto mb-3 overflow-hidden transition-all duration-300">
                     <Image
                       src={imageSrc}
                       alt={category.name}

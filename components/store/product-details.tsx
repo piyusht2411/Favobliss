@@ -58,6 +58,7 @@ interface ProductDetailsProps {
       estimatedDelivery: number;
     } | null>
   >;
+  divRef?: React.RefObject<HTMLDivElement>;
 }
 
 const formatDeliveryDate = (deliveryDays: number | null): string => {
@@ -99,6 +100,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     setSelectedLocationId,
     deliveryInfo,
     setDeliveryInfo,
+    divRef,
   } = props;
 
   const [selectedSize, setSelectedSize] = useState<string | undefined>(
@@ -538,7 +540,8 @@ export const ProductDetails = (props: ProductDetailsProps) => {
   );
 
   return (
-    <>
+    <div ref={divRef}>
+      {/* <div ref={divRef} style={{ height: "1px", width: "1px" }} /> */}
       <div ref={containerRef} className="text-black bg-white">
         <div className="container mx-auto px-4 py-3 md:py-3">
           <div
@@ -746,7 +749,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
             </div>
           </div>
 
-          <div className="mt-4 border-0 rounded-2xl py-6 bg-gradient-to-br from-white to-gray-50 shadow-lg shadow-gray-200/50 border-gray-100">
+          {/* <div className="mt-4 border-0 rounded-2xl py-6 bg-gradient-to-br from-white to-gray-50 shadow-lg shadow-gray-200/50 border-gray-100">
             {!isPincodeChecked && (
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-gradient-to-br from-orange-100 to-orange-200 rounded-full">
@@ -1048,6 +1051,118 @@ export const ProductDetails = (props: ProductDetailsProps) => {
                 )}
               </div>
             )}
+          </div> */}
+          {/* <div ref={divRef} style={{ height: "1px", width: "1px" }} /> */}
+
+          <div className="mt-4 border rounded-3xl p-4 bg-[#f6f4f4] ">
+            {!isPincodeChecked && (
+              <div className="flex items-center gap-2 mb-3">
+                <svg
+                  className="w-5 h-5 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+                <span className="text-sm font-medium text-gray-700">
+                  Delivery Options
+                </span>
+              </div>
+            )}
+
+            {!isPincodeChecked ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="text"
+                    value={pincode}
+                    onChange={(e) => setPincode(e.target.value)}
+                    placeholder="Enter pincode"
+                    className="flex-1 h-9 text-sm border-gray-300 focus:border-[#ee8c1d] "
+                    maxLength={6}
+                  />
+                  <Button
+                    variant="outline"
+                    className="h-9 px-4 text-sm font-medium text-[#ee8c1d] border-[#ee8c1d] hover:bg-[#ee8c1d]"
+                    onClick={handlePincodeCheck}
+                    disabled={!pincode.trim() || pincode.length < 6}
+                  >
+                    Check
+                  </Button>
+                </div>
+                <p className="text-xs text-gray-500">
+                  Please enter PIN code to check delivery time & pay on delivery
+                  availability
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={cn(
+                        "text-sm font-medium",
+                        isProductAvailable ? "text-gray-900" : "text-red-700"
+                      )}
+                    >
+                      {isProductAvailable
+                        ? `Deliver options ${deliveryInfo?.location}`
+                        : `Product not available at ${pincode.trim()}`}
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleChangePincode}
+                    className="text-sm font-medium text-[#ee8c1d] hover:text-[#ee8c1d]"
+                  >
+                    Change
+                  </button>
+                </div>
+
+                {deliveryInfo && isProductAvailable && (
+                  <div>
+                    <div className="space-y-2">
+                      <div className="text-sm text-gray-800">
+                        <span className="font-medium">
+                          Express Delivery{" "}
+                          {formatDeliveryDate(deliveryInfo.estimatedDelivery)}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">
+                          {isCodAvailableForPincode
+                            ? "Cash on Delivery Available"
+                            : "Cash on Delivery Not Available"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {!isProductAvailable && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-2">
+                    <p className="text-sm text-red-700">
+                      Sorry, this product is not available for delivery to your
+                      location{" "}
+                      <span className="font-bold">{pincode.trim()}</span>.
+                      Please try a different pincode.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <ProductFeatures data={data} />
@@ -1060,7 +1175,8 @@ export const ProductDetails = (props: ProductDetailsProps) => {
             </p>
           )}
         </div>
+        {/* <div ref={divRef} style={{ height: "1px", width: "1px" }} /> */}
       </div>
-    </>
+    </div>
   );
 };

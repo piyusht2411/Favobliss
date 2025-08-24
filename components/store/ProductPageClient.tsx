@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Product, Variant, Location } from "@/types";
 import { Gallery } from "@/components/gallery";
 import { ProductDetails } from "@/components/store/product-details";
@@ -9,7 +9,6 @@ import { Container } from "@/components/ui/container";
 import { ProductReviews } from "@/components/store/product-reviews";
 import { ProductTabs } from "@/components/store/prodcutTabs";
 import Breadcrumb from "./Breadcrumbs";
-import { ActionButtons } from "./ActionButton";
 import { MobileStickyActionBar } from "./MobileStickyBar";
 import { getLocationById } from "@/actions/get-locations";
 import { addToRecentlyViewed } from "@/lib/utils";
@@ -44,8 +43,10 @@ export const ProductPageContent = ({
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
     null
   );
-
   const [locationPinCode, setLocationPinCode] = useState<string | null>(null);
+  const [showStickyBar, setShowStickyBar] = useState(false);
+
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleVariantChange = (variant: Variant) => {
     setCurrentVariant(variant);
@@ -55,6 +56,10 @@ export const ProductPageContent = ({
     {
       label: product.category.name,
       href: `/category/${product?.category?.slug}?page=1`,
+    },
+    {
+      label: product.subCategory.name,
+      href: `/category/${product?.category?.slug}?sub=${product?.subCategory?.slug}?page=1`,
     },
   ];
 
@@ -77,6 +82,67 @@ export const ProductPageContent = ({
     };
     getData();
   }, [selectedLocationId]);
+
+  useEffect(() => {
+    // Handle mobile case
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 768;
+      if (isMobile) {
+        setShowStickyBar(true);
+        return;
+      }
+    };
+
+    handleResize(); // Check initial state
+
+    // Set up IntersectionObserver for web
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        console.log("IntersectionObserver triggered:", {
+          isIntersecting: entry.isIntersecting,
+          target: entry.target,
+        });
+        setShowStickyBar(!entry.isIntersecting);
+      },
+      {
+        root: null, // Use viewport
+        threshold: [0, 0.1], // Trigger when fully or 10% out of view
+        rootMargin: "-100px", // Trigger 100px before fully out
+      }
+    );
+
+    if (containerRef.current) {
+      console.log("Observing containerRef:", containerRef.current);
+      observer.observe(containerRef.current);
+    } else {
+      console.warn("containerRef.current is null");
+    }
+
+    // Fallback scroll listener
+    const handleScroll = () => {
+      if (window.innerWidth < 768) {
+        setShowStickyBar(true);
+        return;
+      }
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const isOutOfView = rect.bottom < 0;
+        console.log("Scroll check:", { isOutOfView, rectBottom: rect.bottom });
+        setShowStickyBar(isOutOfView);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      if (containerRef.current) {
+        observer.unobserve(containerRef.current);
+      }
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   return (
     <div className="bg-white text-black mb-16">
@@ -114,6 +180,7 @@ export const ProductPageContent = ({
                 setSelectedLocationId={setSelectedLocationId}
                 deliveryInfo={deliveryInfo}
                 setDeliveryInfo={setDeliveryInfo}
+                divRef={containerRef}
               />
             </div>
           </div>
@@ -135,7 +202,7 @@ export const ProductPageContent = ({
             locations={locations}
           />
           <MobileStickyActionBar
-            show={true}
+            show={showStickyBar}
             price={locationPrice.price}
             mrp={locationPrice.mrp}
             product={product}

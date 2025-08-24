@@ -62,6 +62,7 @@ export interface Category {
   bannerImage: string;
   landingPageBanner: string;
   slug: string;
+  descripition?: string;
 }
 
 export enum ProductType {

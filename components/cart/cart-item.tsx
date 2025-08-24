@@ -150,7 +150,7 @@ export const CartItem = ({ data, deliveryDays }: CartItemProps) => {
                 {formatter.format(data.price)}
               </div>
 
-              <div className="text-xs text-white bg-red-600 rounded-full border border-transparent font-normal text-center px-2">
+              <div className="text-xs text-white bg-[#ee8e1d] rounded-full border border-transparent font-normal text-center px-2">
                 {discountPercentage}% Off
               </div>
             </div>
