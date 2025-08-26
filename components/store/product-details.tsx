@@ -161,13 +161,12 @@ export const ProductDetails = (props: ProductDetailsProps) => {
   );
 
   const codAvailable = (pincode: string, locationGroups: LocationGroup[]) => {
-    let foundLocation = null;
-    for (const group of locationGroups) {
-      foundLocation = group.locations.find((loc) => loc.pincode === pincode);
-      if (foundLocation) {
-        setCurrentLocationGroupData(group);
-        return foundLocation.isCodAvailable;
-      }
+    const foundGroup = locationGroups.find((group) =>
+      group.locations.some((loc) => loc.pincode === pincode)
+    );
+    if (foundGroup) {
+      setCurrentLocationGroupData(foundGroup);
+      return foundGroup.isCodAvailable;
     }
     return false;
   };
@@ -184,24 +183,22 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         ) ?? null;
 
       if (activeLocationGroup) {
+        const matchedLocation = activeLocationGroup.locations.find(
+          (loc) => loc.pincode === sessionPincode
+        );
         const sessionLocation = {
-          city: firstAddress.district || "Unknown",
+          city: firstAddress.district || matchedLocation?.city || "Unknown",
           pincode: sessionPincode,
-          state: firstAddress.state,
+          state: firstAddress.state || matchedLocation?.state || "Unknown",
           country: "India",
         };
 
         localStorage.setItem("locationData", JSON.stringify(sessionLocation));
         window.dispatchEvent(new Event("locationDataUpdated"));
-        setIsCodAvailableForPincode(
-          codAvailable(sessionPincode, locationGroups)
-        );
-        const matchedLocation = activeLocationGroup.locations.find(
-          (loc) => loc.pincode === sessionPincode
-        );
+        setIsCodAvailableForPincode(activeLocationGroup.isCodAvailable);
         setDeliveryInfo({
-          location: `${matchedLocation?.city || "Unknown"}, ${sessionPincode}`,
-          estimatedDelivery: matchedLocation?.deliveryDays || 0,
+          location: `${sessionLocation.city}, ${sessionPincode}`,
+          estimatedDelivery: activeLocationGroup.deliveryDays || 0,
         });
       }
     }
@@ -221,17 +218,15 @@ export const ProductDetails = (props: ProductDetailsProps) => {
                 group.locations.some((loc) => loc.pincode === storedPincode)
               ) ?? null;
             if (activeLocationGroup) {
-              setIsCodAvailableForPincode(
-                codAvailable(storedPincode, locationGroups)
-              );
               const matchedLocation = activeLocationGroup.locations.find(
                 (loc) => loc.pincode === storedPincode
               );
+              setIsCodAvailableForPincode(activeLocationGroup.isCodAvailable);
               setDeliveryInfo({
                 location: `${
                   matchedLocation?.city || "Unknown"
                 }, ${storedPincode}`,
-                estimatedDelivery: matchedLocation?.deliveryDays || 0,
+                estimatedDelivery: activeLocationGroup.deliveryDays || 0,
               });
             }
           }
@@ -249,35 +244,27 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         ) ?? null;
 
       if (activeLocationGroup) {
+        const matchedLocation = activeLocationGroup.locations.find(
+          (loc) => loc.pincode === fallbackPincode
+        );
         const fallbackLocation = {
-          city:
-            activeLocationGroup.locations.find(
-              (loc) => loc.pincode === fallbackPincode
-            )?.city || "Delhi",
-          state:
-            activeLocationGroup.locations.find(
-              (loc) => loc.pincode === fallbackPincode
-            )?.state || "Delhi",
+          city: matchedLocation?.city || "Delhi",
+          state: matchedLocation?.state || "Delhi",
           country: "India",
           pincode: fallbackPincode,
         };
         localStorage.setItem("locationData", JSON.stringify(fallbackLocation));
         window.dispatchEvent(new Event("locationDataUpdated"));
-        setIsCodAvailableForPincode(
-          codAvailable(fallbackPincode, locationGroups)
-        );
-        const matchedLocation = activeLocationGroup.locations.find(
-          (loc) => loc.pincode === fallbackPincode
-        );
+        setIsCodAvailableForPincode(activeLocationGroup.isCodAvailable);
         setDeliveryInfo({
           location: `${matchedLocation?.city || "Delhi"}, ${fallbackPincode}`,
-          estimatedDelivery: matchedLocation?.deliveryDays || 0,
+          estimatedDelivery: activeLocationGroup.deliveryDays || 0,
         });
       }
     }
 
     if (activeLocationGroup) {
-      const group = activeLocationGroup;
+      const group = activeLocationGroup; // Narrow type to LocationGroup
       const variantPrice = selectedVariant.variantPrices?.find(
         (vp) => vp.locationGroupId === group.id
       );
@@ -297,22 +284,26 @@ export const ProductDetails = (props: ProductDetailsProps) => {
       setIsCodAvailableForPincode(false);
       setDeliveryInfo(null);
     }
-  }, [locationGroups, selectedVariant, session, addresses, isAddressLoading]);
+  }, [
+    locationGroups,
+    selectedVariant,
+    session,
+    addresses,
+    isAddressLoading,
+    setDeliveryInfo,
+    setIsCodAvailableForPincode,
+    setLocationPrice,
+    setSelectedLocationGroupId,
+  ]);
 
   const handlePincodeCheck = () => {
     if (pincode.trim()) {
-      let foundGroup: any = null;
-      let foundLocation: any = null;
-      for (const group of locationGroups) {
-        const matchedLocation = group.locations.find(
-          (loc) => loc.pincode === pincode.trim()
-        );
-        if (matchedLocation) {
-          foundGroup = group;
-          foundLocation = matchedLocation;
-          break;
-        }
-      }
+      const foundGroup = locationGroups.find((group) =>
+        group.locations.some((loc) => loc.pincode === pincode.trim())
+      );
+      const foundLocation = foundGroup?.locations.find(
+        (loc) => loc.pincode === pincode.trim()
+      );
 
       if (foundGroup && foundLocation) {
         const variantPrice = selectedVariant.variantPrices?.find(
@@ -328,13 +319,14 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         });
         setDeliveryInfo({
           location: `${foundLocation.city}, ${foundLocation.pincode}`,
-          estimatedDelivery: foundLocation.deliveryDays,
+          estimatedDelivery: foundGroup.deliveryDays || 0,
         });
-        setIsCodAvailableForPincode(foundLocation.isCodAvailable);
+        setIsCodAvailableForPincode(foundGroup.isCodAvailable);
+        setCurrentLocationGroupData(foundGroup);
         const locationData = {
           city: foundLocation.city,
           state: foundLocation.state,
-          country: foundLocation.country,
+          country: foundLocation.country || "India",
           pincode: foundLocation.pincode,
         };
         localStorage.setItem("locationData", JSON.stringify(locationData));
@@ -348,6 +340,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
           estimatedDelivery: 0,
         });
         setIsCodAvailableForPincode(false);
+        setCurrentLocationGroupData(null);
         const defaultLocationGroupDataUpdated = defaultLocationGroupData
           ? {
               city: defaultLocationGroupData.locations[0]?.city || "Delhi",
@@ -376,6 +369,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     setDeliveryInfo(null);
     setPincode("");
     setIsCodAvailableForPincode(null);
+    setCurrentLocationGroupData(null);
     initializeDefaultPrice();
   };
 
@@ -444,7 +438,13 @@ export const ProductDetails = (props: ProductDetailsProps) => {
       setSelectedVariant(variant);
       onVariantChange?.(variant);
     }
-  }, [selectedSize, selectedColor, data.variants, onVariantChange]);
+  }, [
+    selectedSize,
+    selectedColor,
+    data.variants,
+    setSelectedVariant,
+    onVariantChange,
+  ]);
 
   const handleSizeChange = useCallback(
     (sizeId: string) => {
@@ -475,7 +475,12 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         mrp: variantPrice?.mrp || selectedVariant.mrp || selectedVariant.price,
       });
     }
-  }, [selectedVariant, selectedLocationGroupId, isPincodeChecked]);
+  }, [
+    selectedVariant,
+    selectedLocationGroupId,
+    isPincodeChecked,
+    setLocationPrice,
+  ]);
 
   const handleColorChange = useCallback(
     (colorId: string) => {
@@ -523,6 +528,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     locationPrice,
     selectedLocationGroupId,
     isProductAvailable,
+    deliveryInfo,
   ]);
 
   const onHandleBuyNow = useCallback(() => {
@@ -554,6 +560,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     selectedLocationGroupId,
     router,
     isProductAvailable,
+    deliveryInfo,
   ]);
 
   const discountPercentage = locationPrice.mrp
@@ -917,11 +924,10 @@ export const ProductDetails = (props: ProductDetailsProps) => {
           <ProductFeatures data={data} />
 
           {data.expressDelivery &&
-            currentLocationGroupData?.locations[0]?.isExpressDelivery && (
+            currentLocationGroupData?.isExpressDelivery && (
               <p className="font-bold text-orange-500 text-2xl pt-6">
-                {currentLocationGroupData?.locations[0]?.expressDeliveryText
-                  ?.length > 0
-                  ? currentLocationGroupData.locations[0].expressDeliveryText
+                {currentLocationGroupData.expressDeliveryText?.length > 0
+                  ? currentLocationGroupData.expressDeliveryText
                   : "Express Delivery | Delhi NCR Only | Call Now +91-9540717161"}
               </p>
             )}

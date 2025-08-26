@@ -103,10 +103,6 @@ export const ProductPageContent = ({
     // Set up IntersectionObserver for web
     const observer = new IntersectionObserver(
       ([entry]) => {
-        console.log("IntersectionObserver triggered:", {
-          isIntersecting: entry.isIntersecting,
-          target: entry.target,
-        });
         setShowStickyBar(!entry.isIntersecting);
       },
       {
@@ -117,7 +113,6 @@ export const ProductPageContent = ({
     );
 
     if (containerRef.current) {
-      console.log("Observing containerRef:", containerRef.current);
       observer.observe(containerRef.current);
     } else {
       console.warn("containerRef.current is null");
@@ -132,7 +127,6 @@ export const ProductPageContent = ({
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
         const isOutOfView = rect.bottom < 0;
-        console.log("Scroll check:", { isOutOfView, rectBottom: rect.bottom });
         setShowStickyBar(isOutOfView);
       }
     };
@@ -149,7 +143,6 @@ export const ProductPageContent = ({
     };
   }, []);
 
-  console.log(locationPrice, locationPinCode, selectedLocationGroupId);
   return (
     <div className="bg-white text-black mb-16">
       <Breadcrumb items={breadcrumbItems} />

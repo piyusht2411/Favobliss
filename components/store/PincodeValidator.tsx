@@ -82,9 +82,7 @@ export const PincodeValidator = (props: Props) => {
             variantPrice.price,
             variantPrice.mrp,
             String(address.zipCode),
-            variantPrice.locationGroup?.locations?.find(
-              (loc) => loc.pincode === targetPincode
-            )?.deliveryDays || 0
+            variantPrice.locationGroup.deliveryDays || 0
           );
 
           updateItemCheckoutPrice(

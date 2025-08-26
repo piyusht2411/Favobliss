@@ -28,17 +28,17 @@ export interface Location {
   id: string;
   pincode: string;
   city: string;
-  isCodAvailable: boolean;
   state: string;
   country: string;
-  deliveryDays: number;
-  isExpressDelivery: boolean;
-  expressDeliveryText: string;
 }
 
 export interface LocationGroup {
   id: string;
   name: string;
+  deliveryDays: number;
+  isExpressDelivery: boolean;
+  expressDeliveryText: string;
+  isCodAvailable: boolean;
   locations: Location[];
 }
 
