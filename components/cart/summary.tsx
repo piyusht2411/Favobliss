@@ -61,9 +61,9 @@ export const Summary = (props: Props) => {
       return;
     }
 
-    console.log(items);
-
-    const allItemsCodAvailable = items.every((item) => item.isCodAvailable === true);
+    const allItemsCodAvailable = items.every(
+      (item) => item.isCodAvailable === true
+    );
     setIsCODAvailable(allItemsCodAvailable);
   }, [items]);
 
