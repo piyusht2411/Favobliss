@@ -179,7 +179,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
       const sessionPincode = String(firstAddress.zipCode).trim();
 
       activeLocationGroup =
-        locationGroups?.find((group) =>
+        locationGroups.find((group) =>
           group.locations.some((loc) => loc.pincode === sessionPincode)
         ) ?? null;
 
@@ -217,7 +217,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
 
           if (storedPincode) {
             activeLocationGroup =
-              locationGroups?.find((group) =>
+              locationGroups.find((group) =>
                 group.locations.some((loc) => loc.pincode === storedPincode)
               ) ?? null;
             if (activeLocationGroup) {
@@ -243,9 +243,8 @@ export const ProductDetails = (props: ProductDetailsProps) => {
 
     if (!activeLocationGroup) {
       const fallbackPincode = "110040";
-      console.log("location", locationGroups);
       activeLocationGroup =
-        locationGroups?.find((group) =>
+        locationGroups.find((group) =>
           group.locations.some((loc) => loc.pincode === fallbackPincode)
         ) ?? null;
 
@@ -278,12 +277,13 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     }
 
     if (activeLocationGroup) {
+      const group = activeLocationGroup;
       const variantPrice = selectedVariant.variantPrices?.find(
-        (vp) => vp.locationGroupId === activeLocationGroup.id
+        (vp) => vp.locationGroupId === group.id
       );
 
-      setDefaultLocationGroupData(activeLocationGroup);
-      setSelectedLocationGroupId(activeLocationGroup.id);
+      setDefaultLocationGroupData(group);
+      setSelectedLocationGroupId(group.id);
       setLocationPrice({
         price: variantPrice?.price || selectedVariant.price,
         mrp: variantPrice?.mrp || selectedVariant.mrp || selectedVariant.price,
@@ -301,8 +301,8 @@ export const ProductDetails = (props: ProductDetailsProps) => {
 
   const handlePincodeCheck = () => {
     if (pincode.trim()) {
-      let foundGroup = null;
-      let foundLocation = null;
+      let foundGroup: any = null;
+      let foundLocation: any = null;
       for (const group of locationGroups) {
         const matchedLocation = group.locations.find(
           (loc) => loc.pincode === pincode.trim()
@@ -501,7 +501,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     const selectedLocationGroup = locationGroups.find(
       (group) => group.id === selectedLocationGroupId
     );
-    const itemPincode = selectedLocationGroup?.locations[0]?.pincode || ""; // Use first location's pincode or fallback
+    const itemPincode = selectedLocationGroup?.locations[0]?.pincode || "";
 
     try {
       addItem({
@@ -916,16 +916,17 @@ export const ProductDetails = (props: ProductDetailsProps) => {
 
           <ProductFeatures data={data} />
 
-          {/* {data.expressDelivery && currentLocationData?.isExpressDelivery && (
-            <p className="font-bold text-orange-500 text-2xl pt-6">
-              {currentLocationData.expressDeliveryText.length > 0
-                ? currentLocationData.expressDeliveryText
-                : "Express Delivery | Delhi NCR Only | Call Now +91-9540717161"}
-            </p>
-          )} */}
+          {data.expressDelivery &&
+            currentLocationGroupData?.locations[0]?.isExpressDelivery && (
+              <p className="font-bold text-orange-500 text-2xl pt-6">
+                {currentLocationGroupData?.locations[0]?.expressDeliveryText
+                  ?.length > 0
+                  ? currentLocationGroupData.locations[0].expressDeliveryText
+                  : "Express Delivery | Delhi NCR Only | Call Now +91-9540717161"}
+              </p>
+            )}
         </div>
       </div>
     </div>
-    // </div>
   );
 };

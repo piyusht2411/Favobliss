@@ -13,6 +13,7 @@ import { PriceRange, Location } from "@/types";
 import Image from "next/image";
 import Breadcrumb from "@/components/store/Breadcrumbs";
 import { getSubCategoryBySlug } from "@/actions/get-subcategory";
+import { getLocationGroups } from "@/actions/get-location-group";
 
 async function withRetry<T>(
   fn: () => Promise<T>,
@@ -105,7 +106,9 @@ const LatestLaunches = async ({ params, searchParams }: CategoryPageProps) => {
 
   const sizes = await withRetry(() => getSizes());
   const colors = await withRetry(() => getColors());
-  const locations = await withRetry(() => getLocations(params.storeId));
+  const locationGroups = await withRetry(() =>
+    getLocationGroups(params.storeId)
+  );
 
   const sizeMap: { [key: string]: string[] } = {
     TOPWEAR: ["S", "M", "L", "XL", "XXL"],
@@ -165,7 +168,7 @@ const LatestLaunches = async ({ params, searchParams }: CategoryPageProps) => {
                     <ProductCard
                       key={product.id}
                       data={product}
-                      locations={locations}
+                      locationGroups={locationGroups}
                     />
                   ))}
                 </div>
