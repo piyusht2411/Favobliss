@@ -8,7 +8,7 @@ import {
   Dispatch,
   SetStateAction,
 } from "react";
-import { Product, Variant, Location } from "@/types";
+import { Product, Variant, LocationGroup } from "@/types";
 import { formatter } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { HiShoppingBag } from "react-icons/hi";
@@ -29,7 +29,7 @@ interface ProductDetailsProps {
   data: Product;
   defaultVariant: Variant;
   onVariantChange?: (variant: Variant) => void;
-  locations: Location[];
+  locationGroups: LocationGroup[];
   totalReviews: number;
   avgRating: number | null;
   selectedVariant: Variant;
@@ -46,8 +46,8 @@ interface ProductDetailsProps {
   >;
   isProductAvailable: boolean;
   setIsProductAvailable: Dispatch<SetStateAction<boolean>>;
-  selectedLocationId: string | null;
-  setSelectedLocationId: Dispatch<SetStateAction<string | null>>;
+  selectedLocationGroupId: string | null;
+  setSelectedLocationGroupId: Dispatch<SetStateAction<string | null>>;
   deliveryInfo: {
     location: string;
     estimatedDelivery: number;
@@ -88,7 +88,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     data,
     defaultVariant,
     onVariantChange,
-    locations,
+    locationGroups,
     totalReviews,
     avgRating,
     selectedVariant,
@@ -97,8 +97,8 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     setLocationPrice,
     isProductAvailable,
     setIsProductAvailable,
-    selectedLocationId,
-    setSelectedLocationId,
+    selectedLocationGroupId,
+    setSelectedLocationGroupId,
     deliveryInfo,
     setDeliveryInfo,
     divRef,
@@ -117,10 +117,10 @@ export const ProductDetails = (props: ProductDetailsProps) => {
   const [isPincodeChecked, setIsPincodeChecked] = useState(false);
   const { data: session } = useSession();
   const { data: addresses, isLoading: isAddressLoading } = useAddress();
-  const [defaultLocationData, setDefaultLocationData] =
-    useState<Location | null>(null);
-  const [currentLocationData, setcurrentLocationData] =
-    useState<Location | null>(null);
+  const [defaultLocationGroupData, setDefaultLocationGroupData] =
+    useState<LocationGroup | null>(null);
+  const [currentLocationGroupData, setCurrentLocationGroupData] =
+    useState<LocationGroup | null>(null);
   const [isCodAvailableForPincode, setIsCodAvailableForPincode] = useState<
     boolean | null
   >(null);
@@ -160,23 +160,30 @@ export const ProductDetails = (props: ProductDetailsProps) => {
       : true
   );
 
-  const codAvailable = (pincode: string, locations: Location[]) => {
-    const currentLocation = locations.find((item) => item.pincode === pincode);
-    setcurrentLocationData(currentLocation ?? null);
-    return currentLocation?.isCodAvailable || false;
+  const codAvailable = (pincode: string, locationGroups: LocationGroup[]) => {
+    let foundLocation = null;
+    for (const group of locationGroups) {
+      foundLocation = group.locations.find((loc) => loc.pincode === pincode);
+      if (foundLocation) {
+        setCurrentLocationGroupData(group);
+        return foundLocation.isCodAvailable;
+      }
+    }
+    return false;
   };
 
   const initializeDefaultPrice = useCallback(() => {
-    let activeLocation: any = null;
+    let activeLocationGroup: LocationGroup | null = null;
     if (session?.user && addresses?.length && !isAddressLoading) {
       const firstAddress = addresses[0];
       const sessionPincode = String(firstAddress.zipCode).trim();
 
-      activeLocation = locations.find(
-        (loc) => String(loc.pincode).trim() === sessionPincode
-      );
+      activeLocationGroup =
+        locationGroups?.find((group) =>
+          group.locations.some((loc) => loc.pincode === sessionPincode)
+        ) ?? null;
 
-      if (activeLocation) {
+      if (activeLocationGroup) {
         const sessionLocation = {
           city: firstAddress.district || "Unknown",
           pincode: sessionPincode,
@@ -186,15 +193,20 @@ export const ProductDetails = (props: ProductDetailsProps) => {
 
         localStorage.setItem("locationData", JSON.stringify(sessionLocation));
         window.dispatchEvent(new Event("locationDataUpdated"));
-        setIsCodAvailableForPincode(codAvailable(sessionPincode, locations));
+        setIsCodAvailableForPincode(
+          codAvailable(sessionPincode, locationGroups)
+        );
+        const matchedLocation = activeLocationGroup.locations.find(
+          (loc) => loc.pincode === sessionPincode
+        );
         setDeliveryInfo({
-          location: `${activeLocation.city}, ${activeLocation.pincode}`,
-          estimatedDelivery: activeLocation.deliveryDays,
+          location: `${matchedLocation?.city || "Unknown"}, ${sessionPincode}`,
+          estimatedDelivery: matchedLocation?.deliveryDays || 0,
         });
       }
     }
 
-    if (!activeLocation) {
+    if (!activeLocationGroup) {
       const storedLocation = localStorage.getItem("locationData");
       if (storedLocation) {
         try {
@@ -204,16 +216,22 @@ export const ProductDetails = (props: ProductDetailsProps) => {
             : null;
 
           if (storedPincode) {
-            activeLocation = locations.find(
-              (loc) => String(loc.pincode).trim() === storedPincode
-            );
-            if (activeLocation) {
+            activeLocationGroup =
+              locationGroups?.find((group) =>
+                group.locations.some((loc) => loc.pincode === storedPincode)
+              ) ?? null;
+            if (activeLocationGroup) {
               setIsCodAvailableForPincode(
-                codAvailable(storedPincode, locations)
+                codAvailable(storedPincode, locationGroups)
+              );
+              const matchedLocation = activeLocationGroup.locations.find(
+                (loc) => loc.pincode === storedPincode
               );
               setDeliveryInfo({
-                location: `${activeLocation.city}, ${activeLocation.pincode}`,
-                estimatedDelivery: activeLocation.deliveryDays,
+                location: `${
+                  matchedLocation?.city || "Unknown"
+                }, ${storedPincode}`,
+                estimatedDelivery: matchedLocation?.deliveryDays || 0,
               });
             }
           }
@@ -223,42 +241,55 @@ export const ProductDetails = (props: ProductDetailsProps) => {
       }
     }
 
-    if (!activeLocation) {
+    if (!activeLocationGroup) {
       const fallbackPincode = "110040";
-      activeLocation = locations.find(
-        (loc) => String(loc.pincode).trim() === fallbackPincode
-      );
+      console.log("location", locationGroups);
+      activeLocationGroup =
+        locationGroups?.find((group) =>
+          group.locations.some((loc) => loc.pincode === fallbackPincode)
+        ) ?? null;
 
-      if (activeLocation) {
+      if (activeLocationGroup) {
         const fallbackLocation = {
-          city: activeLocation.city,
-          state: activeLocation.state,
-          country: activeLocation.country,
-          pincode: activeLocation.pincode,
+          city:
+            activeLocationGroup.locations.find(
+              (loc) => loc.pincode === fallbackPincode
+            )?.city || "Delhi",
+          state:
+            activeLocationGroup.locations.find(
+              (loc) => loc.pincode === fallbackPincode
+            )?.state || "Delhi",
+          country: "India",
+          pincode: fallbackPincode,
         };
         localStorage.setItem("locationData", JSON.stringify(fallbackLocation));
         window.dispatchEvent(new Event("locationDataUpdated"));
-        setIsCodAvailableForPincode(codAvailable(fallbackPincode, locations));
+        setIsCodAvailableForPincode(
+          codAvailable(fallbackPincode, locationGroups)
+        );
+        const matchedLocation = activeLocationGroup.locations.find(
+          (loc) => loc.pincode === fallbackPincode
+        );
         setDeliveryInfo({
-          location: `${activeLocation.city}, ${activeLocation.pincode}`,
-          estimatedDelivery: activeLocation.deliveryDays,
+          location: `${matchedLocation?.city || "Delhi"}, ${fallbackPincode}`,
+          estimatedDelivery: matchedLocation?.deliveryDays || 0,
         });
       }
     }
 
-    if (activeLocation) {
+    if (activeLocationGroup) {
       const variantPrice = selectedVariant.variantPrices?.find(
-        (vp) => vp.locationId === activeLocation.id
+        (vp) => vp.locationGroupId === activeLocationGroup.id
       );
 
-      setDefaultLocationData(activeLocation);
-      setSelectedLocationId(activeLocation.id);
+      setDefaultLocationGroupData(activeLocationGroup);
+      setSelectedLocationGroupId(activeLocationGroup.id);
       setLocationPrice({
         price: variantPrice?.price || selectedVariant.price,
         mrp: variantPrice?.mrp || selectedVariant.mrp || selectedVariant.price,
       });
     } else {
-      console.error("No active location found!");
+      console.error("No active location group found!");
       setLocationPrice({
         price: selectedVariant.price,
         mrp: selectedVariant.mrp || selectedVariant.price,
@@ -266,57 +297,74 @@ export const ProductDetails = (props: ProductDetailsProps) => {
       setIsCodAvailableForPincode(false);
       setDeliveryInfo(null);
     }
-  }, [locations, selectedVariant, session, addresses, isAddressLoading]);
+  }, [locationGroups, selectedVariant, session, addresses, isAddressLoading]);
 
   const handlePincodeCheck = () => {
     if (pincode.trim()) {
-      const location = locations.find((loc) => loc.pincode === pincode.trim());
+      let foundGroup = null;
+      let foundLocation = null;
+      for (const group of locationGroups) {
+        const matchedLocation = group.locations.find(
+          (loc) => loc.pincode === pincode.trim()
+        );
+        if (matchedLocation) {
+          foundGroup = group;
+          foundLocation = matchedLocation;
+          break;
+        }
+      }
 
-      if (location) {
+      if (foundGroup && foundLocation) {
         const variantPrice = selectedVariant.variantPrices?.find(
-          (vp) => vp.locationId === location.id
+          (vp) => vp.locationGroupId === foundGroup.id
         );
 
         setIsProductAvailable(true);
-        setSelectedLocationId(location.id);
+        setSelectedLocationGroupId(foundGroup.id);
         setLocationPrice({
           price: variantPrice?.price || selectedVariant.price,
           mrp:
             variantPrice?.mrp || selectedVariant.mrp || selectedVariant.price,
         });
         setDeliveryInfo({
-          location: `${location.city}, ${location.pincode}`,
-          estimatedDelivery: location.deliveryDays,
+          location: `${foundLocation.city}, ${foundLocation.pincode}`,
+          estimatedDelivery: foundLocation.deliveryDays,
         });
-        setIsCodAvailableForPincode(codAvailable(pincode.trim(), locations));
+        setIsCodAvailableForPincode(foundLocation.isCodAvailable);
         const locationData = {
-          city: location.city,
-          state: location.state,
-          country: location.country,
-          pincode: location.pincode,
+          city: foundLocation.city,
+          state: foundLocation.state,
+          country: foundLocation.country,
+          pincode: foundLocation.pincode,
         };
         localStorage.setItem("locationData", JSON.stringify(locationData));
         window.dispatchEvent(new Event("locationDataUpdated"));
         setIsPincodeChecked(true);
       } else {
         setIsProductAvailable(false);
-        setSelectedLocationId(null);
+        setSelectedLocationGroupId(null);
         setDeliveryInfo({
           location: `Pincode ${pincode.trim()}`,
           estimatedDelivery: 0,
         });
         setIsCodAvailableForPincode(false);
-        const defaultLocationDataUpdated = {
-          city: defaultLocationData?.city,
-          state: defaultLocationData?.state,
-          country: defaultLocationData?.country,
-          pincode: defaultLocationData?.pincode,
-        };
-        localStorage.setItem(
-          "locationData",
-          JSON.stringify(defaultLocationDataUpdated)
-        );
-        window.dispatchEvent(new Event("locationDataUpdated"));
+        const defaultLocationGroupDataUpdated = defaultLocationGroupData
+          ? {
+              city: defaultLocationGroupData.locations[0]?.city || "Delhi",
+              state: defaultLocationGroupData.locations[0]?.state || "Delhi",
+              country:
+                defaultLocationGroupData.locations[0]?.country || "India",
+              pincode:
+                defaultLocationGroupData.locations[0]?.pincode || "110040",
+            }
+          : null;
+        if (defaultLocationGroupDataUpdated) {
+          localStorage.setItem(
+            "locationData",
+            JSON.stringify(defaultLocationGroupDataUpdated)
+          );
+          window.dispatchEvent(new Event("locationDataUpdated"));
+        }
         setIsPincodeChecked(true);
       }
     }
@@ -340,7 +388,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     initializeDefaultPrice,
     addresses,
     isAddressLoading,
-    locations,
+    locationGroups,
     selectedVariant,
   ]);
 
@@ -418,16 +466,16 @@ export const ProductDetails = (props: ProductDetailsProps) => {
   );
 
   useEffect(() => {
-    if (isPincodeChecked && selectedLocationId) {
+    if (isPincodeChecked && selectedLocationGroupId) {
       const variantPrice = selectedVariant.variantPrices?.find(
-        (vp) => vp.locationId === selectedLocationId
+        (vp) => vp.locationGroupId === selectedLocationGroupId
       );
       setLocationPrice({
         price: variantPrice?.price || selectedVariant.price,
         mrp: variantPrice?.mrp || selectedVariant.mrp || selectedVariant.price,
       });
     }
-  }, [selectedVariant, selectedLocationId, isPincodeChecked]);
+  }, [selectedVariant, selectedLocationGroupId, isPincodeChecked]);
 
   const handleColorChange = useCallback(
     (colorId: string) => {
@@ -450,10 +498,10 @@ export const ProductDetails = (props: ProductDetailsProps) => {
 
   const onHandleCart = useCallback(() => {
     if (!isProductAvailable) return;
-    const selectedLocation = locations.find(
-      (loc) => loc.id === selectedLocationId
+    const selectedLocationGroup = locationGroups.find(
+      (group) => group.id === selectedLocationGroupId
     );
-    const itemPincode = selectedLocation?.pincode || "";
+    const itemPincode = selectedLocationGroup?.locations[0]?.pincode || ""; // Use first location's pincode or fallback
 
     try {
       addItem({
@@ -473,16 +521,16 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     data,
     selectedVariant,
     locationPrice,
-    selectedLocationId,
+    selectedLocationGroupId,
     isProductAvailable,
   ]);
 
   const onHandleBuyNow = useCallback(() => {
     if (!isProductAvailable) return;
-    const selectedLocation = locations.find(
-      (loc) => loc.id === selectedLocationId
+    const selectedLocationGroup = locationGroups.find(
+      (group) => group.id === selectedLocationGroupId
     );
-    const itemPincode = selectedLocation?.pincode || "";
+    const itemPincode = selectedLocationGroup?.locations[0]?.pincode || "";
 
     try {
       addItem({
@@ -503,7 +551,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     data,
     selectedVariant,
     locationPrice,
-    selectedLocationId,
+    selectedLocationGroupId,
     router,
     isProductAvailable,
   ]);
@@ -549,7 +597,6 @@ export const ProductDetails = (props: ProductDetailsProps) => {
 
   return (
     <div ref={divRef}>
-      {/* <div ref={divRef} style={{ height: "1px", width: "1px" }} /> */}
       <div ref={containerRef} className="text-black bg-white">
         <div className="container mx-auto px-4 py-3 md:py-3">
           <div
@@ -751,320 +798,11 @@ export const ProductDetails = (props: ProductDetailsProps) => {
             </div>
           )}
 
-          {/* <div ref={buttonsRef} className="mt-8 max-w-sm md:block hidden">
-            <ActionButtons />
-          </div> */}
           <div className="mt-6 space-y-4">
             <div>
               <BankOffers />
             </div>
           </div>
-
-          {/* <div className="mt-4 border-0 rounded-2xl py-6 bg-gradient-to-br from-white to-gray-50 shadow-lg shadow-gray-200/50 border-gray-100">
-            {!isPincodeChecked && (
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-gradient-to-br from-orange-100 to-orange-200 rounded-full">
-                  <svg
-                    className="w-5 h-5 text-orange-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <span className="text-lg font-semibold text-gray-800">
-                    Delivery Options
-                  </span>
-                  <p className="text-sm text-gray-500 mt-0.5">
-                    Check availability in your area
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {!isPincodeChecked ? (
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 relative">
-                    <Input
-                      type="text"
-                      value={pincode}
-                      onChange={(e) => setPincode(e.target.value)}
-                      placeholder="Enter your 6-digit pincode"
-                      className="h-12 text-sm pl-4 pr-12 rounded-xl border-2 border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 transition-all duration-200 bg-white shadow-sm"
-                      maxLength={6}
-                    />
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      <svg
-                        className="w-5 h-5 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                  <Button
-                    variant="outline"
-                    className="h-12 px-6 text-sm font-semibold text-white bg-gradient-to-r from-orange-500 to-orange-600 border-0 hover:from-orange-600 hover:to-orange-700 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={handlePincodeCheck}
-                    disabled={!pincode.trim() || pincode.length < 6}
-                  >
-                    Check
-                  </Button>
-                </div>
-                <div className="bg-orange-100 border border-orange-200 rounded-xl p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="p-1 bg-orange-100 rounded-full mt-0.5">
-                      <svg
-                        className="w-4 h-4 text-[#ee8c1d]"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                    </div>
-                    <p className="text-sm text-[#ee8c1d] leading-relaxed">
-                      Enter your PIN code to check delivery time & cash on
-                      delivery availability in your area
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={cn(
-                        "p-2 rounded-full",
-                        isProductAvailable ? "bg-green-100" : "bg-red-100"
-                      )}
-                    >
-                      {isProductAvailable ? (
-                        <svg
-                          className="w-5 h-5 text-green-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                      ) : (
-                        <svg
-                          className="w-5 h-5 text-red-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      )}
-                    </div>
-                    <div>
-                      <span
-                        className={cn(
-                          "text-sm font-semibold",
-                          isProductAvailable ? "text-green-800" : "text-red-800"
-                        )}
-                      >
-                        {isProductAvailable
-                          ? `Available in ${deliveryInfo?.location}`
-                          : `Not available in ${pincode.trim()}`}
-                      </span>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Pincode: {pincode.trim()}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleChangePincode}
-                    className="px-4 py-2 text-sm font-semibold text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded-lg transition-colors duration-200"
-                  >
-                    Change
-                  </button>
-                </div>
-
-                {deliveryInfo && isProductAvailable && (
-                  <div className="space-y-3">
-                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="p-2 bg-green-100 rounded-full">
-                          <svg
-                            className="w-5 h-5 text-green-600"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M13 10V3L4 14h7v7l9-11h-7z"
-                            />
-                          </svg>
-                        </div>
-                        <div>
-                          <span className="text-sm font-semibold text-green-800">
-                            Express Delivery
-                          </span>
-                          <p className="text-lg font-bold text-green-700 mt-1">
-                            {formatDeliveryDate(deliveryInfo.estimatedDelivery)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div
-                      className={cn(
-                        "border rounded-xl p-4",
-                        isCodAvailableForPincode
-                          ? "bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200"
-                          : "bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200"
-                      )}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={cn(
-                            "p-2 rounded-full",
-                            isCodAvailableForPincode
-                              ? "bg-blue-100"
-                              : "bg-amber-100"
-                          )}
-                        >
-                          {isCodAvailableForPincode ? (
-                            <svg
-                              className="w-5 h-5 text-blue-600"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-                              />
-                            </svg>
-                          ) : (
-                            <svg
-                              className="w-5 h-5 text-amber-600"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                              />
-                            </svg>
-                          )}
-                        </div>
-                        <div>
-                          <span
-                            className={cn(
-                              "text-sm font-semibold",
-                              isCodAvailableForPincode
-                                ? "text-blue-800"
-                                : "text-amber-800"
-                            )}
-                          >
-                            Cash on Delivery
-                          </span>
-                          <p
-                            className={cn(
-                              "text-sm mt-0.5",
-                              isCodAvailableForPincode
-                                ? "text-blue-600"
-                                : "text-amber-600"
-                            )}
-                          >
-                            {isCodAvailableForPincode
-                              ? "Available"
-                              : "Not Available"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {!isProductAvailable && (
-                  <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 bg-red-100 rounded-full mt-0.5">
-                        <svg
-                          className="w-5 h-5 text-red-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                          />
-                        </svg>
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-semibold text-red-800 mb-1">
-                          Delivery Not Available
-                        </h4>
-                        <p className="text-sm text-red-700 leading-relaxed">
-                          Sorry, this product is not available for delivery to
-                          <span className="font-semibold mx-1">
-                            {pincode.trim()}
-                          </span>
-                          Please try a different pincode or contact customer
-                          support for assistance.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div> */}
-          {/* <div ref={divRef} style={{ height: "1px", width: "1px" }} /> */}
-
           <div className="mt-4 border rounded-3xl p-4 bg-[#f6f4f4] ">
             {!isPincodeChecked && (
               <div className="flex items-center gap-2 mb-3">
@@ -1178,16 +916,16 @@ export const ProductDetails = (props: ProductDetailsProps) => {
 
           <ProductFeatures data={data} />
 
-          {data.expressDelivery && currentLocationData?.isExpressDelivery && (
+          {/* {data.expressDelivery && currentLocationData?.isExpressDelivery && (
             <p className="font-bold text-orange-500 text-2xl pt-6">
               {currentLocationData.expressDeliveryText.length > 0
                 ? currentLocationData.expressDeliveryText
                 : "Express Delivery | Delhi NCR Only | Call Now +91-9540717161"}
             </p>
-          )}
+          )} */}
         </div>
-        {/* <div ref={divRef} style={{ height: "1px", width: "1px" }} /> */}
       </div>
     </div>
+    // </div>
   );
 };

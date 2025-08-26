@@ -2,15 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { ProductList } from "@/components/store/product-list";
-import { Product } from "@/types";
+import { LocationGroup, Product } from "@/types";
 import { getRecentlyViewed } from "@/lib/utils";
 import { getRecentlyViewedProducts } from "@/actions/get-product";
 
 interface RecentlyViewedProps {
-  locations: any[];
+  locationGroups: LocationGroup[];
 }
 
-const RecentlyViewed: React.FC<RecentlyViewedProps> = ({ locations }) => {
+const RecentlyViewed: React.FC<RecentlyViewedProps> = ({ locationGroups }) => {
   const [recentlyViewedProducts, setRecentlyViewedProducts] = useState<
     Product[]
   >([]);
@@ -36,7 +36,7 @@ const RecentlyViewed: React.FC<RecentlyViewedProps> = ({ locations }) => {
     <ProductList
       title="Recently Viewed"
       data={recentlyViewedProducts}
-      locations={locations}
+      locationGroups={locationGroups}
     />
   );
 };

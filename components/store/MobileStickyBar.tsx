@@ -11,7 +11,7 @@ interface MobileStickyActionBarProps {
   product: Product;
   selectedVariant: Variant;
   locationPrice: { price: number; mrp: number };
-  selectedLocationId: string | null;
+  selectedLocationGroupId: string | null;
   isProductAvailable: boolean;
   locationPinCode: string | null;
   deliveryInfo: {
@@ -24,7 +24,7 @@ export const MobileStickyActionBar = ({
   price,
   mrp,
   product,
-  selectedLocationId,
+  selectedLocationGroupId,
   selectedVariant,
   isProductAvailable,
   locationPrice,
@@ -47,7 +47,7 @@ export const MobileStickyActionBar = ({
           product={product}
           selectedVariant={selectedVariant}
           locationPrice={locationPrice}
-          selectedLocationId={selectedLocationId}
+          selectedLocationGroupId={selectedLocationGroupId}
           isProductAvailable={isProductAvailable}
           className="w-full"
           deliveryInfo={deliveryInfo}
@@ -85,7 +85,7 @@ export const MobileStickyActionBar = ({
           product={product}
           selectedVariant={selectedVariant}
           locationPrice={locationPrice}
-          selectedLocationId={selectedLocationId}
+          selectedLocationGroupId={selectedLocationGroupId}
           isProductAvailable={isProductAvailable}
           className="flex-shrink-0"
           deliveryInfo={deliveryInfo}

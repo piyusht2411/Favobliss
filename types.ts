@@ -36,6 +36,12 @@ export interface Location {
   expressDeliveryText: string;
 }
 
+export interface LocationGroup {
+  id: string;
+  name: string;
+  locations: Location[];
+}
+
 export enum CategoryType {
   MEN,
   WOMEN,
@@ -158,7 +164,13 @@ export interface Variant {
   color?: { id: string; name: string; value: string };
   images: VariantImage[];
   mrp?: number;
-  variantPrices?: { locationId: string; price: number; mrp: number }[];
+  variantPrices?: {
+    locationId: string;
+    price: number;
+    mrp: number;
+    locationGroupId: string;
+    locationGroup: LocationGroup;
+  }[];
 }
 
 export interface Color {

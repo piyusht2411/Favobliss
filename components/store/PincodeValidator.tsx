@@ -69,10 +69,10 @@ export const PincodeValidator = (props: Props) => {
 
         const targetPincode = String(address.zipCode).trim();
 
-        //@ts-ignore
         const variantPrice = variant?.variantPrices?.find((vp) => {
-          //@ts-ignore
-          const apiPincode = String(vp?.location?.pincode).trim();
+          const apiPincode = vp?.locationGroup?.locations?.find(
+            (loc) => loc.pincode === targetPincode
+          )?.pincode;
           return apiPincode === targetPincode;
         });
 
@@ -82,16 +82,16 @@ export const PincodeValidator = (props: Props) => {
             variantPrice.price,
             variantPrice.mrp,
             String(address.zipCode),
-            //@ts-ignore
-            variantPrice.location?.deliveryDays
+            variantPrice.locationGroup?.locations?.find(
+              (loc) => loc.pincode === targetPincode
+            )?.deliveryDays || 0
           );
 
           updateItemCheckoutPrice(
-            // From useCheckout
             item.selectedVariant.id,
             variantPrice.price,
             variantPrice.mrp,
-            String(address.zipCode) // Or address.zipCode
+            String(address.zipCode)
           );
           toast.success(`Updated price for ${item.name}`);
         } else {
@@ -101,9 +101,9 @@ export const PincodeValidator = (props: Props) => {
         }
       });
     } catch (error) {
-      console.log("Error details:", error); // Log error details
+      console.log("Error details:", error);
       //@ts-ignore
-      if (error?.response?.status === 404) {
+      if (error?.response?.status === 400) {
         toast.error(
           "The entered pincode is invalid. Please enter a valid pincode or select a different address."
         );

@@ -4,6 +4,7 @@ import { getLocations } from "@/actions/get-locations";
 import { redirect } from "next/navigation";
 import { Metadata, ResolvingMetadata } from "next";
 import { ProductPageContent } from "@/components/store/ProductPageClient";
+import { getLocationGroups } from "@/actions/get-location-group";
 
 interface ProductPageProps {
   params: { storeId: string; slug: string };
@@ -80,13 +81,13 @@ const ProductPage = async ({ params }: ProductPageProps) => {
     (item) => item.id !== product.id
   );
 
-  const locations = await getLocations(params.storeId);
+  const locationGroups = await getLocationGroups();
 
   return (
     <ProductPageContent
       product={product}
       suggestProducts={suggestProducts}
-      locations={locations}
+      locationGroups={locationGroups}
     />
   );
 };

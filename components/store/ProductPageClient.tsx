@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Product, Variant, Location } from "@/types";
+import { Product, Variant, LocationGroup } from "@/types";
 import { Gallery } from "@/components/gallery";
 import { ProductDetails } from "@/components/store/product-details";
 import { ProductList } from "@/components/store/product-list";
@@ -10,19 +10,19 @@ import { ProductReviews } from "@/components/store/product-reviews";
 import { ProductTabs } from "@/components/store/prodcutTabs";
 import Breadcrumb from "./Breadcrumbs";
 import { MobileStickyActionBar } from "./MobileStickyBar";
-import { getLocationById } from "@/actions/get-locations";
 import { addToRecentlyViewed } from "@/lib/utils";
+import { getLocationGroupById } from "@/actions/get-location-group";
 
 interface ProductPageContentProps {
   product: Product;
   suggestProducts: Product[];
-  locations: Location[];
+  locationGroups: LocationGroup[];
 }
 
 export const ProductPageContent = ({
   product,
   suggestProducts,
-  locations,
+  locationGroups,
 }: ProductPageContentProps) => {
   const [currentVariant, setCurrentVariant] = useState(product.variants[0]);
   const [avgRating, setAvgRating] = useState<number | null>(null);
@@ -40,9 +40,9 @@ export const ProductPageContent = ({
     estimatedDelivery: number;
   } | null>(null);
   const [isProductAvailable, setIsProductAvailable] = useState(true);
-  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
-    null
-  );
+  const [selectedLocationGroupId, setSelectedLocationGroupId] = useState<
+    string | null
+  >(null);
   const [locationPinCode, setLocationPinCode] = useState<string | null>(null);
   const [showStickyBar, setShowStickyBar] = useState(false);
 
@@ -55,13 +55,17 @@ export const ProductPageContent = ({
 
   const breadcrumbItems = [
     {
-      label: product.category.name,
+      label: product?.category?.name,
       href: `/category/${product?.category?.slug}?page=1`,
     },
-    {
-      label: product.subCategory.name,
-      href: `/category/${product?.category?.slug}?sub=${product?.subCategory?.slug}?page=1`,
-    },
+    ...(product?.subCategory
+      ? [
+          {
+            label: product?.subCategory?.name,
+            href: `/category/${product?.category?.slug}?sub=${product?.subCategory?.slug}&page=1`,
+          },
+        ]
+      : []),
   ];
 
   useEffect(() => {
@@ -73,16 +77,16 @@ export const ProductPageContent = ({
   useEffect(() => {
     const getData = async () => {
       try {
-        if (selectedLocationId) {
-          const response = await getLocationById(selectedLocationId);
-          setLocationPinCode(response.pincode);
+        if (selectedLocationGroupId) {
+          const response = await getLocationGroupById(selectedLocationGroupId);
+          setLocationPinCode(response.locations[0]?.pincode || null);
         }
       } catch (error) {
-        console.error("Failed to fetch locations:", error);
+        console.error("Failed to fetch location group:", error);
       }
     };
     getData();
-  }, [selectedLocationId]);
+  }, [selectedLocationGroupId]);
 
   useEffect(() => {
     // Handle mobile case
@@ -145,6 +149,7 @@ export const ProductPageContent = ({
     };
   }, []);
 
+  console.log(locationPrice, locationPinCode, selectedLocationGroupId);
   return (
     <div className="bg-white text-black mb-16">
       <Breadcrumb items={breadcrumbItems} />
@@ -157,7 +162,7 @@ export const ProductPageContent = ({
                 product={product}
                 selectedVariant={selectedVariant}
                 locationPrice={locationPrice}
-                selectedLocationId={selectedLocationId}
+                selectedLocationGroupId={selectedLocationGroupId}
                 isProductAvailable={isProductAvailable}
                 deliveryInfo={deliveryInfo}
                 locationPinCode={locationPinCode}
@@ -168,17 +173,17 @@ export const ProductPageContent = ({
                 data={product}
                 defaultVariant={product.variants[0]}
                 onVariantChange={handleVariantChange}
-                locations={locations}
+                locationGroups={locationGroups}
                 totalReviews={totalReviews}
                 avgRating={avgRating}
-                selectedLocationId={selectedLocationId}
+                selectedLocationGroupId={selectedLocationGroupId}
                 selectedVariant={selectedVariant}
                 setSelectedVariant={setSelectedVariant}
                 locationPrice={locationPrice}
                 setLocationPrice={setLocationPrice}
                 isProductAvailable={isProductAvailable}
                 setIsProductAvailable={setIsProductAvailable}
-                setSelectedLocationId={setSelectedLocationId}
+                setSelectedLocationGroupId={setSelectedLocationGroupId}
                 deliveryInfo={deliveryInfo}
                 setDeliveryInfo={setDeliveryInfo}
                 divRef={containerRef}
@@ -202,7 +207,7 @@ export const ProductPageContent = ({
           <ProductList
             title="Similar Products"
             data={suggestProducts}
-            locations={locations}
+            locationGroups={locationGroups}
           />
           <MobileStickyActionBar
             show={showStickyBar}
@@ -211,7 +216,7 @@ export const ProductPageContent = ({
             product={product}
             selectedVariant={selectedVariant}
             locationPrice={locationPrice}
-            selectedLocationId={selectedLocationId}
+            selectedLocationGroupId={selectedLocationGroupId}
             isProductAvailable={isProductAvailable}
             deliveryInfo={deliveryInfo}
             locationPinCode={locationPinCode}

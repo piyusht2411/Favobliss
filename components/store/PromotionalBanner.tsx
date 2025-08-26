@@ -1,18 +1,18 @@
 "use client";
 
-import { Category, Location, Product } from "@/types";
+import { Category, LocationGroup, Product } from "@/types";
 import React, { useEffect, useState } from "react";
 import { ProductList } from "./product-list";
 import { getProducts } from "@/actions/get-products";
 
 interface Props {
   data: Product[];
-  locations: Location[];
+  locationGroups: LocationGroup[];
   categories: Category[];
 }
 
 const PromotionalBanner = (props: Props) => {
-  const { data, locations, categories } = props;
+  const { data, locationGroups, categories } = props;
 
   const [category, setCategory] = useState<string | null>(null);
   const [product, setProduct] = useState<Product[]>(data);
@@ -77,7 +77,7 @@ const PromotionalBanner = (props: Props) => {
           <ProductList
             title=""
             data={product}
-            locations={locations}
+            locationGroups={locationGroups}
             isBannerProduct={true}
           />
         </div>

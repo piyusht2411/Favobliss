@@ -24,7 +24,7 @@ interface GalleryProps {
     mrp: number;
   };
   isProductAvailable: boolean;
-  selectedLocationId: string | null;
+  selectedLocationGroupId: string | null;
   locationPinCode: string | null;
   deliveryInfo: {
     location: string;
@@ -41,7 +41,7 @@ interface VideoState {
 export const Gallery = ({
   images,
   product,
-  selectedLocationId,
+  selectedLocationGroupId,
   selectedVariant,
   isProductAvailable,
   locationPrice,
@@ -413,7 +413,7 @@ export const Gallery = ({
           product={product}
           selectedVariant={selectedVariant}
           locationPrice={locationPrice}
-          selectedLocationId={selectedLocationId}
+          selectedLocationGroupId={selectedLocationGroupId}
           isProductAvailable={isProductAvailable}
           className="w-full"
           deliveryInfo={deliveryInfo}

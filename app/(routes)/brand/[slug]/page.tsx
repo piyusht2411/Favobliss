@@ -13,6 +13,7 @@ import { Metadata, ResolvingMetadata } from "next";
 import { PriceRange, Location } from "@/types";
 import Image from "next/image";
 import Breadcrumb from "@/components/store/Breadcrumbs";
+import { getLocationGroups } from "@/actions/get-location-group";
 
 interface BrandPageProps {
   params: {
@@ -101,7 +102,7 @@ const BrandPage = async ({ params, searchParams }: BrandPageProps) => {
 
   const sizes = await getSizes();
   const colors = await getColors();
-  const locations = await getLocations(params.storeId);
+  const locationGroups = await getLocationGroups();
 
   const sizeMap: { [key: string]: string[] } = {
     TOPWEAR: ["S", "M", "L", "XL", "XXL"],
@@ -173,7 +174,7 @@ const BrandPage = async ({ params, searchParams }: BrandPageProps) => {
                     <ProductCard
                       key={product.id}
                       data={product}
-                      locations={locations}
+                      locationGroups={locationGroups}
                     />
                   ))}
                 </div>

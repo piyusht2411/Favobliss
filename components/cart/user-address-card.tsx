@@ -177,8 +177,9 @@ export const UserAddressCard = ({ data, label }: UserAddressCardProps) => {
         const targetPincode = String(selectedAddress.zipCode).trim();
 
         const variantPrice = variant?.variantPrices?.find((vp) => {
-          //@ts-ignore
-          const apiPincode = String(vp?.location?.pincode).trim();
+          const apiPincode = vp?.locationGroup?.locations?.find(
+            (loc) => loc.pincode === targetPincode
+          )?.pincode;
           return apiPincode === targetPincode;
         });
 
@@ -188,8 +189,9 @@ export const UserAddressCard = ({ data, label }: UserAddressCardProps) => {
             variantPrice.price,
             variantPrice.mrp,
             String(selectedAddress.zipCode),
-            //@ts-ignore
-            variantPrice.location?.deliveryDays || 0 // Add deliveryDays
+            variantPrice.locationGroup?.locations?.find(
+              (loc) => loc.pincode === targetPincode
+            )?.deliveryDays || 0
           );
 
           updateItemCheckoutPrice(

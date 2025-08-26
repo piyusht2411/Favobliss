@@ -1,5 +1,4 @@
 import { getHotDeals, getProducts } from "@/actions/get-products";
-import { getLocations } from "@/actions/get-locations"; // New import
 import HeroSlider from "@/components/store/billboard";
 import { HotDealBanner } from "@/components/store/hotDealBanner";
 import { LatestLaunches } from "@/components/store/latestLaunches";
@@ -28,6 +27,7 @@ import FeatureHighlights from "@/components/store/FeatureHighlights";
 import PromotionalBanner from "@/components/store/PromotionalBanner";
 import { getSubCategories } from "@/actions/get-subcategory";
 import RecentlyViewed from "@/components/store/RecentlyViewed";
+import { getLocationGroups } from "@/actions/get-location-group";
 
 export const revalidate = 0;
 
@@ -44,7 +44,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
 
   const { products: favoblissChoice } = await getProducts({ isFeatured: true });
   const categories = await getCategories();
-  const locations = await getLocations(params.storeId);
+  const locationGroups = await getLocationGroups(params.storeId);
   const brands = await getBrands();
   const { products: brandProducts } = await getProducts({
     brandId: "687247fbfefe791c5521f384",
@@ -71,17 +71,17 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
       <Container>
         <div className="space-y-10 pb-20 mt-20">
           <div className="flex flex-col gap-y-8 md:gap-y-12 px-4 sm:px-6 lg:px-8">
-            <RecentlyViewed locations={locations} />
+            <RecentlyViewed locationGroups={locationGroups} />
             <ProductList
               title="Latest Launches"
               data={products}
-              locations={locations}
+              locationGroups={locationGroups}
               showViewAll={true}
               link="/latest-launches?page=1"
             />
             <PromotionalBanner
               data={favoblissChoice}
-              locations={locations}
+              locationGroups={locationGroups}
               categories={brandCategory}
             />
             <FourImageGrid />
@@ -103,7 +103,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
             <ProductList
               title=""
               data={homeApplicance || []}
-              locations={locations}
+              locationGroups={locationGroups}
             />
             <LandingPageSection
               title="Kitchen Appliances"
@@ -111,7 +111,11 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
               viewAllLink="/category/kitchen-appliances?page=1"
               className="mx-auto bg-[#b8e0ee]"
             />
-            <ProductList title="" data={kitchen || []} locations={locations} />
+            <ProductList
+              title=""
+              data={kitchen || []}
+              locationGroups={locationGroups}
+            />
             {/* <BestOfProduct
               products={brandProducts || []}
               title="Best of Apple"
@@ -121,81 +125,18 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
             <PremiumProductsSection
               products={premiumProducts}
               backgroundColor="#534747"
-              // className="mx-auto"
             />
             <ProductList
               title="Favobliss's Choice"
               data={favoblissChoice || []}
-              locations={locations}
+              locationGroups={locationGroups}
               showViewAll={true}
               link="/favobliss-choice?page=1"
             />
-            {/* <div className="container mx-auto p-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
-                {offerImages.map((product, index) => (
-                  <OfferImage
-                    key={index}
-                    imageSrc={product.imageSrc}
-                    title={product.title}
-                  />
-                ))}
-              </div>
-            </div> */}
-
-            {/* <div className="space-y-4 md:space-y-16">
-              <Image
-                src="https://www.vijaysales.com/_jcr_content/root/container/container/vscontainer_92192583/vscontainer/productpromtioncardt.coreimg.jpeg/1750505071227/back-to-school-clp-desktop.jpeg"
-                alt="Image"
-                width={1500}
-                height={300}
-                className="object-cover bg-blend-color-burn"
-              />
-            </div>
-            <ProductList
-              title=""
-              data={laptops || []}
-              locations={locations}
-              isSpaceTop={true}
-            /> */}
-            {/* <div className="space-y-4 md:space-y-16">
-              <Image
-                src="https://www.vijaysales.com/_jcr_content/root/container/container/vscontainer_318402664/vscontainer/productpromtioncardt.coreimg.jpeg/1753689025425/kitchen-appliances-desktop.jpeg"
-                alt="Image"
-                width={1500}
-                height={300}
-                className="object-cover bg-blend-color-burn"
-              />
-            </div>
-            <ProductList
-              title=""
-              data={kitchen || []}
-              locations={locations}
-              isSpaceTop={true}
-            /> */}
-
-            {/* <div className="space-y-4 md:space-y-16">
-              <Image
-                src="/assets/washing.jpg"
-                alt="Image"
-                width={1500}
-                height={300}
-                className="object-cover bg-blend-color-burn"
-              />
-            </div>
-            <ProductList
-              title=""
-              data={washingMachines || []}
-              locations={locations}
-              isSpaceTop={true}
-            /> */}
             <BrandList brands={Array.isArray(brands) ? brands : [brands]} />
             <HotDealBanner />
             <LatestLaunches />
             <FeatureHighlights />
-            {/* <div className="pt-8 ">
-              <h3 className="text-3xl font-bold">Hot Deals</h3>
-            </div> */}
-            {/* <HotDealSlider /> */}
           </div>
         </div>
       </Container>

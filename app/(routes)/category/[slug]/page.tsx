@@ -14,6 +14,7 @@ import { PriceRange, Location } from "@/types";
 import Image from "next/image";
 import Breadcrumb from "@/components/store/Breadcrumbs";
 import { getSubCategoryBySlug } from "@/actions/get-subcategory";
+import { getLocationGroups } from "@/actions/get-location-group";
 
 // Helper function for retrying API calls
 async function withRetry<T>(
@@ -142,7 +143,7 @@ const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
   // Fetch other data with retry
   const sizes = await withRetry(() => getSizes());
   const colors = await withRetry(() => getColors());
-  const locations = await withRetry(() => getLocations(params.storeId));
+  const locationGroups = await withRetry(() => getLocationGroups());
 
   // Size filtering logic remains the same
   const sizeMap: { [key: string]: string[] } = {
@@ -232,7 +233,7 @@ const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
                     <ProductCard
                       key={product.id}
                       data={product}
-                      locations={locations}
+                      locationGroups={locationGroups}
                     />
                   ))}
                 </div>

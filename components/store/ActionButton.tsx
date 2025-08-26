@@ -14,7 +14,7 @@ interface ActionButtonsProps {
   product: Product;
   selectedVariant: Variant;
   locationPrice: { price: number; mrp: number };
-  selectedLocationId: string | null;
+  selectedLocationGroupId: string | null;
   isProductAvailable: boolean;
   locationPinCode: string | null;
   deliveryInfo: {
@@ -29,7 +29,7 @@ export const ActionButtons = ({
   product,
   selectedVariant,
   locationPrice,
-  selectedLocationId,
+  selectedLocationGroupId,
   isProductAvailable,
   deliveryInfo,
   locationPinCode,

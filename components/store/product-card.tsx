@@ -1,6 +1,6 @@
 "use client";
 
-import { Product, Location } from "@/types";
+import { Product, LocationGroup } from "@/types";
 import Image from "next/image";
 import { IconButton } from "@/components/ui/icon-button";
 import { ExpandIcon, ShoppingCart } from "lucide-react";
@@ -13,10 +13,10 @@ import { Star } from "lucide-react";
 
 interface ProductCardProps {
   data: Product;
-  locations: Location[]; // Add locations
+  locationGroups: LocationGroup[];
 }
 
-export const ProductCard = ({ data, locations }: ProductCardProps) => {
+export const ProductCard = ({ data, locationGroups }: ProductCardProps) => {
   const router = useRouter();
   const { onOpen } = usePreviewModal();
   const { addItem } = useCart();
@@ -28,13 +28,13 @@ export const ProductCard = ({ data, locations }: ProductCardProps) => {
     price: data.variants[0]?.price || 0,
     mrp: data.variants[0]?.mrp || data.variants[0]?.price || 0,
   });
-  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
-    null
-  );
+  const [selectedLocationGroupId, setSelectedLocationGroupId] = useState<
+    string | null
+  >(null);
 
-  // Calculate location-based price
+  // Calculate location group-based price
   useEffect(() => {
-    const defaultPincode = "110040"; // New Delhi
+    const defaultLocationGroupId = "68acbf8a6fd4d122ffa12404"; // Default to Delhi location group
     let locationData: { pincode: string } | null = null;
     try {
       const storedData = localStorage.getItem("locationData");
@@ -45,32 +45,36 @@ export const ProductCard = ({ data, locations }: ProductCardProps) => {
       console.error("Error parsing locationData from localStorage:", error);
     }
 
-    const inputPincode = locationData?.pincode || defaultPincode;
-    const location = locations.find((loc) => loc.pincode === inputPincode);
+    const inputPincode = locationData?.pincode;
+    const locationGroup = inputPincode
+      ? locationGroups?.find((lg) =>
+          lg.locations.some((loc) => loc.pincode === inputPincode)
+        )
+      : null;
     const selectedVariant =
       data.variants[selectedVariantIndex] || data.variants[0];
 
-    if (location && selectedVariant?.variantPrices) {
+    if (locationGroup && selectedVariant?.variantPrices) {
       const variantPrice = selectedVariant.variantPrices.find(
-        (vp) => vp.locationId === location.id
+        (vp) => vp.locationGroupId === locationGroup.id
       );
       if (variantPrice) {
-        setSelectedLocationId(location.id);
+        setSelectedLocationGroupId(locationGroup.id);
         setLocationPrice({ price: variantPrice.price, mrp: variantPrice.mrp });
         return;
       }
     }
 
-    // Fallback to New Delhi or default variant price
-    const defaultLocation = locations.find(
-      (loc) => loc.pincode === defaultPincode
+    // Fallback to default location group or variant price
+    const defaultLocationGroup = locationGroups?.find(
+      (lg) => lg.id === defaultLocationGroupId
     );
-    const defaultVariantPrice = defaultLocation
+    const defaultVariantPrice = defaultLocationGroup
       ? selectedVariant?.variantPrices?.find(
-          (vp) => vp.locationId === defaultLocation.id
+          (vp) => vp.locationGroupId === defaultLocationGroup.id
         )
       : null;
-    setSelectedLocationId(defaultLocation?.id || null);
+    setSelectedLocationGroupId(defaultLocationGroup?.id || null);
     setLocationPrice({
       price: defaultVariantPrice?.price || selectedVariant?.price || 0,
       mrp:
@@ -79,7 +83,7 @@ export const ProductCard = ({ data, locations }: ProductCardProps) => {
         selectedVariant?.price ||
         0,
     });
-  }, [selectedVariantIndex, locations, data.variants]);
+  }, [selectedVariantIndex, locationGroups, data.variants]);
 
   const onClick = () => {
     router.push(`/product/${data?.slug}`);
@@ -89,30 +93,6 @@ export const ProductCard = ({ data, locations }: ProductCardProps) => {
     event.stopPropagation();
     onOpen(data);
   };
-
-  // const onHandleCart: MouseEventHandler<HTMLButtonElement> = async (event) => {
-  //   event.stopPropagation();
-  //   if (data.variants.length > 0) {
-  //     const selectedVariant = data.variants[selectedVariantIndex];
-  //     addItem({
-  //       ...data,
-  //       price: locationPrice.price, // Use location-based price
-  //       deliveryDays: 0,
-  //       selectedVariant: {
-  //         id: selectedVariant.id,
-  //         price: locationPrice.price, // Use location-based price
-  //         stock: selectedVariant.stock,
-  //         sku: selectedVariant.sku,
-  //         size: selectedVariant.size,
-  //         color: selectedVariant.color,
-  //         images: selectedVariant.images,
-  //       },
-  //       checkOutQuantity: 1,
-  //       // locationId: selectedLocationId, // Include locationId
-  //       pincode: "247001",
-  //     });
-  //   }
-  // };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-IN", {

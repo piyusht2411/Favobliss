@@ -1,6 +1,6 @@
 "use client";
 
-import { Product, Location } from "@/types";
+import { LocationGroup, Product } from "@/types";
 import { NoResults } from "./no-results";
 import { ProductCard } from "./product-card";
 import Link from "next/link";
@@ -8,7 +8,7 @@ import Link from "next/link";
 interface ProductListProps {
   title: string;
   data: Product[];
-  locations: Location[];
+  locationGroups: LocationGroup[];
   isSpaceTop?: boolean;
   isBannerProduct?: boolean;
   showViewAll?: boolean;
@@ -18,7 +18,7 @@ interface ProductListProps {
 export const ProductList = ({
   title,
   data,
-  locations,
+  locationGroups,
   isSpaceTop = true,
   isBannerProduct = false,
   showViewAll = false,
@@ -49,7 +49,7 @@ export const ProductList = ({
               isBannerProduct ? "xl:w-[16vw]" : "xl:w-[17vw]"
             } snap-start`}
           >
-            <ProductCard data={product} locations={locations} />
+            <ProductCard data={product} locationGroups={locationGroups} />
           </div>
         ))}
       </div>
