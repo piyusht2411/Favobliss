@@ -51,11 +51,13 @@ interface ProductDetailsProps {
   deliveryInfo: {
     location: string;
     estimatedDelivery: number;
+    isCodAvailable: boolean;
   } | null;
   setDeliveryInfo: Dispatch<
     SetStateAction<{
       location: string;
       estimatedDelivery: number;
+      isCodAvailable: boolean;
     } | null>
   >;
   divRef?: React.RefObject<HTMLDivElement>;
@@ -199,6 +201,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         setDeliveryInfo({
           location: `${sessionLocation.city}, ${sessionPincode}`,
           estimatedDelivery: activeLocationGroup.deliveryDays || 0,
+          isCodAvailable: activeLocationGroup.isCodAvailable || false,
         });
       }
     }
@@ -227,6 +230,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
                   matchedLocation?.city || "Unknown"
                 }, ${storedPincode}`,
                 estimatedDelivery: activeLocationGroup.deliveryDays || 0,
+                isCodAvailable: activeLocationGroup.isCodAvailable || false,
               });
             }
           }
@@ -259,6 +263,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         setDeliveryInfo({
           location: `${matchedLocation?.city || "Delhi"}, ${fallbackPincode}`,
           estimatedDelivery: activeLocationGroup.deliveryDays || 0,
+          isCodAvailable: activeLocationGroup.isCodAvailable || false,
         });
       }
     }
@@ -320,6 +325,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         setDeliveryInfo({
           location: `${foundLocation.city}, ${foundLocation.pincode}`,
           estimatedDelivery: foundGroup.deliveryDays || 0,
+          isCodAvailable: foundGroup.isCodAvailable || false,
         });
         setIsCodAvailableForPincode(foundGroup.isCodAvailable);
         setCurrentLocationGroupData(foundGroup);
@@ -338,6 +344,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         setDeliveryInfo({
           location: `Pincode ${pincode.trim()}`,
           estimatedDelivery: 0,
+          isCodAvailable: false,
         });
         setIsCodAvailableForPincode(false);
         setCurrentLocationGroupData(null);
@@ -517,6 +524,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         checkOutQuantity: 1,
         pincode: itemPincode,
         deliveryDays: deliveryInfo?.estimatedDelivery || 0,
+        isCodAvailable: deliveryInfo?.isCodAvailable || false,
       });
     } catch (error) {
       console.error("Error adding to cart:", error);
@@ -547,6 +555,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         checkOutQuantity: 1,
         pincode: itemPincode,
         deliveryDays: deliveryInfo?.estimatedDelivery || 0,
+        isCodAvailable: deliveryInfo?.isCodAvailable || false,
       });
       router.push("/checkout/cart");
     } catch (error) {

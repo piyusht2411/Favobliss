@@ -189,7 +189,8 @@ export const UserAddressCard = ({ data, label }: UserAddressCardProps) => {
             variantPrice.price,
             variantPrice.mrp,
             String(selectedAddress.zipCode),
-            variantPrice.locationGroup?.deliveryDays || 0
+            variantPrice.locationGroup?.deliveryDays || 0,
+            variantPrice.locationGroup?.isCodAvailable || false
           );
 
           updateItemCheckoutPrice(

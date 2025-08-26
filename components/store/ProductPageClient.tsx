@@ -38,6 +38,7 @@ export const ProductPageContent = ({
   const [deliveryInfo, setDeliveryInfo] = useState<{
     location: string;
     estimatedDelivery: number;
+    isCodAvailable: boolean;
   } | null>(null);
   const [isProductAvailable, setIsProductAvailable] = useState(true);
   const [selectedLocationGroupId, setSelectedLocationGroupId] = useState<

@@ -61,16 +61,9 @@ export const Summary = (props: Props) => {
       return;
     }
 
-    const allItemsCodAvailable = items.every((item) => {
-      if (!item.selectedVariant || !item.selectedVariant.variantPrices) {
-        return false;
-      }
-      return item.selectedVariant.variantPrices.every(
-        //@ts-ignore
-        (price) => price.location?.isCodAvailable === true
-      );
-    });
+    console.log(items);
 
+    const allItemsCodAvailable = items.every((item) => item.isCodAvailable === true);
     setIsCODAvailable(allItemsCodAvailable);
   }, [items]);
 

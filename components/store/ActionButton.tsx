@@ -20,6 +20,7 @@ interface ActionButtonsProps {
   deliveryInfo: {
     location: string;
     estimatedDelivery: number;
+    isCodAvailable: boolean;
   } | null;
 }
 
@@ -50,6 +51,7 @@ export const ActionButtons = ({
         checkOutQuantity: 1,
         pincode: itemPincode,
         deliveryDays: deliveryInfo?.estimatedDelivery || 0,
+        isCodAvailable: deliveryInfo?.isCodAvailable || false,
       });
     } catch (error) {
       console.error("Error adding to cart:", error);
@@ -69,6 +71,7 @@ export const ActionButtons = ({
         checkOutQuantity: 1,
         pincode: itemPincode,
         deliveryDays: deliveryInfo?.estimatedDelivery || 0,
+        isCodAvailable: deliveryInfo?.isCodAvailable || false,
       });
       router.push("/checkout/cart");
     } catch (error) {

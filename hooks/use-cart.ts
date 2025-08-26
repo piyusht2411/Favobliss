@@ -8,9 +8,10 @@ interface CartItem extends Product {
   checkOutQuantity: number;
   selectedVariant: Variant;
   price: number;
-  mrp: number; // Added
+  mrp: number;
   pincode: string;
   deliveryDays: number;
+  isCodAvailable: boolean;
 }
 
 interface UseCart {
@@ -24,7 +25,8 @@ interface UseCart {
     newPrice: number,
     newMrp: number, // Added
     newPincode: string,
-    newDeliveryDays: number
+    newDeliveryDays: number,
+    isCodAvailable: boolean
   ) => void;
   removeItem: (variantId: string) => void;
   removeAll: () => void;
@@ -51,7 +53,7 @@ export const useCart = create(
               {
                 ...data,
                 checkOutQuantity: 1,
-                mrp: data.mrp || data.price, // Fallback to price if mrp is missing
+                mrp: data.mrp || data.price,
               },
             ],
           });
@@ -108,7 +110,8 @@ export const useCart = create(
         newPrice: number,
         newMrp: number,
         newPincode: string,
-        newDeliveryDays: number
+        newDeliveryDays: number,
+        isCodAvailable: boolean
       ) => {
         set((state) => ({
           items: state.items.map((item) =>
@@ -116,9 +119,10 @@ export const useCart = create(
               ? {
                   ...item,
                   price: newPrice,
-                  mrp: newMrp, // Added
+                  mrp: newMrp,
                   pincode: newPincode,
                   deliveryDays: newDeliveryDays,
+                  isCodAvailable: isCodAvailable,
                 }
               : item
           ),

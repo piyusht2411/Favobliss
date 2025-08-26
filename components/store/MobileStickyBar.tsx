@@ -17,6 +17,7 @@ interface MobileStickyActionBarProps {
   deliveryInfo: {
     location: string;
     estimatedDelivery: number;
+    isCodAvailable: boolean;
   } | null;
 }
 
