@@ -88,7 +88,7 @@ export const premiumProducts: any[] = [
 
 export const kitchenAppliance: any[] = [
   {
-    id: "1",
+    id: "6846b1218f5c2887dac45aa2",
     title: "Coffee Maker",
     image:
       "https://img.freepik.com/free-photo/view-coffee-making-machine_23-2150698665.jpg?ga=GA1.1.848270097.1752087718&semt=ais_hybrid&w=740&q=80",
@@ -96,7 +96,7 @@ export const kitchenAppliance: any[] = [
     backgroundColor: "#f8f9fa",
   },
   {
-    id: "2",
+    id: "6846b1638f5c2887dac45aa4",
     title: "Rice Cooker",
     image:
       "https://img.freepik.com/premium-photo/electric-rice-cooker-white-background_933530-7898.jpg?ga=GA1.1.848270097.1752087718&semt=ais_hybrid&w=740&q=80",
@@ -104,7 +104,7 @@ export const kitchenAppliance: any[] = [
     backgroundColor: "#fff5f5",
   },
   {
-    id: "3",
+    id: "6846b1bc8f5c2887dac45aa7",
     title: "Hand Mixers",
     image:
       "https://img.freepik.com/premium-photo/confectioner-makes-blender-cream-cake-kitchen_210733-2368.jpg?ga=GA1.1.848270097.1752087718&semt=ais_hybrid&w=740&q=80",
@@ -112,7 +112,7 @@ export const kitchenAppliance: any[] = [
     backgroundColor: "#f0fdf4",
   },
   {
-    id: "4",
+    id: "6846b25e8f5c2887dac45aad",
     title: "Toaster",
     image:
       "https://img.freepik.com/free-photo/brown-retro-electronic-toaster-device_23-2151002823.jpg?ga=GA1.1.848270097.1752087718&semt=ais_hybrid&w=740&q=80",
@@ -123,7 +123,7 @@ export const kitchenAppliance: any[] = [
 
 export const applianceItems: any[] = [
   {
-    id: "1",
+    id: "68469b178f5c2887dac45a3f",
     title: "Air purifier",
     image:
       "https://img.freepik.com/premium-vector/air-purifier-realistic-poster-with-editable-text-modern-appliance-living-room-fresh-air-dust-removing-vector-illustration_1284-70567.jpg?ga=GA1.1.1292182921.1754325589&semt=ais_hybrid&w=740&q=80",
@@ -131,7 +131,7 @@ export const applianceItems: any[] = [
     backgroundColor: "#f8f9fa",
   },
   {
-    id: "2",
+    id: "68469b898f5c2887dac45a40",
     title: "Dishwasher",
     image:
       "https://img.freepik.com/free-vector/3d-realistic-mock-up-kitchen-room-with-white-clean-floor-tile-wall_1441-2103.jpg?ga=GA1.1.1292182921.1754325589&semt=ais_hybrid&w=740&q=80",
@@ -139,7 +139,7 @@ export const applianceItems: any[] = [
     backgroundColor: "#fff5f5",
   },
   {
-    id: "3",
+    id: "68469c888f5c2887dac45a45",
     title: "Refrigerators",
     image:
       "https://img.freepik.com/free-vector/household-appliances-gift-realistic_1284-65309.jpg?ga=GA1.1.1292182921.1754325589&semt=ais_hybrid&w=740&q=80",
@@ -147,7 +147,7 @@ export const applianceItems: any[] = [
     backgroundColor: "#f0fdf4",
   },
   {
-    id: "4",
+    id: "68469bd98f5c2887dac45a41",
     title: "Fan",
     image:
       "https://img.freepik.com/premium-vector/ceiling-fan-silhouette-vector-white-background_931294-1887.jpg?ga=GA1.1.1292182921.1754325589&semt=ais_hybrid&w=740&q=80",

@@ -2,8 +2,6 @@
 
 import { Product, LocationGroup } from "@/types";
 import Image from "next/image";
-import { IconButton } from "@/components/ui/icon-button";
-import { ExpandIcon, ShoppingCart } from "lucide-react";
 import { formatter } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { MouseEventHandler, useState, useEffect } from "react";
@@ -32,9 +30,8 @@ export const ProductCard = ({ data, locationGroups }: ProductCardProps) => {
     string | null
   >(null);
 
-  // Calculate location group-based price
   useEffect(() => {
-    const defaultLocationGroupId = "68acbf8a6fd4d122ffa12404"; // Default to Delhi location group
+    const defaultLocationGroupId = "68acbf8a6fd4d122ffa12404";
     let locationData: { pincode: string } | null = null;
     try {
       const storedData = localStorage.getItem("locationData");
@@ -142,7 +139,6 @@ export const ProductCard = ({ data, locationGroups }: ProductCardProps) => {
     return acc;
   }, [] as (typeof data.variants)[0]["color"][]);
 
-  // Get unique sizes for variant display
   const uniqueSizes = data.variants.reduce((acc, variant) => {
     if (!acc.find((size) => size && variant.size && size.id === size.id)) {
       acc.push(variant.size);
@@ -152,12 +148,10 @@ export const ProductCard = ({ data, locationGroups }: ProductCardProps) => {
 
   return (
     <div onClick={onClick} className="w-full cursor-pointer">
-      <div className="relative bg-gray-100 rounded-xl p-3 md:p-4 shadow-lg hover:shadow-2xl transition-shadow duration-200 h-full">
-        {discount > 0 && (
-          <div className="absolute top-2 left-2 bg-orange-400 text-white text-xs px-2 py-1 rounded-full font-medium z-[10]">
-            {discount}% off
-          </div>
-        )}
+      <div className="relative bg-gray-100 rounded-xl p-3 md:p-4 shadow-[0_0_15px_0_rgba(0,0,0,0.25)] hover:shadow-[0_0_20px_0_rgba(0,0,0,0.35)] transition-shadow duration-200 h-full">
+        <div className="absolute top-2 left-2 bg-orange-400 text-white text-xs px-2 py-1 rounded-full font-medium z-[10]">
+          {discount}% off
+        </div>
 
         <div className="aspect-square mb-3 md:mb-4 flex items-center justify-center bg-white rounded-lg relative overflow-hidden">
           <Image
@@ -184,17 +178,29 @@ export const ProductCard = ({ data, locationGroups }: ProductCardProps) => {
           </div>
           <div className="space-y-1">
             <div className="flex flex-col md:flex-row md:items-center space-y-1 md:space-y-0 md:space-x-2 flex-wrap">
-              <span className="text-sm md:text-lg font-bold text-gray-900">
+              <span
+                className="text-[16px] md:text-lg font-bold text-gray-900"
+                style={{ fontSize: "16px" }}
+              >
                 {formatPrice(locationPrice.price)}
               </span>
               {locationPrice.mrp > locationPrice.price && (
-                <div className="text-xs md:text-sm text-gray-500">
+                <div
+                  className="text-[12px] md:text-sm text-gray-500"
+                  style={{ fontSize: "12px" }}
+                >
                   MRP{" "}
                   <span className="line-through">
                     {formatPrice(locationPrice.mrp)}
                   </span>
                 </div>
               )}
+              <div
+                className="bg-orange-400 text-white text-[12px] px-2 py-1 rounded-full font-medium"
+                style={{ fontSize: "12px" }}
+              >
+                {discount}% off
+              </div>
             </div>
           </div>
         </div>

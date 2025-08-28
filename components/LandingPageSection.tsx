@@ -15,6 +15,7 @@ interface HomeAppliancesSectionProps {
   items: ApplianceItem[];
   viewAllLink?: string;
   className?: string;
+  handleCategoryChange: (id: string) => void;
 }
 
 const LandingPageSection: React.FC<HomeAppliancesSectionProps> = ({
@@ -22,6 +23,7 @@ const LandingPageSection: React.FC<HomeAppliancesSectionProps> = ({
   items,
   viewAllLink,
   className = "",
+  handleCategoryChange,
 }) => {
   return (
     <div className={`rounded-2xl p-6 w-full max-w-full ${className}`}>
@@ -37,13 +39,13 @@ const LandingPageSection: React.FC<HomeAppliancesSectionProps> = ({
         )}
       </div>
 
-      <div className="flex overflow-x-auto space-x-6 md:space-x-12 pb-4 scrollbar-hide snap-x snap-mandatory">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
         {items.map((item) => (
-          <div
-            key={item.id}
-            className="flex-none w-[45vw] md:w-[22%] snap-start"
-          >
-            <ApplianceCard item={item} />
+          <div key={item.id}>
+            <ApplianceCard
+              item={item}
+              handleCategoryChange={handleCategoryChange}
+            />
           </div>
         ))}
       </div>
@@ -53,28 +55,33 @@ const LandingPageSection: React.FC<HomeAppliancesSectionProps> = ({
 
 interface ApplianceCardProps {
   item: ApplianceItem;
+  handleCategoryChange: (id: string) => void;
 }
 
-const ApplianceCard: React.FC<ApplianceCardProps> = ({ item }) => {
-  return (
-    <Link href={item.link}>
-      <div className="group cursor-pointer">
-        <div className="relative w-full aspect-square rounded-xl mb-3 overflow-hidden transition-transform group-hover:scale-105">
-          <Image
-            src={item.image}
-            alt={item.title}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 25vw"
-          />
-        </div>
+const ApplianceCard: React.FC<ApplianceCardProps> = React.memo(
+  ({ item, handleCategoryChange }) => {
+    return (
+      <div onClick={() => handleCategoryChange(item.id)}>
+        <div className="group cursor-pointer">
+          <div className="relative w-full aspect-square rounded-xl mb-3 overflow-hidden transition-transform group-hover:scale-105">
+            <Image
+              src={item.image}
+              alt={item.title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 50vw, 25vw"
+            />
+          </div>
 
-        <h3 className="text-sm font-medium text-gray-900 text-center group-hover:text-blue-600 transition-colors">
-          {item.title}
-        </h3>
+          <h3 className="text-sm font-medium text-gray-900 text-center group-hover:text-blue-600 transition-colors">
+            {item.title}
+          </h3>
+        </div>
       </div>
-    </Link>
-  );
-};
+    );
+  }
+);
+
+ApplianceCard.displayName = "ApplianceCard";
 
 export default LandingPageSection;

@@ -11,6 +11,7 @@ import { FlowbiteProvider } from "@/providers/flowbite";
 import Script from "next/script";
 import "react-loading-skeleton/dist/skeleton.css";
 import WhatsAppButton from "@/components/store/WhatsAppButton";
+import { getCategories } from "@/actions/get-categories";
 
 const inter = Urbanist({ subsets: ["latin"] });
 const roboto = Roboto({
@@ -28,11 +29,12 @@ export const metadata: Metadata = {
     "Favobliss Explore a wide range of smartphones, home appliances, and more from top brands at unbeatable prices. Fast delivery &amp; great deals.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const data = await getCategories();
   return (
     <html lang="en">
       <link rel="icon" href="/assets/favicon.ico" sizes="any" />
@@ -44,7 +46,7 @@ export default function RootLayout({
           <Navbar />
           {children}
           <WhatsAppButton />
-          <Footer />
+          <Footer categories={data} />
           <Script src="https://checkout.razorpay.com/v1/checkout.js" />
         </SessionProvider>
       </body>

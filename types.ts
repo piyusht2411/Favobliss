@@ -69,6 +69,7 @@ export interface Category {
   landingPageBanner: string;
   slug: string;
   description?: string;
+  subCategories?: Category[];
 }
 
 export enum ProductType {

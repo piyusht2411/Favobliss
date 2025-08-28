@@ -1,3 +1,5 @@
+"use client";
+
 import {
   FaFacebookF,
   FaInstagram,
@@ -5,10 +7,39 @@ import {
   FaTwitter,
   FaYoutube,
 } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { Category } from "@/types";
+import { useRouter } from "next/navigation";
 
-export const Footer = () => {
+interface Props {
+  categories: Category[];
+}
+
+export const Footer = (props: Props) => {
+  const [mounted, setMounted] = useState(false);
+  const { categories } = props;
+  const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleCategoryClick = (slug: string) => {
+    router.push(`/category/${slug}?page=1`);
+  };
+
+  const handleSubCategoryClick = (
+    categorySlug: string,
+    subCategorySlug: string
+  ) => {
+    router.push(`/category/${categorySlug}?sub=${subCategorySlug}?page=1`);
+  };
+
+  if (!mounted) {
+    return null;
+  }
+
   return (
-    // <footer className="bg-gradient-to-br from-gray-900 to-black text-white">
     <footer className="bg-black text-white">
       <div className="container mx-auto px-6 lg:px-16 py-16">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-16">
@@ -121,7 +152,51 @@ export const Footer = () => {
           </div>
         </div>
 
-        {/* Divider */}
+        {categories.length > 0 && (
+          <div className="mt-16 pt-8 border-t border-white/10">
+            <div className="space-y-8">
+              {categories.map((category) => (
+                <div key={category.id} className="space-y-4">
+                  {/* Category Header */}
+                  <h3
+                    className="text-sm font-bold text-white uppercase tracking-wider cursor-pointer hover:text-blue-400 transition-colors duration-200"
+                    onClick={() => handleCategoryClick(category.slug)}
+                  >
+                    {category.name}
+                  </h3>
+
+                  {/* Subcategories */}
+                  {category.subCategories &&
+                    category.subCategories.length > 0 && (
+                      <div className="text-xs text-gray-400 leading-relaxed">
+                        {category.subCategories.map((subCategory, index) => (
+                          <span key={subCategory.id}>
+                            <span
+                              className="hover:text-white cursor-pointer transition-colors duration-200"
+                              onClick={() =>
+                                handleSubCategoryClick(
+                                  category.slug,
+                                  subCategory.slug
+                                )
+                              }
+                            >
+                              {subCategory.name}
+                            </span>
+                            {category.subCategories &&
+                              index < category.subCategories.length - 1 && (
+                                <span className="mx-2 text-gray-600">|</span>
+                              )}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Original Divider */}
         <div className="mt-16 pt-8 border-t border-white/10">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-gray-400">

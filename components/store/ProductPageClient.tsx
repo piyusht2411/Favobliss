@@ -148,7 +148,7 @@ export const ProductPageContent = ({
     <div className="bg-white text-black mb-16">
       <Breadcrumb items={breadcrumbItems} />
       <Container>
-        <div className="px-4 py-10 sm:px-6 lg:px-5">
+        <div className="px-4 py-4 sm:px-6 lg:px-5">
           <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8 relative">
             <div className="lg:sticky lg:top-0 lg:overflow-hidden lg:h-auto">
               <Gallery

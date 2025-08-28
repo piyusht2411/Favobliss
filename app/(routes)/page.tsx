@@ -28,6 +28,7 @@ import PromotionalBanner from "@/components/store/PromotionalBanner";
 import { getSubCategories } from "@/actions/get-subcategory";
 import RecentlyViewed from "@/components/store/RecentlyViewed";
 import { getLocationGroups } from "@/actions/get-location-group";
+import HomeAppliance from "@/components/store/HomeAppliance";
 
 export const revalidate = 0;
 
@@ -94,7 +95,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
                 className="object-cover bg-blend-color-burn"
               />
             </div> */}
-            <LandingPageSection
+            {/* <LandingPageSection
               title="Home Appliances"
               items={applianceItems}
               viewAllLink="/category/home-appliances?page=1"
@@ -104,8 +105,22 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
               title=""
               data={homeApplicance || []}
               locationGroups={locationGroups}
+            /> */}
+            <HomeAppliance
+              title="Home Appliances"
+              categoryId="6843219ac338ba8cc9db1e72"
+              locationGroups={locationGroups}
+              link="/category/home-appliances?page=1"
+              items={applianceItems}
             />
-            <LandingPageSection
+            <HomeAppliance
+              title="Kitchen Appliances"
+              categoryId="684321aac338ba8cc9db1e73"
+              locationGroups={locationGroups}
+              link="/category/kitchen-appliances?page=1"
+              items={kitchenAppliance}
+            />
+            {/* <LandingPageSection
               title="Kitchen Appliances"
               items={kitchenAppliance}
               viewAllLink="/category/kitchen-appliances?page=1"
@@ -115,7 +130,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
               title=""
               data={kitchen || []}
               locationGroups={locationGroups}
-            />
+            /> */}
             {/* <BestOfProduct
               products={brandProducts || []}
               title="Best of Apple"
