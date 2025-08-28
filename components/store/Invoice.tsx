@@ -1,6 +1,6 @@
 "use client";
 
-import { myNumberToWords } from "@/lib/utils";
+import { myNumberToWords, wrapNumber } from "@/lib/utils";
 import React, { RefObject } from "react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -38,6 +38,9 @@ const Invoice = (props: Props) => {
       });
     }
   };
+
+  const isTaxDouble = invoiceData.deliveredTo.state === "Delhi" ? true : false;
+
   return (
     <>
       <div className="flex justify-end px-12 pt-8 items-center">
@@ -145,7 +148,32 @@ const Invoice = (props: Props) => {
           </div>
 
           <div className="border-b-2 border-black">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm table-fixed">
+              <colgroup>
+                {/* Description */}
+                <col style={{ width: "28%" }} />
+                {/* HSN */}
+                <col style={{ width: "10%" }} />
+                {/* Qty */}
+                <col style={{ width: "6%" }} />
+                {/* Unit Price */}
+                <col style={{ width: "12%" }} />
+                {/* Unit Disc. */}
+                <col style={{ width: "10%" }} />
+                {/* Taxable Value */}
+                <col style={{ width: "12%" }} />
+                {/* Tax columns: either IGST (one col) or CGST + SGST (two cols) */}
+                {isTaxDouble ? (
+                  <>
+                    <col style={{ width: "10%" }} />
+                    <col style={{ width: "10%" }} />
+                  </>
+                ) : (
+                  <col style={{ width: "10%" }} />
+                )}
+                {/* Total */}
+                <col style={{ width: "12%" }} />
+              </colgroup>
               <thead>
                 <tr className="bg-[#d2d2d2] border-black border-b-2">
                   <th className="border-r-2 border-black p-2 text-center font-bold">
@@ -166,9 +194,21 @@ const Invoice = (props: Props) => {
                   <th className="border-r-2 border-black p-2 text-center font-bold">
                     Taxable Value
                   </th>
-                  <th className="border-r-2 border-black p-2 text-center font-bold">
-                    IGST
-                  </th>
+                  {isTaxDouble && (
+                    <th className="border-r-2 border-black p-2 text-center font-bold">
+                      CGST
+                    </th>
+                  )}
+                  {isTaxDouble ? (
+                    <th className="border-r-2 border-black p-2 text-center font-bold">
+                      SGST
+                    </th>
+                  ) : (
+                    <th className="border-r-2 border-black p-2 text-center font-bold">
+                      IGST
+                    </th>
+                  )}
+
                   <th className="p-2 text-center font-bold">Total</th>
                 </tr>
               </thead>
@@ -183,7 +223,7 @@ const Invoice = (props: Props) => {
                     </td>
                     <td className="border-r-2 border-black p-2 text-center align-top">
                       <div className="leading-tight">
-                        <p className="text-base">{item.hsn}</p>
+                        <p className="text-base">{wrapNumber(item.hsn, 5)}</p>
                       </div>
                     </td>
                     <td className="border-r-2 border-black p-2 text-center align-top text-base">
@@ -198,11 +238,22 @@ const Invoice = (props: Props) => {
                     <td className="border-r-2 border-black p-2 text-center align-top text-base">
                       {item.taxableValue.toFixed(2)}
                     </td>
-                    <td className="border-r-2 border-black p-2 text-center align-top text-base">
-                      {item.igst.toFixed(2)}
-                    </td>
+                    {isTaxDouble && (
+                      <td className="border-r-2 border-black p-2 text-center align-top text-base">
+                        {(Number(item.igst) / 2).toFixed(2)}
+                      </td>
+                    )}
+                    {isTaxDouble ? (
+                      <td className="border-r-2 border-black p-2 text-center align-top text-base">
+                        {(Number(item.igst) / 2).toFixed(2)}
+                      </td>
+                    ) : (
+                      <td className="border-r-2 border-black p-2 text-center align-top text-base">
+                        {item.igst.toFixed(2)}
+                      </td>
+                    )}
                     <td className="p-2 text-center align-top text-base">
-                      {item.total.toFixed(2)}
+                      {wrapNumber(item.total.toFixed(2), 8)}
                     </td>
                   </tr>
                 ))}
@@ -216,7 +267,10 @@ const Invoice = (props: Props) => {
                   <td className="border-r-2 border-black p-2 text-center font-bold">
                     {invoiceData.items.length}
                   </td>
-                  <td colSpan={4} className="border-r-2 border-black"></td>
+                  <td
+                    colSpan={isTaxDouble ? 5 : 4}
+                    className="border-r-2 border-black"
+                  ></td>
                   <td className="p-2 text-right font-bold">
                     {invoiceData.netTotal.toFixed(2)}
                   </td>

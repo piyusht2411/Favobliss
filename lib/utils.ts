@@ -158,3 +158,34 @@ function convertHundreds(num: number): string {
   }
   return "";
 }
+
+export function wrapNumber(input: string, width: number): string {
+  const words = input.split(" ");
+  const lines: string[] = [];
+  let currentLine = "";
+
+  for (const word of words) {
+    if ((currentLine + word).length > width) {
+      if (currentLine) {
+        lines.push(currentLine.trim());
+        currentLine = "";
+      }
+
+      if (word.length > width) {
+        for (let i = 0; i < word.length; i += width) {
+          lines.push(word.substring(i, i + width));
+        }
+      } else {
+        currentLine = word + " ";
+      }
+    } else {
+      currentLine += word + " ";
+    }
+  }
+
+  if (currentLine) {
+    lines.push(currentLine.trim());
+  }
+
+  return lines.join("\n");
+}
