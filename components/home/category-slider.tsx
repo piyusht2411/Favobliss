@@ -66,10 +66,19 @@ export function CategorySlider(props: Props) {
         opts={{
           align: "start",
           loop: false,
+          dragFree: true,
         }}
         className="w-full max-w-7xl mx-auto px-4"
       >
-        <CarouselContent className="-ml-1 justify-between">
+        <CarouselContent
+          className="-ml-1 justify-between overflow-x-auto touch-auto"
+          style={{
+            scrollBehavior: "smooth",
+            WebkitOverflowScrolling: "touch",
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+          }}
+        >
           {categories.map((category, index) => {
             const imageSrc = getImageSrc(category);
 
@@ -95,17 +104,13 @@ export function CategorySlider(props: Props) {
                       }}
                     />
                   </div>
-
-                  {/* <div className="text-center px-1">
-                    <h3 className="text-xs sm:text-sm font-semibold text-gray-800 uppercase tracking-wide leading-tight group-hover:text-orange-600 transition-colors duration-300 line-clamp-2">
-                      {category.name}
-                    </h3>
-                  </div> */}
                 </div>
               </CarouselItem>
             );
           })}
         </CarouselContent>
+        {/* <CarouselPrevious />
+        <CarouselNext /> */}
       </Carousel>
     </div>
   );
