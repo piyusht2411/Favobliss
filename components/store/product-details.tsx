@@ -8,16 +8,14 @@ import {
   Dispatch,
   SetStateAction,
 } from "react";
-import { Product, Variant, LocationGroup } from "@/types";
+import { Product, Variant, LocationGroup, Address } from "@/types";
 import { formatter } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { HiShoppingBag } from "react-icons/hi";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { ProductFeatures } from "./productFeature";
 import BankOffers from "./bankOffer";
-import { useCart } from "@/hooks/use-cart";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useAddress } from "@/hooks/use-address";
@@ -126,7 +124,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
   const [isCodAvailableForPincode, setIsCodAvailableForPincode] = useState<
     boolean | null
   >(null);
-  const { addItem } = useCart();
+  // const { addItem } = useCart();
   const buttonsRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -176,33 +174,66 @@ export const ProductDetails = (props: ProductDetailsProps) => {
   const initializeDefaultPrice = useCallback(() => {
     let activeLocationGroup: LocationGroup | null = null;
     if (session?.user && addresses?.length && !isAddressLoading) {
-      const firstAddress = addresses[0];
-      const sessionPincode = String(firstAddress.zipCode).trim();
+      const defaultAddress = addresses.find(
+        (address: Address) => address.isDefault
+      );
 
-      activeLocationGroup =
-        locationGroups.find((group) =>
-          group.locations.some((loc) => loc.pincode === sessionPincode)
-        ) ?? null;
+      if (defaultAddress) {
+        const sessionPincode = String(defaultAddress.zipCode).trim();
+        activeLocationGroup =
+          locationGroups.find((group) =>
+            group.locations.some((loc) => loc.pincode === sessionPincode)
+          ) ?? null;
 
-      if (activeLocationGroup) {
-        const matchedLocation = activeLocationGroup.locations.find(
-          (loc) => loc.pincode === sessionPincode
-        );
-        const sessionLocation = {
-          city: firstAddress.district || matchedLocation?.city || "Unknown",
-          pincode: sessionPincode,
-          state: firstAddress.state || matchedLocation?.state || "Unknown",
-          country: "India",
-        };
+        if (activeLocationGroup) {
+          const matchedLocation = activeLocationGroup.locations.find(
+            (loc) => loc.pincode === sessionPincode
+          );
+          const sessionLocation = {
+            city: defaultAddress.district || matchedLocation?.city || "Unknown",
+            pincode: sessionPincode,
+            state: defaultAddress.state || matchedLocation?.state || "Unknown",
+            country: "India",
+          };
 
-        localStorage.setItem("locationData", JSON.stringify(sessionLocation));
-        window.dispatchEvent(new Event("locationDataUpdated"));
-        setIsCodAvailableForPincode(activeLocationGroup.isCodAvailable);
-        setDeliveryInfo({
-          location: `${sessionLocation.city}, ${sessionPincode}`,
-          estimatedDelivery: activeLocationGroup.deliveryDays || 0,
-          isCodAvailable: activeLocationGroup.isCodAvailable || false,
-        });
+          localStorage.setItem("locationData", JSON.stringify(sessionLocation));
+          window.dispatchEvent(new Event("locationDataUpdated"));
+          setIsCodAvailableForPincode(activeLocationGroup.isCodAvailable);
+          setDeliveryInfo({
+            location: `${sessionLocation.city}, ${sessionPincode}`,
+            estimatedDelivery: activeLocationGroup.deliveryDays || 0,
+            isCodAvailable: activeLocationGroup.isCodAvailable || false,
+          });
+        }
+      } else {
+        const firstAddress = addresses[0];
+        const sessionPincode = String(firstAddress.zipCode).trim();
+
+        activeLocationGroup =
+          locationGroups.find((group) =>
+            group.locations.some((loc) => loc.pincode === sessionPincode)
+          ) ?? null;
+
+        if (activeLocationGroup) {
+          const matchedLocation = activeLocationGroup.locations.find(
+            (loc) => loc.pincode === sessionPincode
+          );
+          const sessionLocation = {
+            city: firstAddress.district || matchedLocation?.city || "Unknown",
+            pincode: sessionPincode,
+            state: firstAddress.state || matchedLocation?.state || "Unknown",
+            country: "India",
+          };
+
+          localStorage.setItem("locationData", JSON.stringify(sessionLocation));
+          window.dispatchEvent(new Event("locationDataUpdated"));
+          setIsCodAvailableForPincode(activeLocationGroup.isCodAvailable);
+          setDeliveryInfo({
+            location: `${sessionLocation.city}, ${sessionPincode}`,
+            estimatedDelivery: activeLocationGroup.deliveryDays || 0,
+            isCodAvailable: activeLocationGroup.isCodAvailable || false,
+          });
+        }
       }
     }
 
@@ -508,69 +539,69 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     [selectedSize, data.variants]
   );
 
-  const onHandleCart = useCallback(() => {
-    if (!isProductAvailable) return;
-    const selectedLocationGroup = locationGroups.find(
-      (group) => group.id === selectedLocationGroupId
-    );
-    const itemPincode = selectedLocationGroup?.locations[0]?.pincode || "";
+  // const onHandleCart = useCallback(() => {
+  //   if (!isProductAvailable) return;
+  //   const selectedLocationGroup = locationGroups.find(
+  //     (group) => group.id === selectedLocationGroupId
+  //   );
+  //   const itemPincode = selectedLocationGroup?.locations[0]?.pincode || "";
 
-    try {
-      addItem({
-        ...data,
-        price: locationPrice.price,
-        mrp: locationPrice.mrp,
-        selectedVariant,
-        checkOutQuantity: 1,
-        pincode: itemPincode,
-        deliveryDays: deliveryInfo?.estimatedDelivery || 0,
-        isCodAvailable: deliveryInfo?.isCodAvailable || false,
-      });
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-    }
-  }, [
-    addItem,
-    data,
-    selectedVariant,
-    locationPrice,
-    selectedLocationGroupId,
-    isProductAvailable,
-    deliveryInfo,
-  ]);
+  //   try {
+  //     addItem({
+  //       ...data,
+  //       price: locationPrice.price,
+  //       mrp: locationPrice.mrp,
+  //       selectedVariant,
+  //       checkOutQuantity: 1,
+  //       pincode: itemPincode,
+  //       deliveryDays: deliveryInfo?.estimatedDelivery || 0,
+  //       isCodAvailable: deliveryInfo?.isCodAvailable || false,
+  //     });
+  //   } catch (error) {
+  //     console.error("Error adding to cart:", error);
+  //   }
+  // }, [
+  //   addItem,
+  //   data,
+  //   selectedVariant,
+  //   locationPrice,
+  //   selectedLocationGroupId,
+  //   isProductAvailable,
+  //   deliveryInfo,
+  // ]);
 
-  const onHandleBuyNow = useCallback(() => {
-    if (!isProductAvailable) return;
-    const selectedLocationGroup = locationGroups.find(
-      (group) => group.id === selectedLocationGroupId
-    );
-    const itemPincode = selectedLocationGroup?.locations[0]?.pincode || "";
+  // const onHandleBuyNow = useCallback(() => {
+  //   if (!isProductAvailable) return;
+  //   const selectedLocationGroup = locationGroups.find(
+  //     (group) => group.id === selectedLocationGroupId
+  //   );
+  //   const itemPincode = selectedLocationGroup?.locations[0]?.pincode || "";
 
-    try {
-      addItem({
-        ...data,
-        price: locationPrice.price,
-        mrp: locationPrice.mrp,
-        selectedVariant,
-        checkOutQuantity: 1,
-        pincode: itemPincode,
-        deliveryDays: deliveryInfo?.estimatedDelivery || 0,
-        isCodAvailable: deliveryInfo?.isCodAvailable || false,
-      });
-      router.push("/checkout/cart");
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-    }
-  }, [
-    addItem,
-    data,
-    selectedVariant,
-    locationPrice,
-    selectedLocationGroupId,
-    router,
-    isProductAvailable,
-    deliveryInfo,
-  ]);
+  //   try {
+  //     addItem({
+  //       ...data,
+  //       price: locationPrice.price,
+  //       mrp: locationPrice.mrp,
+  //       selectedVariant,
+  //       checkOutQuantity: 1,
+  //       pincode: itemPincode,
+  //       deliveryDays: deliveryInfo?.estimatedDelivery || 0,
+  //       isCodAvailable: deliveryInfo?.isCodAvailable || false,
+  //     });
+  //     router.push("/checkout/cart");
+  //   } catch (error) {
+  //     console.error("Error adding to cart:", error);
+  //   }
+  // }, [
+  //   addItem,
+  //   data,
+  //   selectedVariant,
+  //   locationPrice,
+  //   selectedLocationGroupId,
+  //   router,
+  //   isProductAvailable,
+  //   deliveryInfo,
+  // ]);
 
   const discountPercentage = locationPrice.mrp
     ? Math.round(
@@ -584,32 +615,32 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     }
   };
 
-  const ActionButtons = ({
-    className = "",
-    isSticky = false,
-  }: {
-    className?: string;
-    isSticky?: boolean;
-  }) => (
-    <div className={cn("grid grid-cols-2 gap-x-4", className)}>
-      <Button
-        className="h-14 font-bold bg-black hover:bg-gray-800 text-white"
-        onClick={onHandleCart}
-        disabled={selectedVariant.stock <= 0 || !isProductAvailable}
-      >
-        <HiShoppingBag className="mr-2 h-5 w-5" />
-        ADD TO Cart
-      </Button>
-      <Button
-        variant="outline"
-        className="h-14 font-bold border-black text-black hover:bg-gray-50"
-        onClick={onHandleBuyNow}
-        disabled={selectedVariant.stock <= 0 || !isProductAvailable}
-      >
-        Buy Now
-      </Button>
-    </div>
-  );
+  // const ActionButtons = ({
+  //   className = "",
+  //   isSticky = false,
+  // }: {
+  //   className?: string;
+  //   isSticky?: boolean;
+  // }) => (
+  //   <div className={cn("grid grid-cols-2 gap-x-4", className)}>
+  //     <Button
+  //       className="h-14 font-bold bg-black hover:bg-gray-800 text-white"
+  //       onClick={onHandleCart}
+  //       disabled={selectedVariant.stock <= 0 || !isProductAvailable}
+  //     >
+  //       <HiShoppingBag className="mr-2 h-5 w-5" />
+  //       ADD TO Cart
+  //     </Button>
+  //     <Button
+  //       variant="outline"
+  //       className="h-14 font-bold border-black text-black hover:bg-gray-50"
+  //       onClick={onHandleBuyNow}
+  //       disabled={selectedVariant.stock <= 0 || !isProductAvailable}
+  //     >
+  //       Buy Now
+  //     </Button>
+  //   </div>
+  // );
 
   return (
     <div ref={divRef}>
@@ -699,8 +730,8 @@ export const ProductDetails = (props: ProductDetailsProps) => {
 
             <div className="mt-2 text-sm text-gray-700">
               <span className="font-medium">
-                Low Cost EMI starting from ₹
-                {(locationPrice.price / 24).toFixed(0)}/mo*
+                EMI plans at just ₹{(locationPrice.price / 24).toFixed(0)}/mo*.
+                See EMI Options
               </span>
             </div>
           </div>

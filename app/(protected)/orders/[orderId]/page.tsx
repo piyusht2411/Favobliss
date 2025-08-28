@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { CancelOrderButton } from "@/components/store/CancelOrderButton";
+import { DownloadInvoiceButton } from "@/components/store/DownloadInvoiceButton";
 
 interface OrderDetailsPageProps {
   params: { orderId: string };
@@ -60,6 +61,7 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
   }
 
   const order = (await getOrder(orderProduct.orderId)) as EnrichedOrder | null;
+  console.log("first", order);
 
   if (!order) {
     return (
@@ -167,7 +169,6 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
     }
   };
 
-  // Simulate status timestamps (replace with backend data if available)
   const getTimelineSteps = (status: string, createdAt: Date) => {
     const steps = [
       {
@@ -184,13 +185,13 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
         status: "SHIPPED",
         timestamp: addDays(createdAt, 1),
         ...getStatusInfo("SHIPPED"),
-        trackingLink: "https://example.com/track", // Replace with real tracking link
+        trackingLink: "https://example.com/track",
       },
       {
         status: "OUTOFDELIVERY",
         timestamp: addDays(createdAt, 2),
         ...getStatusInfo("OUTOFDELIVERY"),
-        trackingLink: "https://example.com/track", // Replace with real tracking link
+        trackingLink: "https://example.com/track",
       },
       {
         status: "DELIVERED",
@@ -199,18 +200,16 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
       },
     ];
 
-    // Include negative statuses (CANCELLED, RETURNED, REFUNDED) if applicable
     if (["CANCELLED", "RETURNED", "REFUNDED"].includes(status)) {
       return [
         {
           status,
-          timestamp: addHours(createdAt, 1), // Adjust timestamp as needed
+          timestamp: addHours(createdAt, 1),
           ...getStatusInfo(status),
         },
       ];
     }
 
-    // Return steps up to the current status
     const statusOrder = [
       "PENDING",
       "PROCESSING",
@@ -250,17 +249,20 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
                 </p>
               </div>
 
-              <div
-                className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium",
-                  statusInfo.bgColor,
-                  statusInfo.color,
-                  statusInfo.borderColor,
-                  "border"
-                )}
-              >
-                <StatusIcon className="w-4 h-4" />
-                {statusInfo.label}
+              <div className="flex items-center gap-3">
+                <DownloadInvoiceButton orderId={order.backendOrderId || ""} />
+                <div
+                  className={cn(
+                    "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium",
+                    statusInfo.bgColor,
+                    statusInfo.color,
+                    statusInfo.borderColor,
+                    "border"
+                  )}
+                >
+                  <StatusIcon className="w-4 h-4" />
+                  {statusInfo.label}
+                </div>
               </div>
             </div>
           </div>
@@ -354,7 +356,86 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
                   </h3>
                 </div>
 
-                <div className="p-6">
+                {order.orderProduct.map((product) => {
+                  return (
+                    <div className="p-6" key={product.id}>
+                      <div className="flex gap-6">
+                        <div className="flex-shrink-0">
+                          <div className="w-32 h-40 rounded-lg overflow-hidden bg-gray-100">
+                            <Image
+                              src={product.productImage}
+                              width={128}
+                              height={160}
+                              alt="Product Image"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex-1">
+                          <Link
+                            href={`/product/${product.slug}`}
+                            className="text-lg font-semibold text-gray-900 mb-2 cursor-pointer hover:text-blue-600 block"
+                          >
+                            {product.name}
+                          </Link>
+                          {!product.about.startsWith("{") && (
+                            <p className="text-gray-600 mb-4">
+                              {product.about}
+                            </p>
+                          )}
+
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <span className="text-gray-500">Size:</span>
+                              <span className="ml-2 font-medium text-gray-900">
+                                {product.size}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Color:</span>
+                              <span className="ml-2 font-medium text-gray-900">
+                                {product.color}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Quantity:</span>
+                              <span className="ml-2 font-medium text-gray-900">
+                                {product.quantity || 1}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">
+                                Payment Method:
+                              </span>
+                              <span className="ml-2 font-medium text-gray-900">
+                                {orderProduct.paymentMethod === "cod"
+                                  ? "Cash on Delivery"
+                                  : "Online Payment"}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">MRP:</span>
+                              <span className="ml-2 font-medium text-gray-900">
+                                {formatter.format(
+                                  product.mrp || product.price || 0
+                                )}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Price:</span>
+                              <span className="ml-2 font-medium text-gray-900">
+                                {formatter.format(product.price || 0)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* <div className="p-6">
                   <div className="flex gap-6">
                     <div className="flex-shrink-0">
                       <div className="w-32 h-40 rounded-lg overflow-hidden bg-gray-100">
@@ -422,7 +503,7 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
                       </div>
                     </div>
                   </div>
-                </div>
+                </div> */}
               </div>
 
               {/* Order Timeline */}
@@ -537,9 +618,7 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
               </div>
             </div>
 
-            {/* Sidebar */}
             <div className="space-y-6">
-              {/* Order Summary */}
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100">
                   <h3 className="font-semibold text-gray-900">Order Summary</h3>
@@ -568,14 +647,23 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
                         </span>
                       </div>
                     )}
-                  {order.discount && order.discount > 0 && (
+                  {order.discount !== undefined && (
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Coupon Discount</span>
-                      <span className="font-medium text-green-600">
-                        -{formatter.format(order.discount)}
+                      <span
+                        className={`font-medium ${
+                          (order.discount ?? 0) > 0
+                            ? "text-green-600"
+                            : "text-black"
+                        }`}
+                      >
+                        {order.discount && order.discount > 0
+                          ? `-${formatter.format(order.discount)}`
+                          : "-₹0.00"}
                       </span>
                     </div>
                   )}
+
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Subtotal</span>
                     <span className="font-medium">
@@ -606,7 +694,6 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
                 </div>
               </div>
 
-              {/* Delivery Address */}
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100">
                   <h3 className="font-semibold text-gray-900 flex items-center gap-2">
@@ -620,7 +707,6 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
                 </div>
               </div>
 
-              {/* Actions */}
               {["PENDING", "PROCESSING"].includes(order.status) && (
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                   <div className="px-6 py-4 border-b border-gray-100">
@@ -629,13 +715,12 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
                     </h3>
                   </div>
 
-                  <div className="p-6">
+                  <div className="p-6 flex flex-col gap-3">
                     <CancelOrderButton orderId={order.id} />
                   </div>
                 </div>
               )}
 
-              {/* Help & Support */}
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100">
                   <h3 className="font-semibold text-gray-900 flex items-center gap-2">

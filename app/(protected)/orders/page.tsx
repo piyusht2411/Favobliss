@@ -33,7 +33,6 @@ const OrdersPage = () => {
             <div className="h-px bg-gradient-to-r from-blue-200 via-purple-200 to-blue-200"></div>
           </div>
 
-          {/* Content Section */}
           <div className="space-y-6">
             {isLoading ? (
               <div className="space-y-6">
@@ -44,25 +43,28 @@ const OrdersPage = () => {
             ) : data && data.length > 0 ? (
               data.map((order) => (
                 <div key={order.id} className="space-y-4">
-                  {order.orderProduct.map((product) => (
-                    <OrderCard
-                      key={product.id}
-                      data={{
-                        ...product,
-                        color: product.color ?? "",
-                      }}
-                      date={order.createdAt}
-                      paid={order.isPaid}
-                      status={order.status}
-                      orderNumber={order.orderNumber}
-                      estimatedDeliveryDays={order.estimatedDeliveryDays}
-                      orderId={order.id}
-                      onCancel={() => mutate()}
-                      mrp={order.mrp}
-                      price={order.price}
-                      paymentMethod={order.paymentMethod}
-                    />
-                  ))}
+                  <OrderCard
+                    key={order.orderProduct[0].id}
+                    data={{
+                      ...order.orderProduct[0],
+                      color: order.orderProduct[0].color ?? "",
+                    }}
+                    date={order.createdAt}
+                    paid={order.isPaid}
+                    status={order.status}
+                    orderNumber={order.orderNumber}
+                    estimatedDeliveryDays={order.estimatedDeliveryDays}
+                    orderId={order.id}
+                    backendOrderId={order.backendOrderId || ""}
+                    onCancel={() => mutate()}
+                    mrp={order.mrp}
+                    price={order.price}
+                    paymentMethod={order.paymentMethod}
+                    noOfProducts={order.orderProduct.length}
+                  />
+                  {/* ) */}
+                  {/* )
+                  } */}
                 </div>
               ))
             ) : (
@@ -86,7 +88,7 @@ const OrdersPage = () => {
           </div>
 
           {/* Stats Footer (Optional) */}
-          {data && data.length > 0 && (
+          {/* {data && data.length > 0 && (
             <div className="mt-12 pt-8 border-t border-gray-200">
               <div className="text-center text-sm text-gray-500">
                 Showing{" "}
@@ -97,7 +99,7 @@ const OrdersPage = () => {
                 items from {data.length} order{data.length !== 1 ? "s" : ""}
               </div>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>

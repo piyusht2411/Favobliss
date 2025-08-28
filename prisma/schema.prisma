@@ -141,8 +141,11 @@ model OrderProduct {
   productId    String   @db.ObjectId
   name         String
   about        String
+  slug         String?
   size         String?
   color        String?
+  mrp          Float?
+  price        Float?
   productImage String
   isCancelled  Boolean  @default(false)
   quantity     Int

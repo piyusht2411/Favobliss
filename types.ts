@@ -188,6 +188,7 @@ export interface CartSelectedItem {
   name: string;
   about: string;
   size?: string;
+  slug: string;
   color?: string;
   selectedVariant?: Variant;
   variantId: string;
@@ -226,4 +227,63 @@ export interface ApiSubCategory {
   categoryId: string;
   parentId: string | null;
   productCount: number; // Assumed API includes count
+}
+
+export interface InvoiceItem {
+  description: string;
+  hsn: string;
+  sku: string;
+  qty: number;
+  unitPrice: number;
+  unitDisc: number;
+  taxableValue: number;
+  igst: number;
+  total: number;
+}
+
+export interface InvoiceData {
+  soldBy: {
+    company: string;
+    address: string;
+    city: string;
+    state: string;
+    country: string;
+    stateCode: string;
+    phone: string;
+    gstin: string;
+    invoiceNo: string;
+    invoiceDate: string;
+    orderNo: string;
+    orderDate: string;
+  };
+  deliveredTo: {
+    name: string;
+    address: string;
+    city: string;
+    state: string;
+    country: string;
+    stateCode: string;
+    paymentMethod: string;
+    shippedBy: string;
+    awbNo: string;
+    waybillNo: string;
+  };
+  items: InvoiceItem[];
+  netTotal: number;
+}
+
+export interface Address {
+  id: string;
+  userId: string;
+  isDefault: boolean;
+  name: string;
+  phoneNumber: string;
+  zipCode: number;
+  address: string;
+  landmark: string;
+  town: string;
+  district: string;
+  state: string;
+  createdAt: string;
+  updatedAt: string;
 }

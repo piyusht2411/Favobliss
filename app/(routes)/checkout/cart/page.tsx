@@ -29,6 +29,7 @@ const CartPage = () => {
       size: item.selectedVariant.size?.value,
       color: item.selectedVariant.color?.name,
       selectedVariant: item.selectedVariant,
+      slug: item.slug,
       // locationId: item.locationId,
     }));
     setCheckOutItems(checkoutItems);

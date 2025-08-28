@@ -186,6 +186,7 @@ export const Summary = (props: Props) => {
             color: item.color || "",
             image: item.image,
             name: item.name,
+            slug: item.slug,
             about: JSON.stringify({
               variantId: item.variantId,
               color: item.color,
@@ -286,6 +287,7 @@ export const Summary = (props: Props) => {
             color: item.color || "",
             image: item.image,
             name: item.name,
+            slug: item.slug,
             about: JSON.stringify({
               variantId: item.variantId,
               color: item.color,

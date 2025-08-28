@@ -55,6 +55,7 @@ export const CartItem = ({ data, deliveryDays }: CartItemProps) => {
       color: data.selectedVariant.color?.name,
       selectedVariant: data.selectedVariant,
       locationId: data.locationId,
+      slug: data.slug,
     };
 
     if (isChecked) {

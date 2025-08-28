@@ -80,6 +80,9 @@ export async function POST(request: Request) {
       productImage: product.image,
       quantity: product.quantity,
       name: product.name,
+      mrp: product.mrp,
+      slug: product.slug,
+      price: product.price,
       about: JSON.stringify({
         variantId: product.variantId,
         color: product.color || "",

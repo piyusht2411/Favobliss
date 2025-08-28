@@ -47,6 +47,7 @@ export const ActionButtons = ({
         ...product,
         price: locationPrice.price,
         mrp: locationPrice.mrp, // Added
+        slug: product.slug,
         selectedVariant,
         checkOutQuantity: 1,
         pincode: itemPincode,

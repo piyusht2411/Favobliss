@@ -5,7 +5,7 @@ import { MdArrowRight, MdArrowDropUp, MdArrowDropDown } from "react-icons/md";
 import Link from "next/link";
 import useMediaQuery from "@/hooks/use-mediaquery";
 import { Popover, Transition } from "@headlessui/react";
-import { MenuCategory, MenuItem } from "@/types";
+import { Address, MenuCategory, MenuItem } from "@/types";
 import { useRouter } from "next/navigation";
 import { Account } from "@/components/account";
 import { useCart } from "@/hooks/use-cart";
@@ -121,33 +121,68 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
       }
 
       if (session?.user && addresses?.length && !isAddressLoading) {
-        const firstAddress = addresses[0];
-        const addressPincode = String(firstAddress.zipCode).trim();
+        const defaultAddress = addresses.find(
+          (address: Address) => address.isDefault
+        );
 
-        if (addressPincode) {
-          const locationData = {
-            city: firstAddress.district || "Unknown",
-            pincode: addressPincode,
-            state: firstAddress.state,
-            country: "India",
-          };
+        if (defaultAddress) {
+          const addressPincode = String(defaultAddress.zipCode).trim();
+          if (addressPincode) {
+            const locationData = {
+              city: defaultAddress.district || "Unknown",
+              pincode: addressPincode,
+              state: defaultAddress.state,
+              country: "India",
+            };
 
-          const currentLocation = JSON.parse(
-            localStorage.getItem("locationData") || "{}"
-          );
-          if (currentLocation.pincode !== addressPincode) {
-            localStorage.setItem("locationData", JSON.stringify(locationData));
-            window.dispatchEvent(new Event("locationDataUpdated"));
+            const currentLocation = JSON.parse(
+              localStorage.getItem("locationData") || "{}"
+            );
+            if (currentLocation.pincode !== addressPincode) {
+              localStorage.setItem(
+                "locationData",
+                JSON.stringify(locationData)
+              );
+              window.dispatchEvent(new Event("locationDataUpdated"));
+            }
+
+            setDefaultLocation({
+              city: locationData.city,
+              pincode: locationData.pincode,
+            });
+            return;
           }
+        } else {
+          const firstAddress = addresses[0];
+          const addressPincode = String(firstAddress.zipCode).trim();
 
-          setDefaultLocation({
-            city: locationData.city,
-            pincode: locationData.pincode,
-          });
-          return;
+          if (addressPincode) {
+            const locationData = {
+              city: firstAddress.district || "Unknown",
+              pincode: addressPincode,
+              state: firstAddress.state,
+              country: "India",
+            };
+
+            const currentLocation = JSON.parse(
+              localStorage.getItem("locationData") || "{}"
+            );
+            if (currentLocation.pincode !== addressPincode) {
+              localStorage.setItem(
+                "locationData",
+                JSON.stringify(locationData)
+              );
+              window.dispatchEvent(new Event("locationDataUpdated"));
+            }
+
+            setDefaultLocation({
+              city: locationData.city,
+              pincode: locationData.pincode,
+            });
+            return;
+          }
         }
       }
-
       const fallbackLocation = {
         city: "Delhi",
         pincode: "110040",
