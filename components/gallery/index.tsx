@@ -13,7 +13,7 @@ import { Pagination } from "swiper/modules";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GallerySkeleton } from "./gallery-skeleton";
 import { ActionButtons } from "../store/ActionButton";
-import { FaPlay, FaPause } from "react-icons/fa";
+import { FaPlay, FaPause, FaVolumeMute, FaVolumeUp } from "react-icons/fa";
 
 interface GalleryProps {
   images: VariantImage[];
@@ -37,6 +37,9 @@ interface VideoState {
   isPlaying: boolean;
   showControls: boolean;
   isLoading: boolean;
+  isMuted: boolean;
+  duration: number;
+  currentTime: number;
 }
 
 export const Gallery = ({
@@ -73,6 +76,9 @@ export const Gallery = ({
             isPlaying: false,
             showControls: true,
             isLoading: false,
+            isMuted: true,
+            duration: 0,
+            currentTime: 0,
           };
         }
       });
@@ -129,7 +135,6 @@ export const Gallery = ({
     if (currentState?.isPlaying) {
       video.pause();
       updateVideoState(mediaId, { isPlaying: false, showControls: true });
-
       // Clear existing timeout
       if (controlsTimeoutRef.current[mediaId]) {
         clearTimeout(controlsTimeoutRef.current[mediaId]);
@@ -165,13 +170,6 @@ export const Gallery = ({
     if (controlsTimeoutRef.current[mediaId]) {
       clearTimeout(controlsTimeoutRef.current[mediaId]);
     }
-
-    // Only hide controls if video is playing
-    if (videoStates[mediaId]?.isPlaying) {
-      controlsTimeoutRef.current[mediaId] = setTimeout(() => {
-        updateVideoState(mediaId, { showControls: false });
-      }, 3000);
-    }
   };
 
   const handleVideoMouseLeave = (mediaId: string) => {
@@ -179,7 +177,7 @@ export const Gallery = ({
     if (videoStates[mediaId]?.isPlaying) {
       controlsTimeoutRef.current[mediaId] = setTimeout(() => {
         updateVideoState(mediaId, { showControls: false });
-      }, 1000);
+      }, 2000);
     }
   };
 
@@ -189,6 +187,31 @@ export const Gallery = ({
     // Clear timeout
     if (controlsTimeoutRef.current[mediaId]) {
       clearTimeout(controlsTimeoutRef.current[mediaId]);
+    }
+  };
+
+  const handleTimeUpdate = (index: number, mediaId: string) => {
+    const video = videoRefs.current[index];
+    if (video) {
+      updateVideoState(mediaId, {
+        currentTime: video.currentTime,
+        duration: video.duration || 0,
+      });
+    }
+  };
+
+  const handleSeek = (index: number, percentage: number) => {
+    const video = videoRefs.current[index];
+    if (video && video.duration) {
+      video.currentTime = (percentage / 100) * video.duration;
+    }
+  };
+
+  const toggleMute = (index: number, mediaId: string) => {
+    const video = videoRefs.current[index];
+    if (video) {
+      video.muted = !video.muted;
+      updateVideoState(mediaId, { isMuted: video.muted });
     }
   };
 
@@ -211,6 +234,125 @@ export const Gallery = ({
       <Skeleton className="w-full h-full bg-zinc-200" />
     </div>
   );
+
+  const VideoControls = ({
+    mediaId,
+    index,
+    isMobile = false,
+  }: {
+    mediaId: string;
+    index: number;
+    isMobile?: boolean;
+  }) => {
+    const state = videoStates[mediaId];
+    if (!state) return null;
+
+    const progress =
+      state.duration > 0 ? (state.currentTime / state.duration) * 100 : 0;
+
+    return (
+      <div
+        className={`absolute inset-0 transition-all duration-300 ${
+          state.showControls
+            ? "bg-black/20 opacity-100"
+            : "bg-transparent opacity-0"
+        }`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Center Play/Pause Button */}
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          onClick={() => handleVideoClick(index, mediaId)}
+        >
+          {state.isLoading ? (
+            <div className="bg-black/70 rounded-full p-4">
+              <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : (
+            <div
+              className={`bg-black/70 rounded-full p-4 transition-all duration-200 ${
+                isMobile ? "active:scale-95" : "hover:scale-110"
+              }`}
+            >
+              {state.isPlaying ? (
+                <FaPause className="text-white text-2xl" />
+              ) : (
+                <FaPlay className="text-white text-2xl ml-1" />
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Bottom Controls Bar */}
+        <div
+          className={`absolute bottom-0 left-0 right-0 p-4 transition-all duration-300 ${
+            state.showControls ? "translate-y-0" : "translate-y-full"
+          }`}
+        >
+          {/* Progress Bar */}
+          <div className="mb-3">
+            <div
+              className="h-1 bg-white/30 rounded-full cursor-pointer"
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const percentage = ((e.clientX - rect.left) / rect.width) * 100;
+                handleSeek(index, percentage);
+              }}
+            >
+              <div
+                className="h-full bg-white rounded-full transition-all duration-100"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Control Buttons */}
+          <div className="flex items-center justify-between text-white">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => handleVideoClick(index, mediaId)}
+                className={`p-2 rounded-full transition-all duration-200 ${
+                  isMobile ? "active:bg-white/20" : "hover:bg-white/20"
+                }`}
+              >
+                {state.isPlaying ? (
+                  <FaPause className="text-sm" />
+                ) : (
+                  <FaPlay className="text-sm" />
+                )}
+              </button>
+
+              <button
+                onClick={() => toggleMute(index, mediaId)}
+                className={`p-2 rounded-full transition-all duration-200 ${
+                  isMobile ? "active:bg-white/20" : "hover:bg-white/20"
+                }`}
+              >
+                {state.isMuted ? (
+                  <FaVolumeMute className="text-sm" />
+                ) : (
+                  <FaVolumeUp className="text-sm" />
+                )}
+              </button>
+            </div>
+
+            {/* Time Display */}
+            <div className="text-xs font-medium">
+              {Math.floor(state.currentTime / 60)}:
+              {Math.floor(state.currentTime % 60)
+                .toString()
+                .padStart(2, "0")}{" "}
+              /&nbsp;
+              {Math.floor(state.duration / 60)}:
+              {Math.floor(state.duration % 60)
+                .toString()
+                .padStart(2, "0")}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="w-full">
@@ -238,15 +380,15 @@ export const Gallery = ({
                     />
                   ) : (
                     <div
-                      className="relative w-full h-full flex items-start justify-center bg-black cursor-pointer"
+                      className="relative w-full h-full flex items-center justify-center bg-black"
                       onTouchStart={() => handleVideoMouseEnter(media.id)}
-                      onClick={() => handleVideoClick(index, media.id)}
+                      onTouchEnd={() => handleVideoMouseLeave(media.id)}
                     >
                       <video
                         ref={(el) => (videoRefs.current[index] = el)}
                         src={media.url}
                         className="object-contain aspect-[3/4] max-h-full w-full"
-                        muted
+                        muted={videoStates[media.id]?.isMuted}
                         loop
                         playsInline
                         onEnded={() => handleVideoEnded(media.id)}
@@ -256,49 +398,22 @@ export const Gallery = ({
                         onCanPlay={() =>
                           updateVideoState(media.id, { isLoading: false })
                         }
+                        onTimeUpdate={() => handleTimeUpdate(index, media.id)}
+                        onLoadedMetadata={() => {
+                          const video = videoRefs.current[index];
+                          if (video) {
+                            updateVideoState(media.id, {
+                              duration: video.duration,
+                            });
+                          }
+                        }}
                       />
 
-                      {/* Video Controls Overlay */}
-                      <div
-                        className={`absolute inset-0 flex items-start justify-center transition-all duration-300 ${
-                          videoStates[media.id]?.showControls
-                            ? "bg-black bg-opacity-30 opacity-100"
-                            : "bg-transparent opacity-0"
-                        }`}
-                      >
-                        {videoStates[media.id]?.isLoading ? (
-                          <div className="bg-white bg-opacity-90 rounded-full p-4">
-                            <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                          </div>
-                        ) : (
-                          <div className="bg-white bg-opacity-90 rounded-full p-4 transition-transform duration-200 active:scale-95">
-                            {videoStates[media.id]?.isPlaying ? (
-                              <FaPause className="text-black text-2xl" />
-                            ) : (
-                              <FaPlay className="text-black text-2xl ml-1" />
-                            )}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Video Progress Bar for Mobile */}
-                      {videoStates[media.id]?.isPlaying && (
-                        <div className="absolute bottom-4 left-4 right-4">
-                          <div className="h-1 bg-white bg-opacity-30 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-white transition-all duration-100"
-                              style={{
-                                width: `${
-                                  ((videoRefs.current[index]?.currentTime ||
-                                    0) /
-                                    (videoRefs.current[index]?.duration || 1)) *
-                                  100
-                                }%`,
-                              }}
-                            />
-                          </div>
-                        </div>
-                      )}
+                      <VideoControls
+                        mediaId={media.id}
+                        index={index}
+                        isMobile={true}
+                      />
                     </div>
                   )}
                 </div>
@@ -342,16 +457,15 @@ export const Gallery = ({
                 />
               ) : (
                 <div
-                  className="relative w-full h-full flex items-start justify-center bg-black cursor-pointer min-h-[500px]"
+                  className="relative w-full h-full flex items-center justify-center bg-black min-h-[500px]"
                   onMouseEnter={() => handleVideoMouseEnter(media.id)}
                   onMouseLeave={() => handleVideoMouseLeave(media.id)}
-                  onClick={() => handleVideoClick(index, media.id)}
                 >
                   <video
                     ref={(el) => (videoRefs.current[index] = el)}
                     src={media.url}
                     className="object-contain max-h-full w-full h-auto"
-                    muted
+                    muted={videoStates[media.id]?.isMuted}
                     loop
                     playsInline
                     onEnded={() => handleVideoEnded(media.id)}
@@ -361,48 +475,18 @@ export const Gallery = ({
                     onCanPlay={() =>
                       updateVideoState(media.id, { isLoading: false })
                     }
+                    onTimeUpdate={() => handleTimeUpdate(index, media.id)}
+                    onLoadedMetadata={() => {
+                      const video = videoRefs.current[index];
+                      if (video) {
+                        updateVideoState(media.id, {
+                          duration: video.duration,
+                        });
+                      }
+                    }}
                   />
 
-                  {/* Video Controls Overlay */}
-                  <div
-                    className={`absolute inset-0 flex items-start justify-center transition-all duration-300 ${
-                      videoStates[media.id]?.showControls
-                        ? "bg-black bg-opacity-30 opacity-100"
-                        : "bg-transparent opacity-0"
-                    }`}
-                  >
-                    {videoStates[media.id]?.isLoading ? (
-                      <div className="bg-white bg-opacity-90 rounded-full p-4">
-                        <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                      </div>
-                    ) : (
-                      <div className="bg-white bg-opacity-90 rounded-full p-4 transition-transform duration-200 hover:scale-110">
-                        {videoStates[media.id]?.isPlaying ? (
-                          <FaPause className="text-black text-2xl" />
-                        ) : (
-                          <FaPlay className="text-black text-2xl ml-1" />
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Video Progress Bar */}
-                  {videoStates[media.id]?.isPlaying && (
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <div className="h-1 bg-white bg-opacity-30 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-white transition-all duration-100"
-                          style={{
-                            width: `${
-                              ((videoRefs.current[index]?.currentTime || 0) /
-                                (videoRefs.current[index]?.duration || 1)) *
-                              100
-                            }%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
+                  <VideoControls mediaId={media.id} index={index} />
                 </div>
               )}
             </TabsContent>
