@@ -149,9 +149,9 @@ export const ProductCard = ({ data, locationGroups }: ProductCardProps) => {
   return (
     <div onClick={onClick} className="w-full cursor-pointer">
       <div className="relative bg-gray-100 rounded-xl p-3 md:p-4 shadow-[0_0_15px_0_rgba(0,0,0,0.25)] hover:shadow-[0_0_20px_0_rgba(0,0,0,0.35)] transition-shadow duration-200 h-full">
-        <div className="absolute top-2 left-2 bg-orange-400 text-white text-xs px-2 py-1 rounded-full font-medium z-[10]">
+        {/* <div className="absolute top-2 left-2 bg-orange-400 text-white text-xs px-2 py-1 rounded-full font-medium z-[10]">
           {discount}% off
-        </div>
+        </div> */}
 
         <div className="aspect-square mb-3 md:mb-4 flex items-center justify-center bg-white rounded-lg relative overflow-hidden">
           <Image
