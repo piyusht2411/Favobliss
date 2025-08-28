@@ -29,6 +29,7 @@ import { getSubCategories } from "@/actions/get-subcategory";
 import RecentlyViewed from "@/components/store/RecentlyViewed";
 import { getLocationGroups } from "@/actions/get-location-group";
 import HomeAppliance from "@/components/store/HomeAppliance";
+import BannerProductSection from "@/components/store/BannerProductSection";
 
 export const revalidate = 0;
 
@@ -72,6 +73,11 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
       <Container>
         <div className="space-y-10 pb-20 mt-20">
           <div className="flex flex-col gap-y-8 md:gap-y-12 px-4 sm:px-6 lg:px-8">
+            <BannerProductSection
+              locationGroups={locationGroups}
+              products={brandProducts}
+              bannerImage="/assets/gaming.jpg"
+            />
             <RecentlyViewed locationGroups={locationGroups} />
             <ProductList
               title="Latest Launches"

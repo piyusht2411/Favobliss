@@ -27,9 +27,11 @@ export const ProductList = ({
   return (
     <div className="space-y-2 md:space-y-8">
       <div className="flex items-center justify-between">
-        <h3 className="text-3xl font-bold mb-5">{title}</h3>
+        <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-5">
+          {title}
+        </h3>
         {showViewAll && (
-          <Link href={link} className="text-gray-500 underline text-sm">
+          <Link href={link} className="text-gray-500 text-sm">
             View All
           </Link>
         )}
@@ -45,7 +47,7 @@ export const ProductList = ({
         {data.slice(0, 5).map((product) => (
           <div
             key={product.id}
-            className={`flex-none w-[45vw] sm:w-[30vw] md:w-[18vw] lg:w-[18vw] ${
+            className={`flex-none w-[45vw] sm:w-[30vw] md:w-[25vw] lg:w-[25vw] ${
               isBannerProduct ? "xl:w-[16vw]" : "xl:w-[17vw]"
             } snap-start`}
           >

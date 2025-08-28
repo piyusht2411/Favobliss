@@ -60,8 +60,60 @@ export function CategorySlider(props: Props) {
     return "/assets/category/air-conditioner.png";
   };
 
-  return (
-    <div className="w-full bg-white py-8">
+  // Mobile/Tablet Grid Layout
+  const MobileGridLayout = () => (
+    <div className="block md:hidden w-full bg-white py-8">
+      <div className="px-4">
+        <div
+          className="grid grid-rows-2 gap-y-4 overflow-x-auto pb-4"
+          style={{
+            gridTemplateColumns: "repeat(11, minmax(60px, 1fr))", // 11 columns to show 5.5 items
+            width: "calc(100vw - 2rem)", // Full width minus padding
+            scrollBehavior: "smooth",
+            WebkitOverflowScrolling: "touch",
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+          }}
+        >
+          {categories.map((category, index) => {
+            const imageSrc = getImageSrc(category);
+            const isFirstRow = index < Math.ceil(categories.length / 2);
+
+            return (
+              <div
+                key={category.id}
+                className="group cursor-pointer flex flex-col items-center"
+                onClick={() => handleCategoryClick(category.slug)}
+                style={{
+                  gridRow: isFirstRow ? 1 : 2,
+                  gridColumn: isFirstRow
+                    ? index + 1
+                    : index - Math.ceil(categories.length / 2) + 1,
+                }}
+              >
+                <div className="relative w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-2 overflow-hidden transition-all duration-300 bg-gray-50 rounded-lg">
+                  <Image
+                    src={imageSrc}
+                    alt={category.name}
+                    fill
+                    className="object-cover p-1 group-hover:opacity-90 transition-opacity duration-300"
+                    sizes="56px"
+                    onError={(e) => {
+                      e.currentTarget.src =
+                        "/assets/category/air-conditioner.png";
+                    }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+
+  const DesktopCarouselLayout = () => (
+    <div className="hidden md:block w-full bg-white py-8">
       <Carousel
         opts={{
           align: "start",
@@ -109,9 +161,14 @@ export function CategorySlider(props: Props) {
             );
           })}
         </CarouselContent>
-        {/* <CarouselPrevious />
-        <CarouselNext /> */}
       </Carousel>
     </div>
+  );
+
+  return (
+    <>
+      <MobileGridLayout />
+      <DesktopCarouselLayout />
+    </>
   );
 }

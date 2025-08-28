@@ -177,29 +177,31 @@ export const ProductCard = ({ data, locationGroups }: ProductCardProps) => {
             {renderStars(data.averageRating || 0)}
           </div>
           <div className="space-y-1">
-            <div className="flex flex-col md:flex-row md:items-center space-y-1 md:space-y-0 md:space-x-2 flex-wrap">
+            <div className="flex flex-col flex-wrap sm:flex-row sm:items-center sm:space-x-2 space-y-1 sm:space-y-0">
               <span
-                className="text-[16px] md:text-lg font-bold text-gray-900"
+                className="text-[16px] font-bold text-gray-900"
                 style={{ fontSize: "16px" }}
               >
                 {formatPrice(locationPrice.price)}
               </span>
-              {locationPrice.mrp > locationPrice.price && (
+              <div className="flex items-center space-x-2 flex-wrap">
+                {locationPrice.mrp > locationPrice.price && (
+                  <div
+                    className="text-[12px] text-gray-500 whitespace-nowrap"
+                    style={{ fontSize: "12px" }}
+                  >
+                    MRP{" "}
+                    <span className="line-through">
+                      {formatPrice(locationPrice.mrp)}
+                    </span>
+                  </div>
+                )}
                 <div
-                  className="text-[12px] md:text-sm text-gray-500"
+                  className="bg-orange-400 text-white text-[12px] px-2 py-1 rounded-full font-medium whitespace-nowrap"
                   style={{ fontSize: "12px" }}
                 >
-                  MRP{" "}
-                  <span className="line-through">
-                    {formatPrice(locationPrice.mrp)}
-                  </span>
+                  {discount}% off
                 </div>
-              )}
-              <div
-                className="bg-orange-400 text-white text-[12px] px-2 py-1 rounded-full font-medium"
-                style={{ fontSize: "12px" }}
-              >
-                {discount}% off
               </div>
             </div>
           </div>
