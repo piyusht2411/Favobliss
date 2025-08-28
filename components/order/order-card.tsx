@@ -46,7 +46,7 @@ interface OrderCardProps {
   price: number | null;
   paymentMethod: string | null;
   onCancel: () => void;
-  noOfProducts:number;
+  noOfProducts: number;
 }
 
 export const OrderCard = ({
@@ -178,29 +178,31 @@ export const OrderCard = ({
         {/* Header */}
         <div
           className={cn(
-            "px-6 py-4 border-b border-gray-100",
+            "px-4 md:px-6 py-3 md:py-4 border-b border-gray-100",
             statusInfo.bgColor
           )}
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1 md:flex-none">
               <div
                 className={cn(
-                  "w-10 h-10 rounded-full flex items-center justify-center",
+                  "w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center flex-shrink-0",
                   statusInfo.bgColor,
                   statusInfo.borderColor,
                   "border-2"
                 )}
               >
-                <StatusIcon className={cn("w-5 h-5", statusInfo.color)} />
+                <StatusIcon
+                  className={cn("w-4 h-4 md:w-5 md:h-5", statusInfo.color)}
+                />
               </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">
+              <div className="min-w-0">
+                <h3 className="font-semibold text-gray-900 text-sm md:text-base truncate">
                   Order #{orderNumber || "Pending"}
                 </h3>
                 <div
                   className={cn(
-                    "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                    "inline-flex items-center px-2 md:px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 md:mt-0",
                     statusInfo.bgColor,
                     statusInfo.color,
                     statusInfo.borderColor,
@@ -212,7 +214,7 @@ export const OrderCard = ({
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-1 md:gap-2 w-full md:w-auto">
               {["PENDING", "PROCESSING"].includes(status) && (
                 <CancelOrderButton
                   orderId={orderId}
@@ -220,7 +222,7 @@ export const OrderCard = ({
                   variant="outline"
                   size="sm"
                   showFullWidth={false}
-                  className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                  className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 text-xs md:text-sm px-2 md:px-3 w-1/2 md:w-auto"
                 />
               )}
               <Button
@@ -228,25 +230,30 @@ export const OrderCard = ({
                 variant="outline"
                 size="sm"
                 disabled={isLoading}
-                className="text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300"
+                className="text-[#ee8c1d] border-orange-200 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 text-xs md:text-sm px-2 md:px-3 flex-1 md:flex-none"
               >
-                <Download className="w-4 h-4 mr-2" />
-                {isLoading ? "Generating..." : "Download Invoice"}
+                <Download className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+                <span className="hidden sm:inline">
+                  {isLoading ? "Generating..." : "Download Invoice"}
+                </span>
+                <span className="sm:hidden">
+                  {isLoading ? "..." : "Invoice"}
+                </span>
               </Button>
             </div>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-4 md:p-6">
           {/* Order Info */}
-          <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-gray-600">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-2 sm:gap-4 mb-4 md:mb-6 text-xs md:text-sm text-gray-600">
             <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
+              <Calendar className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
               <span>Placed {format(date, "MMM dd, yyyy")}</span>
             </div>
             <div className="flex items-center gap-2">
-              <CreditCard className="w-4 h-4" />
+              <CreditCard className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
               <span className={paid ? "text-emerald-600" : "text-amber-600"}>
                 {paid ? "Paid" : "Payment Pending"}
               </span>
@@ -254,8 +261,8 @@ export const OrderCard = ({
             {estimatedDeliveryDays &&
               ["PENDING", "PROCESSING", "SHIPPED"].includes(status) && (
                 <div className="flex items-center gap-2">
-                  <Truck className="w-4 h-4" />
-                  <span>
+                  <Truck className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                  <span className="break-words">
                     Delivery by {formatDeliveryDate(estimatedDeliveryDays)}
                   </span>
                 </div>
@@ -264,11 +271,11 @@ export const OrderCard = ({
 
           {/* Product Details */}
           <div
-            className="flex gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer group"
+            className="flex gap-3 md:gap-4 p-3 md:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer group"
             onClick={() => router.push(`/orders/${data.id}`)}
           >
             <div className="relative flex-shrink-0">
-              <div className="w-20 h-24 rounded-lg overflow-hidden bg-white shadow-sm">
+              <div className="w-16 h-20 md:w-20 md:h-24 rounded-lg overflow-hidden bg-white shadow-sm">
                 <Image
                   src={data.productImage}
                   alt="Product"
@@ -279,39 +286,32 @@ export const OrderCard = ({
             </div>
 
             <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+                  <h4 className="font-semibold text-gray-900 text-sm md:text-base group-hover:text-blue-600 transition-colors line-clamp-2 md:truncate">
                     {data.name}
                   </h4>
                   {!data.about.startsWith("{") && (
-                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                    <p className="text-xs md:text-sm text-gray-600 mt-1 line-clamp-2">
                       {data.about}
                     </p>
                   )}
 
-                  <div className="flex flex-wrap gap-4 mt-3 text-sm">
-                    {/* <div className="flex items-center gap-1">
-                      <span className="text-gray-500">Size:</span>
-                      <span className="font-medium text-gray-700">
-                        {data.size}
-                      </span>
-                    </div> */}
-                    <div className="flex items-center gap-1">
-                      <span className="text-gray-500">Total numbers of Products:</span>
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 mt-2 md:mt-3 text-xs md:text-sm">
+                    <div className="flex items-center gap-1 flex-wrap">
+                      <span className="text-gray-500">Total Products:</span>
                       <span className="font-medium text-gray-700">
                         {noOfProducts}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 flex-wrap">
                       <span className="text-gray-500">Total Price:</span>
                       <span className="font-medium text-gray-900">
                         {formatter.format(price || 0)}
                       </span>
                     </div>
-                    <br />
-                    <div className="flex items-center gap-1">
-                      <span className="text-gray-500">Payment Method:</span>
+                    <div className="flex items-center gap-1 flex-wrap sm:w-full md:w-auto">
+                      <span className="text-gray-500">Payment:</span>
                       <span className="font-medium text-gray-900">
                         {paymentMethod === "cod"
                           ? "Cash On Delivery"
@@ -321,7 +321,7 @@ export const OrderCard = ({
                   </div>
                 </div>
 
-                <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors ml-4 flex-shrink-0" />
+                <ArrowRight className="w-4 h-4 md:w-5 md:h-5 text-gray-400 group-hover:text-blue-600 transition-colors flex-shrink-0" />
               </div>
             </div>
           </div>

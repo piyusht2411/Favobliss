@@ -61,7 +61,6 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
   }
 
   const order = (await getOrder(orderProduct.orderId)) as EnrichedOrder | null;
-  console.log("first", order);
 
   if (!order) {
     return (
@@ -228,8 +227,7 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <Container>
-        <div className="py-8">
-          {/* Header */}
+        <div className="py-8 px-6">
           <div className="mb-8">
             <Link
               href="/orders"
@@ -239,7 +237,7 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
               Back to Orders
             </Link>
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
                   Order #{order.orderNumber || "Pending"}

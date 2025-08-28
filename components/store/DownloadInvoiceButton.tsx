@@ -69,7 +69,7 @@ export const DownloadInvoiceButton = ({
         variant="outline"
         size={showfullWidth ? "default" : "sm"}
         disabled={isLoading}
-        className={`text-[#ee8c1d] border-orange-200 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 rounded-full ${
+        className={`text-amber-600 border-orange-200 bg-amber-50 hover:text-amber-600 rounded-full hover:bg-amber-50 ${
           showfullWidth ? "w-full" : ""
         }`}
       >
