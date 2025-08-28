@@ -10,19 +10,26 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Home } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const defaultCategoryImages = {
-  electronics: "/assets/category/air-conditioner.png",
   "air conditioners": "/assets/category/air-conditioner.png",
   television: "/assets/category/television.png",
-  "washing machine": "/assets/category/air-conditioner.png",
+  "washing machine": "/assets/category/washing-machine.png",
   "home appliances": "/assets/category/air-conditioner.png",
   "kitchen appliances": "/assets/category/kitchen-appliance.png",
-  "computer & printer": "/assets/category/computer-printer.png",
+  laptop: "/assets/category/computer-printer.png",
   "personal care": "/assets/category/personal-care.png",
   "air purifier": "/assets/category/air-purifier.png",
+  "water purifiers": "/assets/category/water-purifier.png",
+  "home audio": "/assets/category/home-audio.png",
+  "air coolers": "/assets/category/air-cooler.png",
+  watch: "/assets/category/watch.png",
+  refrigerator: "/assets/category/refrigerator.png",
+  mobiles: "/assets/category/mobiles.png",
+  "gas stove": "/assets/category/gas-stove.png",
+  chimney: "/assets/category/chimney.png",
+  printers: "/assets/category/printer.png",
 };
 
 interface Category {
@@ -44,18 +51,12 @@ export function CategorySlider(props: Props) {
   };
 
   const getImageSrc = (category: Category) => {
-    // First try to use the category's own image if available
-    // if (category.image) return category.image;
-
-    // Then try to match by lowercase category name
     const lowerCaseName = category.name.toLowerCase();
     if (defaultCategoryImages.hasOwnProperty(lowerCaseName)) {
       return defaultCategoryImages[
         lowerCaseName as keyof typeof defaultCategoryImages
       ];
     }
-
-    // Fallback to default image
     return "/assets/category/air-conditioner.png";
   };
 
@@ -70,9 +71,6 @@ export function CategorySlider(props: Props) {
       >
         <CarouselContent className="-ml-1 justify-between">
           {categories.map((category, index) => {
-            // const imageSrc =
-            //   categoryImages[category.name as keyof typeof categoryImages] ||
-            //   "/assets/category/air-conditioner.png";
             const imageSrc = getImageSrc(category);
 
             return (

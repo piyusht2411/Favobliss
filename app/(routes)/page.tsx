@@ -36,7 +36,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
   const { products: homeApplicance } = await getProducts({
     categoryId: "6843219ac338ba8cc9db1e72",
   });
-  const brandCategory = await getSubCategories("68431da0c338ba8cc9db1e6d");
+  const brandCategory = await getSubCategories("6843219ac338ba8cc9db1e72");
   const deals = await getHotDeals({
     limit: "10",
     timeFrame: "30 days",
