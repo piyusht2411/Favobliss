@@ -19,7 +19,7 @@ const BannerProductSection = (props: Props) => {
   } = props;
 
   return (
-    <div className="w-full bg-[#292928] py-2 md:py-2 rounded-3xl">
+    <div className="w-full bg-[#292928] py-2 md:py-2 rounded-3xl pr-2">
       <div className="max-w-full mx-auto px-2">
         <div className="lg:hidden flex flex-col gap-5">
           <div className="w-full h-48">

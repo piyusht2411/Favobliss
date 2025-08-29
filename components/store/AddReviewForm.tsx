@@ -506,7 +506,7 @@ export const AddReviewForm = ({
                   (isAdmin && !customUserName.trim()) ||
                   categoryRatings.some((cr) => cr.rating === 0)
                 }
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50"
+                className="bg-[#ee8c1d] hover:bg-[#ee8c1d] text-black px-8 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50"
               >
                 {isLoading ? (
                   <div className="flex items-center gap-2">

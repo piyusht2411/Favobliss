@@ -167,3 +167,7 @@ example:
     position: relative;
     top: -1px;
   }
+
+  .swiper-pagination{
+    bottom: -5px !important;
+  }

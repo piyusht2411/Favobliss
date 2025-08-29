@@ -359,22 +359,26 @@ export const Gallery = ({
       {isLoading ? (
         <MobileSkeleton />
       ) : (
-        <div className="block md:hidden aspect-[3/4] relative">
+        <div className="block md:hidden relative mt-2 pb-4 md:pb-12">
           <Swiper
             spaceBetween={10}
             pagination={{ clickable: true }}
             modules={[Pagination]}
-            className="w-full h-full"
+            className="w-full swiper-pagination-bottom"
+            style={{ height: "auto", minHeight: "400px", maxHeight: "500px" }}
           >
             {images.map((media, index) => (
               <SwiperSlide key={media.id}>
-                <div className="relative aspect-[3/4] w-full h-full bg-white">
+                <div
+                  className="relative w-full bg-white"
+                  style={{ height: "400px", maxHeight: "500px" }}
+                >
                   {media.mediaType === "IMAGE" ? (
                     <Image
                       src={media.url}
                       alt="Variant Image"
                       fill
-                      className="object-contain aspect-[3/4]"
+                      className="object-contain"
                       onLoad={() => handleMediaLoad(media.id)}
                       onError={() => handleMediaError(media.id)}
                     />
@@ -387,7 +391,7 @@ export const Gallery = ({
                       <video
                         ref={(el) => (videoRefs.current[index] = el)}
                         src={media.url}
-                        className="object-contain aspect-[3/4] max-h-full w-full"
+                        className="object-contain max-h-full w-full"
                         muted={videoStates[media.id]?.isMuted}
                         loop
                         playsInline
@@ -508,3 +512,17 @@ export const Gallery = ({
     </div>
   );
 };
+
+const swiperStyles = `
+  .swiper-pagination-bottom .swiper-pagination {
+    bottom: -10px !important;
+  }
+  .swiper-pagination-bullet {
+    background: rgba(0, 0, 0, 0.5) !important;
+    opacity: 0.5 !important;
+  }
+  .swiper-pagination-bullet-active {
+    background: #000 !important;
+    opacity: 1 !important;
+  }
+`;

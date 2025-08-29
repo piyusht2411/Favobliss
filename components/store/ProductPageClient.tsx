@@ -148,7 +148,7 @@ export const ProductPageContent = ({
     <div className="bg-white text-black mb-16">
       <Breadcrumb items={breadcrumbItems} />
       <Container>
-        <div className="px-4 py-4 sm:px-6 lg:px-5">
+        <div className="px-4 py-4 sm:px-6 lg:px-5 pt-0 md:pt-4">
           <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8 relative">
             <div className="lg:sticky lg:top-0 lg:overflow-hidden lg:h-auto">
               <Gallery
@@ -162,7 +162,7 @@ export const ProductPageContent = ({
                 locationPinCode={locationPinCode}
               />
             </div>
-            <div className="mt-10 sm:mt-16 lg:mt-0 md:px-24 lg:px-0 flex flex-col gap-y-5">
+            <div className="mt-2 sm:mt-16 lg:mt-0 md:px-24 lg:px-0 flex flex-col gap-y-5">
               <ProductDetails
                 data={product}
                 defaultVariant={product.variants[0]}

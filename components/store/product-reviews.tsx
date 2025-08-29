@@ -5,7 +5,7 @@ import { FaStar, FaTrash } from "react-icons/fa";
 import { AddReviewForm } from "./AddReviewForm";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { getSubCategoryById } from "@/actions/get-subcategory"; // Adjust import path
+import { getSubCategoryById } from "@/actions/get-subcategory";
 
 interface Review {
   id: string;
@@ -78,9 +78,9 @@ const CircularProgress = ({
 };
 
 const getRatingColor = (rating: number) => {
-  if (rating >= 3.5) return "#22c55e"; // Green
-  if (rating >= 2) return "#f59e0b"; // Orange/Yellow
-  return "#ef4444"; // Red
+  if (rating >= 3.5) return "#22c55e";
+  if (rating >= 2) return "#f59e0b";
+  return "#ef4444";
 };
 
 export const ProductReviews = (props: ProductReviewsProps) => {
@@ -367,7 +367,7 @@ export const ProductReviews = (props: ProductReviewsProps) => {
         )}
 
         <div className="flex md:flex-nowrap flex-wrap items-start w-full gap-[50px] md:gap-2 justify-between">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:w-1/2 w-full">
+          <div className="grid grid-cols-2 lg:grid-cols-2 gap-2 md:gap-8 md:w-1/2 w-full">
             {/* Overall Rating */}
             <div className="flex flex-col items-center">
               <div className="mb-4">
@@ -396,7 +396,7 @@ export const ProductReviews = (props: ProductReviewsProps) => {
                 const percentage =
                   totalReviews > 0 ? (count / totalReviews) * 100 : 0;
                 return (
-                  <div key={star} className="flex items-center gap-3">
+                  <div key={star} className="flex items-center gap-1 md:gap-3">
                     <div className="flex items-center gap-1 w-8">
                       <span className="text-sm text-gray-600">{star}</span>
                       <FaStar className="h-3 w-3 text-gray-400" />
@@ -407,7 +407,7 @@ export const ProductReviews = (props: ProductReviewsProps) => {
                         style={{ width: `${percentage}%` }}
                       ></div>
                     </div>
-                    <span className="text-sm text-gray-600 w-12 text-right">
+                    <span className="text-sm text-gray-600 w-2 md:w-12 text-right">
                       {count.toLocaleString()}
                     </span>
                   </div>
@@ -418,7 +418,7 @@ export const ProductReviews = (props: ProductReviewsProps) => {
           {subCategory?.reviewCategories?.length > 0 &&
             categoryAverages.length > 0 && (
               <div className="md:w-[40%] w-full">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="flex items-center justify-between overflow-x-auto scrollbar-hide gap-6">
                   {categoryAverages.map((cat) => {
                     const reviewCategories = subCategory.reviewCategories.map(
                       (rc: { name: string }) => rc.name
