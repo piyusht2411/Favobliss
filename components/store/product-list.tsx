@@ -26,16 +26,18 @@ export const ProductList = ({
 }: ProductListProps) => {
   return (
     <div className="space-y-2 md:space-y-8">
-      <div className="flex items-center justify-between">
-        <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-5">
-          {title}
-        </h3>
-        {showViewAll && (
-          <Link href={link} className="text-gray-500 text-sm">
-            View All
-          </Link>
-        )}
-      </div>
+      {title.length > 0 && (
+        <div className="flex items-center justify-between">
+          <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-5">
+            {title}
+          </h3>
+          {showViewAll && (
+            <Link href={link} className="text-gray-500 text-sm">
+              View All
+            </Link>
+          )}
+        </div>
+      )}
 
       {data.length === 0 && <NoResults />}
       <div
