@@ -46,10 +46,10 @@ const BannerProductSection = (props: Props) => {
           </div>
         </div>
 
-        <div className="hidden lg:flex gap-6 h-[355px]">
+        <div className="hidden lg:flex gap-6 h-[375px]">
           {/* Left Banner - Fixed */}
           <div className="flex-shrink-0 w-[300px] xl:w-[350px]">
-            <div className="relative w-full h-[355px] bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl overflow-hidden">
+            <div className="relative w-full h-[375px] bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl overflow-hidden">
               <Image
                 src={bannerImage}
                 alt="Banner"
@@ -73,7 +73,7 @@ const BannerProductSection = (props: Props) => {
               {products.map((product) => (
                 <div
                   key={product.id}
-                  className="flex-shrink-0 w-[220px] xl:w-[240px]"
+                  className="flex-shrink-0 w-[220px] xl:w-[260px]"
                 >
                   <div className="h-full">
                     <ProductCard
