@@ -41,7 +41,7 @@ const images = [
 
 const Gallery = () => {
   return (
-    <div className="w-full max-w-full mx-auto p-4 pb-0">
+    <div className="w-full max-w-full mx-auto p-4 py-0">
       <div className="sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-4 flex overflow-x-auto snap-x snap-mandatory scrollbar-hide">
         {images.map((img, index) => (
           <a

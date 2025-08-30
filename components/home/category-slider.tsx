@@ -62,7 +62,7 @@ export function CategorySlider(props: Props) {
 
   // Mobile/Tablet Grid Layout
   const MobileGridLayout = () => (
-    <div className="block md:hidden w-full bg-white py-8">
+    <div className="block md:hidden w-full bg-white py-5 md:py-8 pb-0">
       <div className="px-4">
         <div
           className="grid grid-rows-2 gap-y-4 overflow-x-auto pb-4"

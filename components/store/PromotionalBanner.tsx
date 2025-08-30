@@ -4,6 +4,7 @@ import { Category, LocationGroup, Product } from "@/types";
 import React, { useEffect, useState } from "react";
 import { ProductList } from "./product-list";
 import { getProducts } from "@/actions/get-products";
+import { ProductSkeleton } from "./product-skeleton";
 
 interface Props {
   data: Product[];
@@ -13,6 +14,7 @@ interface Props {
 
 const PromotionalBanner = (props: Props) => {
   const { data, locationGroups, categories } = props;
+  const [loading, setLoading] = useState(false);
 
   const [category, setCategory] = useState<string | null>(null);
   const [product, setProduct] = useState<Product[]>(data);
@@ -23,10 +25,12 @@ const PromotionalBanner = (props: Props) => {
 
   useEffect(() => {
     const getData = async () => {
+      setLoading(true);
       const { products: productData } = await getProducts({
         subCategoryId: category || "",
       });
       setProduct(productData);
+      setLoading(false);
     };
     getData();
   }, [category]);
@@ -70,13 +74,22 @@ const PromotionalBanner = (props: Props) => {
             </div> */}
           </div>
 
-          <ProductList
-            title=""
-            data={product}
-            locationGroups={locationGroups}
-            isBannerProduct={true}
-            isSpaceTop={false}
-          />
+          {loading ? (
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide md:grid md:grid-cols-4 md:overflow-y-hidden max-h-[360px]">
+              <ProductSkeleton className="w-[160px] sm:w-[unset] flex-shrink-0 h-[270px] md:h-[unset]" />
+              <ProductSkeleton className="w-[160px] sm:w-[unset] flex-shrink-0 h-[270px]" />
+              <ProductSkeleton className="w-[160px] sm:w-[unset] flex-shrink-0 h-[270px]" />
+              <ProductSkeleton className="w-[160px] sm:w-[unset] flex-shrink-0 h-[270px]" />
+            </div>
+          ) : (
+            <ProductList
+              title=""
+              data={product}
+              locationGroups={locationGroups}
+              isBannerProduct={true}
+              isSpaceTop={false}
+            />
+          )}
         </div>
       </div>
     </div>

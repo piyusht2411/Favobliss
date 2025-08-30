@@ -645,7 +645,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
   return (
     <div ref={divRef}>
       <div ref={containerRef} className="text-black bg-white">
-        <div className="container mx-auto px-4 py-3 md:py-3">
+        <div className="container mx-auto md:px-4 px-0 py-3 md:py-3">
           <div
             onClick={onOpen}
             className={`flex items-center justify-end cursor-pointer gap-1 ${
@@ -661,7 +661,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
             </div>
           )}
 
-          <h1 className="text-lg md:text-xl font-bold">{data.name}</h1>
+          <h1 className="text-lg md:text-xl font-medium">{data.name}</h1>
           <Link
             href={`/brand/${data?.brand?.slug}?page=1`}
             className="text-sm text-blue-600 hover:text-blue-700 underline my-2"
@@ -706,7 +706,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
           <div className="py-2 rounded-md max-w-md">
             <div className="flex items-center justify-between flex-wrap gap-3 md:gap-0">
               <div className="mt-3 flex items-center gap-2 text-sm flex-wrap">
-                <span className="text-2xl font-semibold">
+                <span className="text-xl md:text-2xl font-semibold">
                   {formatter.format(locationPrice.price)}
                 </span>
                 {locationPrice.mrp && (

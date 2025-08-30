@@ -5,7 +5,7 @@ import { FilterSkeleton } from "./_components/filter-skeleton";
 
 const LoadingPage = () => {
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full overflow-hidden">
       <Container>
         <div className="px-4 sm:px-6 lg:px-8 pt-5 pb-24">
           <div className="lg:grid lg:grid-cols-5 lg:gap-x-8 mt-14">

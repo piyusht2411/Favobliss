@@ -83,7 +83,7 @@ export const ActionButtons = ({
   return (
     <div className={cn("grid grid-cols-2 gap-x-4", className)}>
       <Button
-        className="h-14 font-bold bg-[#ee8c1d] hover:bg-[#ee8c1d] text-black rounded-2xl"
+        className="h-14 font-bold bg-[#ee8c1d] hover:bg-[#ee8c1d] text-white rounded-2xl"
         onClick={onHandleCart}
         disabled={selectedVariant.stock <= 0 || !isProductAvailable}
       >

@@ -131,9 +131,9 @@ const Invoice = (props: Props) => {
                   State Code : {invoiceData.deliveredTo.stateCode}
                 </p>
                 <br />
-                <p className="text-base">
+                {/* <p className="text-base">
                   Payment Method : {invoiceData.deliveredTo.paymentMethod}
-                </p>
+                </p> */}
                 <p className="text-base">
                   Shipped By : {invoiceData.deliveredTo.shippedBy}
                 </p>

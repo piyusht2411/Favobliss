@@ -48,7 +48,7 @@ const BrandList = ({ brands }: Props) => {
             {brands.map((item) => (
               <CarouselItem
                 key={item.id}
-                className="basis-1/4 xs:basis-1/4 sm:basis-1/5 md:basis-1/6 lg:basis-1/7 xl:basis-[12.5%] pl-4"
+                className="basis-[22.22%] xs:basis-[22.22%] sm:basis-[22.22%] md:basis-1/6 lg:basis-[13.33%] xl:basis-[13.33%] pl-4"
               >
                 <div className="flex flex-col items-center space-y-2">
                   <div

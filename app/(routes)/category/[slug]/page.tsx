@@ -140,12 +140,10 @@ const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
     })
   );
 
-  // Fetch other data with retry
   const sizes = await withRetry(() => getSizes());
   const colors = await withRetry(() => getColors());
   const locationGroups = await withRetry(() => getLocationGroups());
 
-  // Size filtering logic remains the same
   const sizeMap: { [key: string]: string[] } = {
     TOPWEAR: ["S", "M", "L", "XL", "XXL"],
     BOTTOMWEAR: ["S", "M", "L", "XL", "XXL"],
@@ -169,7 +167,6 @@ const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
     { id: "5000", name: "Above Rs. 5000", value: "5000" },
   ];
 
-  // Build breadcrumbs with hierarchy
   const breadcrumbItems = [
     { label: "Home", href: "/" },
     { label: category.name, href: `/category/${category.slug}?page=1` },
@@ -191,7 +188,6 @@ const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
 
   const totalPages = Math.ceil(totalCount / 12);
 
-  // Select banner image based on priority
   const bannerImage =
     childSubCategory?.bannerImage ||
     subCategory?.bannerImage ||

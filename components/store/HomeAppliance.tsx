@@ -4,6 +4,7 @@ import LandingPageSection from "../LandingPageSection";
 import { ProductList } from "./product-list";
 import { LocationGroup, Product } from "@/types";
 import { getProducts } from "@/actions/get-products";
+import { ProductSkeleton } from "./product-skeleton";
 
 interface Props {
   categoryId: string;
@@ -16,6 +17,7 @@ interface Props {
 const HomeAppliance = (props: Props) => {
   const { categoryId, locationGroups, link, items, title } = props;
   const [data, setData] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const handleCategoryChange = (id: string) => {
     fetchProducts(id);
@@ -24,12 +26,15 @@ const HomeAppliance = (props: Props) => {
   const fetchProducts = useCallback(
     async (id?: string) => {
       try {
+        setLoading(true);
         const { products } = await getProducts({
           subCategoryId: id,
           categoryId,
         });
         setData(products);
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         console.error("Error fetching products:", error);
       }
     },
@@ -49,11 +54,20 @@ const HomeAppliance = (props: Props) => {
         className="mx-auto bg-[#d8d8d8]"
         handleCategoryChange={handleCategoryChange}
       />
-      <ProductList
-        title=""
-        data={data || []}
-        locationGroups={locationGroups || []}
-      />
+      {loading ? (
+        <div className="flex gap-4 overflow-x-auto scrollbar-hide md:grid md:grid-cols-4 md:overflow-y-hidden max-h-[350px] mt-4">
+          <ProductSkeleton className="w-[160px] sm:w-[unset] flex-shrink-0 h-[270px] md:h-[unset]" />
+          <ProductSkeleton className="w-[160px] sm:w-[unset] flex-shrink-0 h-[270px]" />
+          <ProductSkeleton className="w-[160px] sm:w-[unset] flex-shrink-0 h-[270px]" />
+          <ProductSkeleton className="w-[160px] sm:w-[unset] flex-shrink-0 h-[270px]" />
+        </div>
+      ) : (
+        <ProductList
+          title=""
+          data={data || []}
+          locationGroups={locationGroups || []}
+        />
+      )}
     </div>
   );
 };
