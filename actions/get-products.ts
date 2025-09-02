@@ -17,6 +17,8 @@ interface Query {
   price?: string;
   variantIds?: string;
   pincode?: number;
+  rating?: string;
+  discount?: string;
 }
 
 interface HotDealsQuery extends Query {
@@ -41,6 +43,8 @@ export const getProducts = async (
       ...(query?.variantIds && { variantIds: query.variantIds }),
       ...(query?.pincode && { pincode: query.pincode }),
       ...(query?.subCategoryId && { subCategoryId: query.subCategoryId }),
+      ...(query?.rating && { rating: query.rating }),
+      ...(query?.discount && { discount: query.discount }),
     },
   });
 

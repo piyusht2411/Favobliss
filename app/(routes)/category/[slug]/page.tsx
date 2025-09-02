@@ -10,11 +10,12 @@ import { ProductCard } from "@/components/store/product-card";
 import { MobileFilters } from "./_components/mobile-filters";
 import { PaginationComponent } from "./_components/pagination";
 import { Metadata, ResolvingMetadata } from "next";
-import { PriceRange, Location } from "@/types";
+import { PriceRange, Location, Brand } from "@/types";
 import Image from "next/image";
 import Breadcrumb from "@/components/store/Breadcrumbs";
 import { getSubCategoryBySlug } from "@/actions/get-subcategory";
 import { getLocationGroups } from "@/actions/get-location-group";
+import { getBrands } from "@/actions/get-brands";
 
 // Helper function for retrying API calls
 async function withRetry<T>(
@@ -45,6 +46,9 @@ interface CategoryPageProps {
     price?: string;
     sub?: string;
     childsub?: string;
+    brandId?: string;
+    rating?: string;
+    discount?: string;
   };
 }
 
@@ -137,12 +141,16 @@ const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
       page,
       price: searchParams.price,
       limit: "12",
+      brandId: searchParams.brandId,
+      rating: searchParams.rating,
+      discount: searchParams.discount,
     })
   );
 
   const sizes = await withRetry(() => getSizes());
   const colors = await withRetry(() => getColors());
   const locationGroups = await withRetry(() => getLocationGroups());
+  const brands = await withRetry(() => getBrands());
 
   const sizeMap: { [key: string]: string[] } = {
     TOPWEAR: ["S", "M", "L", "XL", "XXL"],
@@ -165,6 +173,23 @@ const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
     { id: "1500-3000", name: "Rs. 1500 to Rs. 3000", value: "1500-3000" },
     { id: "3000-5000", name: "Rs. 3000 to Rs. 5000", value: "3000-5000" },
     { id: "5000", name: "Above Rs. 5000", value: "5000" },
+  ];
+
+  const ratingRanges = [
+    { id: "4", name: "4★ & above", value: "4" },
+    { id: "3", name: "3★ & above", value: "3" },
+    { id: "2", name: "2★ & above", value: "2" },
+    { id: "1", name: "1★ & above", value: "1" },
+  ];
+
+  const discountRanges = [
+    { id: "70", name: "70% and above", value: "70" },
+    { id: "60", name: "60% and above", value: "60" },
+    { id: "50", name: "50% and above", value: "50" },
+    { id: "40", name: "40% and above", value: "40" },
+    { id: "30", name: "30% and above", value: "30" },
+    { id: "20", name: "20% and above", value: "20" },
+    { id: "10", name: "10% and above", value: "10" },
   ];
 
   const breadcrumbItems = [
@@ -213,12 +238,26 @@ const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
       <Container>
         <div className="px-4 sm:px-6 lg:px-8 pt-5 pb-24">
           <div className="lg:grid lg:grid-cols-5 lg:gap-x-8 mt-14">
-            <MobileFilters sizes={filteredSizes} colors={colors} />
+            <MobileFilters
+              sizes={filteredSizes}
+              colors={colors}
+              brands={brands}
+              priceRanges={priceRange}
+              ratingRanges={ratingRanges}
+              discountRanges={discountRanges}
+            />
             <div className="hidden lg:block lg:border-r">
               <h3 className="mb-5 text-lg font-bold">Filters</h3>
               <Filter valueKey="sizeId" name="Sizes" data={filteredSizes} />
               <Filter valueKey="colorId" name="Colors" data={colors} />
               <Filter valueKey="price" name="Price" data={priceRange} />
+              <Filter valueKey="brandId" name="Brands" data={brands} />
+              <Filter valueKey="rating" name="Ratings" data={ratingRanges} />
+              <Filter
+                valueKey="discount"
+                name="Discount"
+                data={discountRanges}
+              />
             </div>
             <div className="mt-6 lg:col-span-4 lg:mt-4">
               {products.length === 0 ? (
