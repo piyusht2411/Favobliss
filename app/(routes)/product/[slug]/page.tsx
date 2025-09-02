@@ -14,26 +14,22 @@ export async function generateMetadata(
   { params }: ProductPageProps,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const product = await getProductBySlug(params.slug);
+  const productData = await getProductBySlug(params.slug);
 
-  if (!product || !product.variants[0]) {
+  if (!productData || !productData.variant) {
     return {
       title: "Product Not Found",
       description: "The requested product is not available.",
     };
   }
 
-  const firstVariant = product.variants[0];
+  const { variant } = productData;
   const previousImages = (await parent).openGraph?.images || [];
 
-  const title =
-    product.metaTitle || `Buy ${product.name} ${product.about || ""}`;
-  const description = product.metaDescription || product.description;
-  const keywords = product.metaKeywords?.length ? product.metaKeywords : [];
-  const ogImage =
-    product.openGraphImage ||
-    firstVariant.images[0]?.url ||
-    "/placeholder-image.jpg";
+  const title = variant.metaTitle || `Buy ${variant.name}`;
+  const description = variant.metaDescription || variant.description;
+  const keywords = variant.metaKeywords?.length ? variant.metaKeywords : [];
+  const ogImage = variant.openGraphImage || variant.images[0]?.url || "/placeholder-image.jpg";
 
   return {
     title,
@@ -67,25 +63,25 @@ export async function generateMetadata(
 }
 
 const ProductPage = async ({ params }: ProductPageProps) => {
-  const product = await getProductBySlug(params.slug);
+  const productData = await getProductBySlug(params.slug);
 
-  if (!product || !product.variants.length) {
+  if (!productData || !productData.variant || !productData.allVariants.length) {
     redirect("/");
   }
 
   const productsData = await getProducts({
-    categoryId: product?.category?.id,
+    categoryId: productData.product?.category?.id,
     limit: "10",
   });
   const suggestProducts = productsData.products.filter(
-    (item) => item.id !== product.id
+    (item) => item.id !== productData.product.id
   );
 
   const locationGroups = await getLocationGroups();
 
   return (
     <ProductPageContent
-      product={product}
+      productData={productData}
       suggestProducts={suggestProducts}
       locationGroups={locationGroups}
     />

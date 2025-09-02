@@ -11,10 +11,10 @@ import BankOffers from "./bankOffer";
 import DeliveryInfo from "./delieveryInfo";
 import KeyFeatures from "./keyFeatures";
 import ZipCarePlan from "./zipCarePlan";
-import { Product } from "@/types";
+import { Product, Variant } from "@/types";
 
 interface ProductDescriptionProps {
-  data: Product;
+  data: Variant;
 }
 
 export const ProductDescription = ({ data }: ProductDescriptionProps) => {
@@ -45,7 +45,7 @@ export const ProductDescription = ({ data }: ProductDescriptionProps) => {
           </div>
 
           {/* Size & Fit */}
-          {data.sizeAndFit.length > 0 && (
+          {/* {data.sizeAndFit.length > 0 && (
             <div className="space-y-2">
               <h4 className="font-semibold text-black text-lg md:text-xl">
                 Size & Fit
@@ -56,10 +56,10 @@ export const ProductDescription = ({ data }: ProductDescriptionProps) => {
                 </p>
               ))}
             </div>
-          )}
+          )} */}
 
           {/* Material & Care */}
-          {data.materialAndCare.length > 0 && (
+          {/* {data.materialAndCare.length > 0 && (
             <div className="space-y-2">
               <h4 className="font-semibold text-black text-lg md:text-xl">
                 Material & Care
@@ -70,7 +70,7 @@ export const ProductDescription = ({ data }: ProductDescriptionProps) => {
                 </p>
               ))}
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </>

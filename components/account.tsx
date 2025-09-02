@@ -66,13 +66,13 @@ export const Account = () => {
               <ShoppingCart className="mr-3 h-4 w-4" />
               Orders
             </DropdownMenuItem>
-            <DropdownMenuItem
+            {/* <DropdownMenuItem
               className="flex items-center text-zinc-700 font-semibold md:cursor-pointer"
               onClick={() => router.push("/wishlist")}
             >
               <Heart className="mr-3 h-4 w-4" />
               Wishlist
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="flex items-center text-zinc-700 font-semibold md:cursor-pointer"

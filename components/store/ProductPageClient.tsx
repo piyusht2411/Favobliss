@@ -1,39 +1,41 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Product, Variant, LocationGroup } from "@/types";
+import { Product, LocationGroup, ProductApiResponse, Variant } from "@/types";
 import { Gallery } from "@/components/gallery";
 import { ProductDetails } from "@/components/store/product-details";
 import { ProductList } from "@/components/store/product-list";
 import { Container } from "@/components/ui/container";
 import { ProductReviews } from "@/components/store/product-reviews";
-import { ProductTabs } from "@/components/store/prodcutTabs";
+// import { ProductTabs } from "@/components/store/product-tabs";
 import Breadcrumb from "./Breadcrumbs";
 import { MobileStickyActionBar } from "./MobileStickyBar";
 import { addToRecentlyViewed } from "@/lib/utils";
 import { getLocationGroupById } from "@/actions/get-location-group";
+import { ProductTabs } from "./prodcutTabs";
 
 interface ProductPageContentProps {
-  product: Product;
+  productData: ProductApiResponse;
   suggestProducts: Product[];
   locationGroups: LocationGroup[];
 }
 
 export const ProductPageContent = ({
-  product,
+  productData,
   suggestProducts,
   locationGroups,
 }: ProductPageContentProps) => {
-  const [currentVariant, setCurrentVariant] = useState(product.variants[0]);
+  const { variant, product, allVariants } = productData;
+  const [currentVariant, setCurrentVariant] = useState(variant);
   const [avgRating, setAvgRating] = useState<number | null>(null);
   const [totalReviews, setTotalReviews] = useState(0);
-  const [selectedVariant, setSelectedVariant] = useState(product.variants[0]);
+  const [selectedVariant, setSelectedVariant] = useState(variant);
   const [locationPrice, setLocationPrice] = useState<{
     price: number;
     mrp: number;
   }>({
-    price: product.variants[0].price,
-    mrp: product.variants[0].mrp || product.variants[0].price,
+    price: variant.variantPrices?.[0]?.price || 0,
+    mrp: variant.variantPrices?.[0]?.mrp || 0,
   });
   const [deliveryInfo, setDeliveryInfo] = useState<{
     location: string;
@@ -52,6 +54,7 @@ export const ProductPageContent = ({
 
   const handleVariantChange = (variant: Variant) => {
     setCurrentVariant(variant);
+    setSelectedVariant(variant);
   };
 
   const breadcrumbItems = [
@@ -90,7 +93,6 @@ export const ProductPageContent = ({
   }, [selectedLocationGroupId]);
 
   useEffect(() => {
-    // Handle mobile case
     const handleResize = () => {
       const isMobile = window.innerWidth < 768;
       if (isMobile) {
@@ -99,17 +101,16 @@ export const ProductPageContent = ({
       }
     };
 
-    handleResize(); // Check initial state
+    handleResize();
 
-    // Set up IntersectionObserver for web
     const observer = new IntersectionObserver(
       ([entry]) => {
         setShowStickyBar(!entry.isIntersecting);
       },
       {
-        root: null, // Use viewport
-        threshold: [0, 0.1], // Trigger when fully or 10% out of view
-        rootMargin: "-100px", // Trigger 100px before fully out
+        root: null,
+        threshold: [0, 0.1],
+        rootMargin: "-100px",
       }
     );
 
@@ -119,7 +120,6 @@ export const ProductPageContent = ({
       console.warn("containerRef.current is null");
     }
 
-    // Fallback scroll listener
     const handleScroll = () => {
       if (window.innerWidth < 768) {
         setShowStickyBar(true);
@@ -153,7 +153,7 @@ export const ProductPageContent = ({
             <div className="lg:sticky lg:top-0 lg:overflow-hidden lg:h-auto">
               <Gallery
                 images={currentVariant.images}
-                product={product}
+                product={productData}
                 selectedVariant={selectedVariant}
                 locationPrice={locationPrice}
                 selectedLocationGroupId={selectedLocationGroupId}
@@ -164,8 +164,8 @@ export const ProductPageContent = ({
             </div>
             <div className="mt-2 sm:mt-16 lg:mt-0 md:px-24 lg:px-0 flex flex-col gap-y-5">
               <ProductDetails
-                data={product}
-                defaultVariant={product.variants[0]}
+                productData={productData}
+                defaultVariant={variant}
                 onVariantChange={handleVariantChange}
                 locationGroups={locationGroups}
                 totalReviews={totalReviews}
@@ -188,7 +188,7 @@ export const ProductPageContent = ({
         </div>
         <hr className="md:m-10 md:my-2 mx-10" />
         <div className="flex flex-col gap-y-5 md:gap-y-8 px-4 sm:px-6 lg:px-8">
-          <ProductTabs product={product} productId={product.id} />
+          <ProductTabs productData={productData} productId={product.id} />
           <ProductReviews
             productId={product.id}
             totalReviews={totalReviews}
@@ -207,7 +207,7 @@ export const ProductPageContent = ({
             show={showStickyBar}
             price={locationPrice.price}
             mrp={locationPrice.mrp}
-            product={product}
+            product={productData}
             selectedVariant={selectedVariant}
             locationPrice={locationPrice}
             selectedLocationGroupId={selectedLocationGroupId}

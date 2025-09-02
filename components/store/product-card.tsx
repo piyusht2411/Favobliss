@@ -23,8 +23,11 @@ export const ProductCard = ({ data, locationGroups }: ProductCardProps) => {
     price: number;
     mrp: number;
   }>({
-    price: data.variants[0]?.price || 0,
-    mrp: data.variants[0]?.mrp || data.variants[0]?.price || 0,
+    price: data?.variants[0]?.variantPrices[0]?.price || 0,
+    mrp:
+      data?.variants[0]?.variantPrices[0].mrp ||
+      data?.variants[0]?.variantPrices[0]?.price ||
+      0,
   });
   const [selectedLocationGroupId, setSelectedLocationGroupId] = useState<
     string | null
@@ -73,17 +76,13 @@ export const ProductCard = ({ data, locationGroups }: ProductCardProps) => {
       : null;
     setSelectedLocationGroupId(defaultLocationGroup?.id || null);
     setLocationPrice({
-      price: defaultVariantPrice?.price || selectedVariant?.price || 0,
-      mrp:
-        defaultVariantPrice?.mrp ||
-        selectedVariant?.mrp ||
-        selectedVariant?.price ||
-        0,
+      price: defaultVariantPrice?.price || 0,
+      mrp: defaultVariantPrice?.mrp || 0,
     });
   }, [selectedVariantIndex, locationGroups, data.variants]);
 
   const onClick = () => {
-    router.push(`/product/${data?.slug}`);
+    router.push(`/product/${data?.variants[0].slug}`);
   };
 
   const onPreview: MouseEventHandler<HTMLButtonElement> = (event) => {
@@ -156,7 +155,7 @@ export const ProductCard = ({ data, locationGroups }: ProductCardProps) => {
         <div className="aspect-square mb-3 md:mb-4 flex items-center justify-center bg-white rounded-lg relative overflow-hidden">
           <Image
             src={imageUrl}
-            alt={data.name}
+            alt={data.variants[0].name}
             fill
             className="object-contain rounded-lg p-2"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -171,7 +170,7 @@ export const ProductCard = ({ data, locationGroups }: ProductCardProps) => {
 
         <div className="space-y-2">
           <h3 className="font-medium text-gray-900 text-xs md:text-sm leading-tight line-clamp-2 min-h-[2rem] md:min-h-[2.5rem]">
-            {data.name}
+            {data.variants[0].name}
           </h3>
           <div className="flex items-center space-x-1">
             {renderStars(data.averageRating || 0)}

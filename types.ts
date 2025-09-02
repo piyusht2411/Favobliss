@@ -82,12 +82,10 @@ export enum ProductType {
 export interface Product {
   id: string;
   category: Category;
-  name: string;
   price: number;
   isFeatured: boolean;
   isArchieved: boolean;
   stock: number;
-  about: string;
   description: string;
   type: ProductType;
   sizeAndFit: string[];
@@ -96,8 +94,6 @@ export interface Product {
   color: Color;
   productImages: ProductImage[];
   enabledFeatures: string[];
-  slug: string;
-  productSpecifications: ProductSpecification[];
   variants: Variant[];
   brand: Brand;
   expressDelivery: boolean;
@@ -106,10 +102,6 @@ export interface Product {
   averageRating: number;
   subCategory: SubCategory;
   productId: string;
-  metaTitle?: string;
-  metaDescription?: string;
-  metaKeywords?: string[];
-  openGraphImage?: string;
 }
 
 export interface Brand {
@@ -152,26 +144,6 @@ export interface VariantImage {
   id: string;
   url: string;
   mediaType: "IMAGE" | "VIDEO";
-}
-
-export interface Variant {
-  id: string;
-  price: number;
-  stock: number;
-  sku?: string;
-  sizeId?: string;
-  colorId?: string;
-  size?: { id: string; value: string };
-  color?: { id: string; name: string; value: string };
-  images: VariantImage[];
-  mrp?: number;
-  variantPrices?: {
-    locationId: string;
-    price: number;
-    mrp: number;
-    locationGroupId: string;
-    locationGroup: LocationGroup;
-  }[];
 }
 
 export interface Color {
@@ -287,4 +259,50 @@ export interface Address {
   state: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ProductApiResponse {
+  variant: Variant;
+  product: Product;
+  allVariants: VariantSummary[];
+}
+
+export interface Variant {
+  id: string;
+  productId: string;
+  sizeId?: string;
+  colorId?: string;
+  stock: number;
+  sku: string;
+  hsn: string;
+  tax: number;
+  gstIn: string;
+  name: string;
+  slug: string;
+  about?: string;
+  description: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string[];
+  openGraphImage?: string;
+  size?: Size;
+  color?: Color;
+  images: VariantImage[];
+  variantPrices: {
+    locationId: string;
+    price: number;
+    mrp: number;
+    locationGroupId: string;
+    locationGroup: LocationGroup;
+  }[];
+  variantSpecifications: ProductSpecification[];
+}
+export interface VariantSummary {
+  id: string;
+  title: string;
+  slug: string;
+  color: string | null;
+  size: string | null;
+  sizeId:string | null;
+  colorId: string | null;
 }

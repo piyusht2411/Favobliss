@@ -39,7 +39,7 @@ export const WishlistItemCard = ({ data, setItem }: WishlistItemCardProps) => {
   return (
     <div
       className="w-full hover:shadow-md md:cursor-pointer"
-      onClick={() => router.push(`/product/${data.slug}`)}
+      onClick={() => router.push(`/product/${data.variants[0].slug}`)}
     >
       <div className="aspect-[3/4] overflow-hidden relative transition-shadow">
         <Image
@@ -57,10 +57,10 @@ export const WishlistItemCard = ({ data, setItem }: WishlistItemCardProps) => {
       </div>
       <div className="p-3 space-y-1 md:space-y-2 overflow-hidden">
         <h4 className="text:lg font-semibold text-zinc-800 line-clamp-1">
-          {data.name}
+          {data.variants[0].name}
         </h4>
         <p className="font-medium text-zinc-700 line-clamp-1 text-sm">
-          {data.about}
+          {data.variants[0].about}
         </p>
       </div>
       <div className="flex items-start justify-center p-3 w-full">

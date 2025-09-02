@@ -1,4 +1,3 @@
-// frontend: pages/cart.tsx
 "use client";
 
 import { cn } from "@/lib/utils";
@@ -24,13 +23,12 @@ const CartPage = () => {
       mrp: item.mrp, // Added
       quantity: item.checkOutQuantity,
       image: item.selectedVariant.images[0]?.url || "",
-      about: item.about,
-      name: item.name,
+      about: item.selectedVariant.about || "",
+      name: item.selectedVariant.name,
       size: item.selectedVariant.size?.value,
       color: item.selectedVariant.color?.name,
       selectedVariant: item.selectedVariant,
       slug: item.slug,
-      // locationId: item.locationId,
     }));
     setCheckOutItems(checkoutItems);
   }, [items, setCheckOutItems]);
@@ -43,7 +41,7 @@ const CartPage = () => {
       {items.length !== 0 && (
         <Container>
           <div className="px-4 sm:px-6 lg:px-8 xl:px-24 h-full">
-            <PincodeValidator />
+            {/* <PincodeValidator /> */}
             <div className="my-12 lg:grid lg:grid-cols-12 lg:items-start gap-x-12">
               <div className="lg:col-span-7">
                 <ul className="space-y-4">

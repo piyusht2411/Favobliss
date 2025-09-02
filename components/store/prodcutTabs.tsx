@@ -1,17 +1,27 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Product } from "@/types";
+import { Product, Variant } from "@/types";
 import { ProductDescription } from "@/components/store/productDescription";
-import { ProductReviews } from "@/components/store/product-reviews";
 import { Button } from "@/components/ui/button";
 
 interface ProductTabsProps {
-  product: Product;
+  productData: {
+    variant: Variant;
+    product: Product;
+    allVariants: {
+      id: string;
+      title: string;
+      slug: string;
+      color: string | null;
+      size: string | null;
+    }[];
+  };
   productId: string;
 }
 
-export const ProductTabs = ({ product, productId }: ProductTabsProps) => {
+export const ProductTabs = ({ productData, productId }: ProductTabsProps) => {
+  const { variant, product } = productData;
   const [showMore, setShowMore] = useState({
     description: false,
     specification: false,
@@ -39,7 +49,7 @@ export const ProductTabs = ({ product, productId }: ProductTabsProps) => {
     `Your request will be fulfilled according to Favobliss's returns/replacement guarantee.`,
   ];
 
-  const groupedSpecifications = product.productSpecifications.reduce(
+  const groupedSpecifications = variant.variantSpecifications.reduce(
     (acc, spec) => {
       const groupName = spec.specificationField.group?.name || "Uncategorized";
       if (!acc[groupName]) {
@@ -61,7 +71,7 @@ export const ProductTabs = ({ product, productId }: ProductTabsProps) => {
   });
 
   const descriptionLineEstimate =
-    product.description.length / 100 +
+    variant.description.length / 100 +
     product.sizeAndFit.length +
     product.materialAndCare.length;
   const isDescriptionLong = descriptionLineEstimate > 8;
@@ -73,8 +83,6 @@ export const ProductTabs = ({ product, productId }: ProductTabsProps) => {
   const isSpecificationLong = totalSpecFields > 15;
 
   const isReturnLong = returnData.length > 8;
-
-  const isReviewLong = false;
 
   const toggleShowMore = (section: keyof typeof showMore) => {
     const refs = {
@@ -90,7 +98,7 @@ export const ProductTabs = ({ product, productId }: ProductTabsProps) => {
     setShowMore((prev) => {
       const newState = { ...prev, [section]: !prev[section] };
 
-      if (!newState[section] && currentRef.current) {
+      if (!newState[section] && currentRef?.current) {
         setTimeout(() => {
           const elementTop =
             currentRef.current!.getBoundingClientRect().top + window.scrollY;
@@ -175,7 +183,7 @@ export const ProductTabs = ({ product, productId }: ProductTabsProps) => {
                 : "none",
           }}
         >
-          <ProductDescription data={product} />
+          <ProductDescription data={variant} />
         </div>
         <ShowMoreButton
           section="description"
@@ -295,30 +303,34 @@ export const ProductTabs = ({ product, productId }: ProductTabsProps) => {
       </div>
 
       {/* Review */}
-      {/* <div className="py-4" ref={reviewRef}>
+      {/* <div className="py-4" ref={reviewsRef}>
         <div
           className={`transition-all duration-500 ease-in-out ${
-            isReviewLong && !showMore.review
-              ? "max-h-32 overflow-hidden"
-              : "max-h-none"
+            showMore.review ? "max-h-none" : "max-h-32 overflow-hidden"
           }`}
           style={{
-            maskImage:
-              isReviewLong && !showMore.review
-                ? "linear-gradient(to bottom, black 60%, transparent 100%)"
-                : "none",
-            WebkitMaskImage:
-              isReviewLong && !showMore.review
-                ? "linear-gradient(to bottom, black 60%, transparent 100%)"
-                : "none",
+            maskImage: !showMore.review
+              ? "linear-gradient(to bottom, black 60%, transparent 100%)"
+              : "none",
+            WebkitMaskImage: !showMore.review
+              ? "linear-gradient(to bottom, black 60%, transparent 100%)"
+              : "none",
           }}
         >
-          <ProductReviews productId={product.id} />
+          <ProductReviews
+            productId={productId}
+            totalReviews={totalReviews}
+            avgRating={avgRating}
+            setAvgRating={setAvgRating}
+            setTotalReviews={setTotalReviews}
+            subCategoryId={subCategoryId}
+            reviewsRef={reviewsRef}
+          />
         </div>
         <ShowMoreButton
           section="review"
           isExpanded={showMore.review}
-          isLong={isReviewLong}
+          isLong={true} // Always show button for reviews to match behavior
         />
       </div> */}
     </div>

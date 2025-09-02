@@ -89,11 +89,10 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
   }, [isSearchDropdownOpen]);
 
   useEffect(() => {
-    // Fetch suggested results when component mounts and searchQuery is empty
     if (!searchQuery) {
       debouncedSearch("");
     }
-  }, []); // Empty dependency array to run on mounts
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -244,8 +243,6 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
   };
 
   const handleResultClick = (href: string) => {
-    // setSearchQuery("");
-    // setSearchResults(null);
     setShowSearchResults(false);
     router.push(href);
   };
@@ -516,9 +513,8 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
                         {category.subCategories &&
                           category.subCategories.length > 0 && (
                             <div className="grid grid-cols-4 gap-3">
-                              {category.subCategories
-                                .slice(0, 8)
-                                .map((subCategory: any) => (
+                              {category.subCategories.map(
+                                (subCategory: any) => (
                                   <button
                                     key={subCategory.id}
                                     onClick={() => {
@@ -530,7 +526,6 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
                                     }}
                                     className="flex flex-col items-center p-2 rounded-lg hover:bg-gray-50 transition-colors group"
                                   >
-                                    {/* Subcategory Icon/Image */}
                                     <div className="w-12 h-12 mb-2 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
                                       {subCategory.icon ? (
                                         <img
@@ -553,7 +548,8 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
                                       {subCategory.name}
                                     </span>
                                   </button>
-                                ))}
+                                )
+                              )}
 
                               {/* Show more button if there are more than 8 subcategories */}
                               {category.subCategories.length > 8 && (
@@ -704,7 +700,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
                                   key={product.id}
                                   onClick={() =>
                                     handleResultClick(
-                                      `/product/${product.slug}`
+                                      `/product/${product?.variants[0]?.slug}`
                                     )
                                   }
                                   className="w-full text-left px-4 py-3 hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0"
@@ -716,7 +712,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
                                           src={
                                             product.variants[0].images[0].url
                                           }
-                                          alt={product.name}
+                                          alt={product.variants[0].name}
                                           className="w-10 h-10 object-contain rounded"
                                         />
                                       </div>
@@ -727,7 +723,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
                                     )}
                                     <div className="flex-1 min-w-0">
                                       <p className="text-sm font-medium text-gray-900 line-clamp-2">
-                                        {product.name}
+                                        {product.variants[0].name}
                                       </p>
                                     </div>
                                   </div>

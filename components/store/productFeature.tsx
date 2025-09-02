@@ -1,15 +1,16 @@
 "use client";
 
-import { Product } from "@/types";
+import { ProductApiResponse } from "@/types";
 
 interface ProductFeaturesProps {
-  data: Product;
+  data: ProductApiResponse;
 }
 
 export const ProductFeatures = ({ data }: ProductFeaturesProps) => {
   if (
-    (!data.enabledFeatures || data.enabledFeatures.length === 0) &&
-    (!data.warranty || data.warranty.trim() === "")
+    (!data.product.enabledFeatures ||
+      data.product.enabledFeatures.length === 0) &&
+    (!data.product.warranty || data.product.warranty.trim() === "")
   ) {
     return null;
   }
@@ -20,19 +21,19 @@ export const ProductFeatures = ({ data }: ProductFeaturesProps) => {
         Enabled Features
       </h3>
       <ul className="list-disc pl-8 space-y-1 text-gray-700">
-        {data.enabledFeatures &&
-          data.enabledFeatures.length > 0 &&
-          data.enabledFeatures.map((feature, index) => (
+        {data.product.enabledFeatures &&
+          data.product.enabledFeatures.length > 0 &&
+          data.product.enabledFeatures.map((feature, index) => (
             <li key={index} className="text-sm">
               {feature}
             </li>
           ))}
-        {data.warranty && data.warranty.trim() !== "" && (
+        {data.product.warranty && data.product.warranty.trim() !== "" && (
           <li>
             <span className="font-semibold text-base text-orange-500">
               Warranty:{" "}
             </span>
-            {data.warranty}
+            {data.product.warranty}
           </li>
         )}
       </ul>

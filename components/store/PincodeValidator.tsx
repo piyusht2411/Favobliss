@@ -92,7 +92,7 @@ export const PincodeValidator = (props: Props) => {
             variantPrice.mrp,
             String(address.zipCode)
           );
-          toast.success(`Updated price for ${item.name}`);
+          toast.success(`Updated price for ${item.variants[0].name}`);
         } else {
           toast.warning(
             `The product is unavailable at this location at ${address.zipCode}`

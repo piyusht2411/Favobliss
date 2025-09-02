@@ -8,7 +8,13 @@ import {
   Dispatch,
   SetStateAction,
 } from "react";
-import { Product, Variant, LocationGroup, Address } from "@/types";
+import {
+  Product,
+  LocationGroup,
+  Address,
+  ProductApiResponse,
+  Variant,
+} from "@/types";
 import { formatter } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -24,7 +30,7 @@ import { useShareModal } from "@/hooks/use-share-modal";
 import Link from "next/link";
 
 interface ProductDetailsProps {
-  data: Product;
+  productData: ProductApiResponse;
   defaultVariant: Variant;
   onVariantChange?: (variant: Variant) => void;
   locationGroups: LocationGroup[];
@@ -85,7 +91,7 @@ const formatDeliveryDate = (deliveryDays: number | null): string => {
 
 export const ProductDetails = (props: ProductDetailsProps) => {
   const {
-    data,
+    productData,
     defaultVariant,
     onVariantChange,
     locationGroups,
@@ -105,14 +111,14 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     reviewsRef,
   } = props;
 
-  const [selectedSize, setSelectedSize] = useState<string | undefined>(
+  const { variant, product, allVariants } = productData;
+  const [selectedSizeId, setSelectedSizeId] = useState<string | undefined>(
     defaultVariant.sizeId
   );
-  const [selectedColor, setSelectedColor] = useState<string | undefined>(
+  const [selectedColorId, setSelectedColorId] = useState<string | undefined>(
     defaultVariant.colorId
   );
   const [pincode, setPincode] = useState<string>("");
-
   const [showStickyBar, setShowStickyBar] = useState(true);
   const [isPincodeChecked, setIsPincodeChecked] = useState(false);
   const { data: session } = useSession();
@@ -124,7 +130,6 @@ export const ProductDetails = (props: ProductDetailsProps) => {
   const [isCodAvailableForPincode, setIsCodAvailableForPincode] = useState<
     boolean | null
   >(null);
-  // const { addItem } = useCart();
   const buttonsRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -132,33 +137,35 @@ export const ProductDetails = (props: ProductDetailsProps) => {
 
   const uniqueSizes = Array.from(
     new Map(
-      data.variants
-        .filter((v) => v.size && v.sizeId)
-        .map((v) => [v.sizeId, v.size])
-    ).entries()
-  ).map(([id, size]) => ({ id, size }));
+      allVariants
+        .filter((v) => v.sizeId)
+        .map((v) => [v.sizeId, { id: v.sizeId, name: v.size }])
+    ).values()
+  );
 
   const uniqueColors = Array.from(
     new Map(
-      data.variants
-        .filter((v) => v.color && v.colorId)
-        .map((v) => [v.colorId, v.color])
-    ).entries()
-  ).map(([id, color]) => ({ id, color }));
-
-  const availableSizes = uniqueSizes.filter(({ id }) =>
-    selectedColor
-      ? data.variants.some(
-          (v) => v.sizeId === id && v.colorId === selectedColor
-        )
-      : true
+      allVariants
+        .filter((v) => v.colorId)
+        .map((v) => [
+          v.colorId,
+          { id: v.colorId, name: v.color, value: v.color },
+        ])
+    ).values()
   );
 
-  const availableColors = uniqueColors.filter(({ id }) =>
-    selectedSize
-      ? data.variants.some((v) => v.colorId === id && v.sizeId === selectedSize)
-      : true
-  );
+  const availableSizes = uniqueSizes;
+  const availableColors = uniqueColors;
+
+  useEffect(() => {
+    const matchingVariant = allVariants.find(
+      (v) => v.sizeId === selectedSizeId && v.colorId === selectedColorId
+    );
+
+    if (matchingVariant && matchingVariant.id !== selectedVariant.id) {
+      router.push(`/product/${matchingVariant.slug}`);
+    }
+  }, [selectedSizeId, selectedColorId, allVariants]);
 
   const codAvailable = (pincode: string, locationGroups: LocationGroup[]) => {
     const foundGroup = locationGroups.find((group) =>
@@ -171,8 +178,18 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     return false;
   };
 
+  const getFallbackGroup = () => {
+    return (
+      locationGroups.find((group) =>
+        group.locations.some((loc) => loc.pincode === "110040")
+      ) ?? null
+    );
+  };
+
   const initializeDefaultPrice = useCallback(() => {
     let activeLocationGroup: LocationGroup | null = null;
+    let usedPincode: string | null = null;
+
     if (session?.user && addresses?.length && !isAddressLoading) {
       const defaultAddress = addresses.find(
         (address: Address) => address.isDefault
@@ -180,59 +197,166 @@ export const ProductDetails = (props: ProductDetailsProps) => {
 
       if (defaultAddress) {
         const sessionPincode = String(defaultAddress.zipCode).trim();
+        usedPincode = sessionPincode;
         activeLocationGroup =
           locationGroups.find((group) =>
             group.locations.some((loc) => loc.pincode === sessionPincode)
           ) ?? null;
 
         if (activeLocationGroup) {
-          const matchedLocation = activeLocationGroup.locations.find(
-            (loc) => loc.pincode === sessionPincode
+          const variantPrice = selectedVariant.variantPrices?.find(
+            //@ts-ignore
+            (vp) => vp.locationGroupId === activeLocationGroup.id
           );
-          const sessionLocation = {
-            city: defaultAddress.district || matchedLocation?.city || "Unknown",
-            pincode: sessionPincode,
-            state: defaultAddress.state || matchedLocation?.state || "Unknown",
-            country: "India",
-          };
 
-          localStorage.setItem("locationData", JSON.stringify(sessionLocation));
-          window.dispatchEvent(new Event("locationDataUpdated"));
-          setIsCodAvailableForPincode(activeLocationGroup.isCodAvailable);
-          setDeliveryInfo({
-            location: `${sessionLocation.city}, ${sessionPincode}`,
-            estimatedDelivery: activeLocationGroup.deliveryDays || 0,
-            isCodAvailable: activeLocationGroup.isCodAvailable || false,
-          });
+          // Check if price is 0 (product not available)
+          if (variantPrice && variantPrice.price === 0) {
+            setIsProductAvailable(false);
+            setCurrentLocationGroupData(null);
+
+            // Fallback to 110040
+            const fallbackGroup = getFallbackGroup();
+            let fallbackVariantPrice = null;
+            if (fallbackGroup) {
+              fallbackVariantPrice = selectedVariant.variantPrices?.find(
+                (vp) => vp.locationGroupId === fallbackGroup.id
+              );
+            }
+
+            setSelectedLocationGroupId(fallbackGroup?.id || null);
+            setLocationPrice({
+              price: fallbackVariantPrice?.price || 0,
+              mrp: fallbackVariantPrice?.mrp || 0,
+            });
+
+            const matchedLocation = activeLocationGroup.locations.find(
+              (loc) => loc.pincode === sessionPincode
+            );
+            const sessionLocation = {
+              city:
+                defaultAddress.district || matchedLocation?.city || "Unknown",
+              pincode: sessionPincode,
+              state:
+                defaultAddress.state || matchedLocation?.state || "Unknown",
+              country: "India",
+            };
+
+            localStorage.setItem(
+              "locationData",
+              JSON.stringify(sessionLocation)
+            );
+            window.dispatchEvent(new Event("locationDataUpdated"));
+            setIsCodAvailableForPincode(false);
+            setDeliveryInfo({
+              location: `${sessionLocation.city}, ${sessionPincode}`,
+              estimatedDelivery: 0,
+              isCodAvailable: false,
+            });
+          } else {
+            const matchedLocation = activeLocationGroup.locations.find(
+              (loc) => loc.pincode === sessionPincode
+            );
+            const sessionLocation = {
+              city:
+                defaultAddress.district || matchedLocation?.city || "Unknown",
+              pincode: sessionPincode,
+              state:
+                defaultAddress.state || matchedLocation?.state || "Unknown",
+              country: "India",
+            };
+
+            localStorage.setItem(
+              "locationData",
+              JSON.stringify(sessionLocation)
+            );
+            window.dispatchEvent(new Event("locationDataUpdated"));
+            setIsCodAvailableForPincode(activeLocationGroup.isCodAvailable);
+            setDeliveryInfo({
+              location: `${sessionLocation.city}, ${sessionPincode}`,
+              estimatedDelivery: activeLocationGroup.deliveryDays || 0,
+              isCodAvailable: activeLocationGroup.isCodAvailable || false,
+            });
+          }
         }
       } else {
         const firstAddress = addresses[0];
         const sessionPincode = String(firstAddress.zipCode).trim();
-
+        usedPincode = sessionPincode;
         activeLocationGroup =
           locationGroups.find((group) =>
             group.locations.some((loc) => loc.pincode === sessionPincode)
           ) ?? null;
 
         if (activeLocationGroup) {
-          const matchedLocation = activeLocationGroup.locations.find(
-            (loc) => loc.pincode === sessionPincode
+          const variantPrice = selectedVariant.variantPrices?.find(
+            //@ts-ignore
+            (vp) => vp.locationGroupId === activeLocationGroup.id
           );
-          const sessionLocation = {
-            city: firstAddress.district || matchedLocation?.city || "Unknown",
-            pincode: sessionPincode,
-            state: firstAddress.state || matchedLocation?.state || "Unknown",
-            country: "India",
-          };
 
-          localStorage.setItem("locationData", JSON.stringify(sessionLocation));
-          window.dispatchEvent(new Event("locationDataUpdated"));
-          setIsCodAvailableForPincode(activeLocationGroup.isCodAvailable);
-          setDeliveryInfo({
-            location: `${sessionLocation.city}, ${sessionPincode}`,
-            estimatedDelivery: activeLocationGroup.deliveryDays || 0,
-            isCodAvailable: activeLocationGroup.isCodAvailable || false,
-          });
+          // Check if price is 0 (product not available)
+          if (variantPrice && variantPrice.price === 0) {
+            setIsProductAvailable(false);
+            setCurrentLocationGroupData(null);
+
+            // Fallback to 110040
+            const fallbackGroup = getFallbackGroup();
+            let fallbackVariantPrice = null;
+            if (fallbackGroup) {
+              fallbackVariantPrice = selectedVariant.variantPrices?.find(
+                (vp) => vp.locationGroupId === fallbackGroup.id
+              );
+            }
+
+            setSelectedLocationGroupId(fallbackGroup?.id || null);
+            setLocationPrice({
+              price: fallbackVariantPrice?.price || 0,
+              mrp: fallbackVariantPrice?.mrp || 0,
+            });
+
+            const matchedLocation = activeLocationGroup.locations.find(
+              (loc) => loc.pincode === sessionPincode
+            );
+            const sessionLocation = {
+              city: firstAddress.district || matchedLocation?.city || "Unknown",
+              pincode: sessionPincode,
+              state: firstAddress.state || matchedLocation?.state || "Unknown",
+              country: "India",
+            };
+
+            localStorage.setItem(
+              "locationData",
+              JSON.stringify(sessionLocation)
+            );
+            window.dispatchEvent(new Event("locationDataUpdated"));
+            setIsCodAvailableForPincode(false);
+            setDeliveryInfo({
+              location: `${sessionLocation.city}, ${sessionPincode}`,
+              estimatedDelivery: 0,
+              isCodAvailable: false,
+            });
+          } else {
+            const matchedLocation = activeLocationGroup.locations.find(
+              (loc) => loc.pincode === sessionPincode
+            );
+            const sessionLocation = {
+              city: firstAddress.district || matchedLocation?.city || "Unknown",
+              pincode: sessionPincode,
+              state: firstAddress.state || matchedLocation?.state || "Unknown",
+              country: "India",
+            };
+
+            localStorage.setItem(
+              "locationData",
+              JSON.stringify(sessionLocation)
+            );
+            window.dispatchEvent(new Event("locationDataUpdated"));
+            setIsCodAvailableForPincode(activeLocationGroup.isCodAvailable);
+            setDeliveryInfo({
+              location: `${sessionLocation.city}, ${sessionPincode}`,
+              estimatedDelivery: activeLocationGroup.deliveryDays || 0,
+              isCodAvailable: activeLocationGroup.isCodAvailable || false,
+            });
+          }
         }
       }
     }
@@ -247,22 +371,61 @@ export const ProductDetails = (props: ProductDetailsProps) => {
             : null;
 
           if (storedPincode) {
+            usedPincode = storedPincode;
             activeLocationGroup =
               locationGroups.find((group) =>
                 group.locations.some((loc) => loc.pincode === storedPincode)
               ) ?? null;
             if (activeLocationGroup) {
-              const matchedLocation = activeLocationGroup.locations.find(
-                (loc) => loc.pincode === storedPincode
+              const variantPrice = selectedVariant.variantPrices?.find(
+                //@ts-ignore
+                (vp) => vp.locationGroupId === activeLocationGroup.id
               );
-              setIsCodAvailableForPincode(activeLocationGroup.isCodAvailable);
-              setDeliveryInfo({
-                location: `${
-                  matchedLocation?.city || "Unknown"
-                }, ${storedPincode}`,
-                estimatedDelivery: activeLocationGroup.deliveryDays || 0,
-                isCodAvailable: activeLocationGroup.isCodAvailable || false,
-              });
+
+              // Check if price is 0 (product not available)
+              if (variantPrice && variantPrice.price === 0) {
+                setIsProductAvailable(false);
+                setCurrentLocationGroupData(null);
+
+                // Fallback to 110040
+                const fallbackGroup = getFallbackGroup();
+                let fallbackVariantPrice = null;
+                if (fallbackGroup) {
+                  fallbackVariantPrice = selectedVariant.variantPrices?.find(
+                    (vp) => vp.locationGroupId === fallbackGroup.id
+                  );
+                }
+
+                setSelectedLocationGroupId(fallbackGroup?.id || null);
+                setLocationPrice({
+                  price: fallbackVariantPrice?.price || 0,
+                  mrp: fallbackVariantPrice?.mrp || 0,
+                });
+
+                const matchedLocation = activeLocationGroup.locations.find(
+                  (loc) => loc.pincode === storedPincode
+                );
+                setIsCodAvailableForPincode(false);
+                setDeliveryInfo({
+                  location: `${
+                    matchedLocation?.city || "Unknown"
+                  }, ${storedPincode}`,
+                  estimatedDelivery: 0,
+                  isCodAvailable: false,
+                });
+              } else {
+                const matchedLocation = activeLocationGroup.locations.find(
+                  (loc) => loc.pincode === storedPincode
+                );
+                setIsCodAvailableForPincode(activeLocationGroup.isCodAvailable);
+                setDeliveryInfo({
+                  location: `${
+                    matchedLocation?.city || "Unknown"
+                  }, ${storedPincode}`,
+                  estimatedDelivery: activeLocationGroup.deliveryDays || 0,
+                  isCodAvailable: activeLocationGroup.isCodAvailable || false,
+                });
+              }
             }
           }
         } catch (e) {
@@ -273,52 +436,106 @@ export const ProductDetails = (props: ProductDetailsProps) => {
 
     if (!activeLocationGroup) {
       const fallbackPincode = "110040";
+      usedPincode = fallbackPincode;
       activeLocationGroup =
         locationGroups.find((group) =>
           group.locations.some((loc) => loc.pincode === fallbackPincode)
         ) ?? null;
 
       if (activeLocationGroup) {
-        const matchedLocation = activeLocationGroup.locations.find(
-          (loc) => loc.pincode === fallbackPincode
+        const variantPrice = selectedVariant.variantPrices?.find(
+          //@ts-ignore
+          (vp) => vp.locationGroupId === activeLocationGroup.id
         );
-        const fallbackLocation = {
-          city: matchedLocation?.city || "Delhi",
-          state: matchedLocation?.state || "Delhi",
-          country: "India",
-          pincode: fallbackPincode,
-        };
-        localStorage.setItem("locationData", JSON.stringify(fallbackLocation));
-        window.dispatchEvent(new Event("locationDataUpdated"));
-        setIsCodAvailableForPincode(activeLocationGroup.isCodAvailable);
-        setDeliveryInfo({
-          location: `${matchedLocation?.city || "Delhi"}, ${fallbackPincode}`,
-          estimatedDelivery: activeLocationGroup.deliveryDays || 0,
-          isCodAvailable: activeLocationGroup.isCodAvailable || false,
-        });
+
+        // Check if price is 0 (product not available)
+        if (variantPrice && variantPrice.price === 0) {
+          setIsProductAvailable(false);
+          setCurrentLocationGroupData(null);
+
+          // Even fallback has price 0, show as unavailable
+          setSelectedLocationGroupId(activeLocationGroup.id);
+          setLocationPrice({
+            price: 0,
+            mrp: variantPrice.mrp || 0,
+          });
+
+          const matchedLocation = activeLocationGroup.locations.find(
+            (loc) => loc.pincode === fallbackPincode
+          );
+          const fallbackLocation = {
+            city: matchedLocation?.city || "Delhi",
+            state: matchedLocation?.state || "Delhi",
+            country: "India",
+            pincode: fallbackPincode,
+          };
+          localStorage.setItem(
+            "locationData",
+            JSON.stringify(fallbackLocation)
+          );
+          window.dispatchEvent(new Event("locationDataUpdated"));
+          setIsCodAvailableForPincode(false);
+          setDeliveryInfo({
+            location: `${matchedLocation?.city || "Delhi"}, ${fallbackPincode}`,
+            estimatedDelivery: 0,
+            isCodAvailable: false,
+          });
+        } else {
+          const matchedLocation = activeLocationGroup.locations.find(
+            (loc) => loc.pincode === fallbackPincode
+          );
+          const fallbackLocation = {
+            city: matchedLocation?.city || "Delhi",
+            state: matchedLocation?.state || "Delhi",
+            country: "India",
+            pincode: fallbackPincode,
+          };
+          localStorage.setItem(
+            "locationData",
+            JSON.stringify(fallbackLocation)
+          );
+          window.dispatchEvent(new Event("locationDataUpdated"));
+          setIsCodAvailableForPincode(activeLocationGroup.isCodAvailable);
+          setDeliveryInfo({
+            location: `${matchedLocation?.city || "Delhi"}, ${fallbackPincode}`,
+            estimatedDelivery: activeLocationGroup.deliveryDays || 0,
+            isCodAvailable: activeLocationGroup.isCodAvailable || false,
+          });
+        }
       }
     }
 
     if (activeLocationGroup) {
-      const group = activeLocationGroup; // Narrow type to LocationGroup
+      const group = activeLocationGroup;
       const variantPrice = selectedVariant.variantPrices?.find(
         (vp) => vp.locationGroupId === group.id
       );
 
-      setDefaultLocationGroupData(group);
-      setSelectedLocationGroupId(group.id);
-      setLocationPrice({
-        price: variantPrice?.price || selectedVariant.price,
-        mrp: variantPrice?.mrp || selectedVariant.mrp || selectedVariant.price,
-      });
+      // Only set default location group data if product is available
+      if (variantPrice && variantPrice.price > 0) {
+        setDefaultLocationGroupData(group);
+        setSelectedLocationGroupId(group.id);
+        setLocationPrice({
+          price: variantPrice.price || 0,
+          mrp: variantPrice.mrp || 0,
+        });
+        setIsProductAvailable(true);
+        setCurrentLocationGroupData(group);
+      } else {
+        setIsProductAvailable(false);
+        setCurrentLocationGroupData(null);
+      }
+
+      if (usedPincode) {
+        setPincode(usedPincode);
+      }
+      setIsPincodeChecked(true);
     } else {
       console.error("No active location group found!");
-      setLocationPrice({
-        price: selectedVariant.price,
-        mrp: selectedVariant.mrp || selectedVariant.price,
-      });
       setIsCodAvailableForPincode(false);
       setDeliveryInfo(null);
+      setIsProductAvailable(false);
+      setIsPincodeChecked(false);
     }
   }, [
     locationGroups,
@@ -346,32 +563,84 @@ export const ProductDetails = (props: ProductDetailsProps) => {
           (vp) => vp.locationGroupId === foundGroup.id
         );
 
-        setIsProductAvailable(true);
-        setSelectedLocationGroupId(foundGroup.id);
-        setLocationPrice({
-          price: variantPrice?.price || selectedVariant.price,
-          mrp:
-            variantPrice?.mrp || selectedVariant.mrp || selectedVariant.price,
-        });
-        setDeliveryInfo({
-          location: `${foundLocation.city}, ${foundLocation.pincode}`,
-          estimatedDelivery: foundGroup.deliveryDays || 0,
-          isCodAvailable: foundGroup.isCodAvailable || false,
-        });
-        setIsCodAvailableForPincode(foundGroup.isCodAvailable);
-        setCurrentLocationGroupData(foundGroup);
-        const locationData = {
-          city: foundLocation.city,
-          state: foundLocation.state,
-          country: foundLocation.country || "India",
-          pincode: foundLocation.pincode,
-        };
-        localStorage.setItem("locationData", JSON.stringify(locationData));
-        window.dispatchEvent(new Event("locationDataUpdated"));
+        if (variantPrice) {
+          setIsProductAvailable(true);
+          setSelectedLocationGroupId(foundGroup.id);
+          setLocationPrice({
+            price: variantPrice.price || 0,
+            mrp: variantPrice.mrp || 0,
+          });
+          setDeliveryInfo({
+            location: `${foundLocation.city}, ${foundLocation.pincode}`,
+            estimatedDelivery: foundGroup.deliveryDays || 0,
+            isCodAvailable: foundGroup.isCodAvailable || false,
+          });
+          setIsCodAvailableForPincode(foundGroup.isCodAvailable);
+          setCurrentLocationGroupData(foundGroup);
+          const locationData = {
+            city: foundLocation.city,
+            state: foundLocation.state,
+            country: foundLocation.country || "India",
+            pincode: foundLocation.pincode,
+          };
+          localStorage.setItem("locationData", JSON.stringify(locationData));
+          window.dispatchEvent(new Event("locationDataUpdated"));
+        } else {
+          // Fallback to 110040 if price not available
+          const fallbackGroup = getFallbackGroup();
+          let fallbackVariantPrice = null;
+          if (fallbackGroup) {
+            fallbackVariantPrice = selectedVariant.variantPrices?.find(
+              (vp) => vp.locationGroupId === fallbackGroup.id
+            );
+          }
+
+          setIsProductAvailable(false);
+          setSelectedLocationGroupId(fallbackGroup?.id || null);
+          setLocationPrice({
+            price: fallbackVariantPrice?.price || 0,
+            mrp: fallbackVariantPrice?.mrp || 0,
+          });
+          setDeliveryInfo({
+            location: `Pincode ${pincode.trim()}`,
+            estimatedDelivery: 0,
+            isCodAvailable: false,
+          });
+          setIsCodAvailableForPincode(false);
+          setCurrentLocationGroupData(null);
+          const fallbackLocation = fallbackGroup
+            ? {
+                city: fallbackGroup.locations[0]?.city || "Delhi",
+                state: fallbackGroup.locations[0]?.state || "Delhi",
+                country: fallbackGroup.locations[0]?.country || "India",
+                pincode: fallbackGroup.locations[0]?.pincode || "110040",
+              }
+            : null;
+          if (fallbackLocation) {
+            localStorage.setItem(
+              "locationData",
+              JSON.stringify(fallbackLocation)
+            );
+            window.dispatchEvent(new Event("locationDataUpdated"));
+          }
+        }
         setIsPincodeChecked(true);
       } else {
+        // No group found, fallback to 110040
+        const fallbackGroup = getFallbackGroup();
+        let fallbackVariantPrice = null;
+        if (fallbackGroup) {
+          fallbackVariantPrice = selectedVariant.variantPrices?.find(
+            (vp) => vp.locationGroupId === fallbackGroup.id
+          );
+        }
+
         setIsProductAvailable(false);
-        setSelectedLocationGroupId(null);
+        setSelectedLocationGroupId(fallbackGroup?.id || null);
+        setLocationPrice({
+          price: fallbackVariantPrice?.price || 0,
+          mrp: fallbackVariantPrice?.mrp || 0,
+        });
         setDeliveryInfo({
           location: `Pincode ${pincode.trim()}`,
           estimatedDelivery: 0,
@@ -379,20 +648,18 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         });
         setIsCodAvailableForPincode(false);
         setCurrentLocationGroupData(null);
-        const defaultLocationGroupDataUpdated = defaultLocationGroupData
+        const fallbackLocation = fallbackGroup
           ? {
-              city: defaultLocationGroupData.locations[0]?.city || "Delhi",
-              state: defaultLocationGroupData.locations[0]?.state || "Delhi",
-              country:
-                defaultLocationGroupData.locations[0]?.country || "India",
-              pincode:
-                defaultLocationGroupData.locations[0]?.pincode || "110040",
+              city: fallbackGroup.locations[0]?.city || "Delhi",
+              state: fallbackGroup.locations[0]?.state || "Delhi",
+              country: fallbackGroup.locations[0]?.country || "India",
+              pincode: fallbackGroup.locations[0]?.pincode || "110040",
             }
           : null;
-        if (defaultLocationGroupDataUpdated) {
+        if (fallbackLocation) {
           localStorage.setItem(
             "locationData",
-            JSON.stringify(defaultLocationGroupDataUpdated)
+            JSON.stringify(fallbackLocation)
           );
           window.dispatchEvent(new Event("locationDataUpdated"));
         }
@@ -408,15 +675,11 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     setPincode("");
     setIsCodAvailableForPincode(null);
     setCurrentLocationGroupData(null);
-    initializeDefaultPrice();
   };
 
   useEffect(() => {
-    if (!isPincodeChecked) {
-      initializeDefaultPrice();
-    }
+    initializeDefaultPrice();
   }, [
-    isPincodeChecked,
     initializeDefaultPrice,
     addresses,
     isAddressLoading,
@@ -468,39 +731,42 @@ export const ProductDetails = (props: ProductDetailsProps) => {
   }, []);
 
   useEffect(() => {
-    const variant = data.variants.find(
-      (v) => v.sizeId === selectedSize && v.colorId === selectedColor
+    const variant = allVariants.find(
+      (v) => v.sizeId === selectedSizeId && v.colorId === selectedColorId
     );
-
     if (variant) {
-      setSelectedVariant(variant);
-      onVariantChange?.(variant);
+      const fullVariant =
+        productData.variant.id === variant.id ? productData.variant : null;
+      if (fullVariant) {
+        setSelectedVariant(fullVariant);
+        onVariantChange?.(fullVariant);
+      }
     }
   }, [
-    selectedSize,
-    selectedColor,
-    data.variants,
+    selectedSizeId,
+    selectedColorId,
+    allVariants,
+    productData,
     setSelectedVariant,
     onVariantChange,
   ]);
 
   const handleSizeChange = useCallback(
     (sizeId: string) => {
-      setSelectedSize(sizeId);
-
-      if (
-        selectedColor &&
-        !data.variants.some(
-          (v) => v.sizeId === sizeId && v.colorId === selectedColor
-        )
-      ) {
-        const availableColorForSize = data.variants.find(
-          (v) => v.sizeId === sizeId
+      setSelectedSizeId(sizeId);
+      let availableColor =
+        selectedColorId &&
+        allVariants.find(
+          (v) => v.sizeId === sizeId && v.colorId === selectedColorId
         )?.colorId;
-        setSelectedColor(availableColorForSize);
+      if (!availableColor) {
+        availableColor = allVariants.find((v) => v.sizeId === sizeId)?.colorId;
+      }
+      if (availableColor) {
+        setSelectedColorId(availableColor);
       }
     },
-    [selectedColor, data.variants]
+    [allVariants, selectedColorId]
   );
 
   useEffect(() => {
@@ -509,8 +775,8 @@ export const ProductDetails = (props: ProductDetailsProps) => {
         (vp) => vp.locationGroupId === selectedLocationGroupId
       );
       setLocationPrice({
-        price: variantPrice?.price || selectedVariant.price,
-        mrp: variantPrice?.mrp || selectedVariant.mrp || selectedVariant.price,
+        price: variantPrice?.price || 0,
+        mrp: variantPrice?.mrp || 0,
       });
     }
   }, [
@@ -522,92 +788,28 @@ export const ProductDetails = (props: ProductDetailsProps) => {
 
   const handleColorChange = useCallback(
     (colorId: string) => {
-      setSelectedColor(colorId);
-
-      if (
-        selectedSize &&
-        !data.variants.some(
-          (v) => v.colorId === colorId && v.sizeId === selectedSize
-        )
-      ) {
-        const availableSizeForColor = data.variants.find(
-          (v) => v.colorId === colorId
+      setSelectedColorId(colorId);
+      let availableSize =
+        selectedSizeId &&
+        allVariants.find(
+          (v) => v.colorId === colorId && v.sizeId === selectedSizeId
         )?.sizeId;
-        setSelectedSize(availableSizeForColor);
+      if (!availableSize) {
+        availableSize = allVariants.find((v) => v.colorId === colorId)?.sizeId;
+      }
+      if (availableSize) {
+        setSelectedSizeId(availableSize);
       }
     },
-    [selectedSize, data.variants]
+    [allVariants, selectedSizeId]
   );
 
-  // const onHandleCart = useCallback(() => {
-  //   if (!isProductAvailable) return;
-  //   const selectedLocationGroup = locationGroups.find(
-  //     (group) => group.id === selectedLocationGroupId
-  //   );
-  //   const itemPincode = selectedLocationGroup?.locations[0]?.pincode || "";
-
-  //   try {
-  //     addItem({
-  //       ...data,
-  //       price: locationPrice.price,
-  //       mrp: locationPrice.mrp,
-  //       selectedVariant,
-  //       checkOutQuantity: 1,
-  //       pincode: itemPincode,
-  //       deliveryDays: deliveryInfo?.estimatedDelivery || 0,
-  //       isCodAvailable: deliveryInfo?.isCodAvailable || false,
-  //     });
-  //   } catch (error) {
-  //     console.error("Error adding to cart:", error);
-  //   }
-  // }, [
-  //   addItem,
-  //   data,
-  //   selectedVariant,
-  //   locationPrice,
-  //   selectedLocationGroupId,
-  //   isProductAvailable,
-  //   deliveryInfo,
-  // ]);
-
-  // const onHandleBuyNow = useCallback(() => {
-  //   if (!isProductAvailable) return;
-  //   const selectedLocationGroup = locationGroups.find(
-  //     (group) => group.id === selectedLocationGroupId
-  //   );
-  //   const itemPincode = selectedLocationGroup?.locations[0]?.pincode || "";
-
-  //   try {
-  //     addItem({
-  //       ...data,
-  //       price: locationPrice.price,
-  //       mrp: locationPrice.mrp,
-  //       selectedVariant,
-  //       checkOutQuantity: 1,
-  //       pincode: itemPincode,
-  //       deliveryDays: deliveryInfo?.estimatedDelivery || 0,
-  //       isCodAvailable: deliveryInfo?.isCodAvailable || false,
-  //     });
-  //     router.push("/checkout/cart");
-  //   } catch (error) {
-  //     console.error("Error adding to cart:", error);
-  //   }
-  // }, [
-  //   addItem,
-  //   data,
-  //   selectedVariant,
-  //   locationPrice,
-  //   selectedLocationGroupId,
-  //   router,
-  //   isProductAvailable,
-  //   deliveryInfo,
-  // ]);
-
-  const discountPercentage = locationPrice.mrp
-    ? Math.round(
-        ((locationPrice.mrp - locationPrice.price) / locationPrice.mrp) * 100
-      )
-    : 0;
+  const discountPercentage =
+    locationPrice.mrp > 0
+      ? Math.round(
+          ((locationPrice.mrp - locationPrice.price) / locationPrice.mrp) * 100
+        )
+      : 0;
 
   const handleRatingClick = () => {
     if (reviewsRef?.current) {
@@ -615,55 +817,50 @@ export const ProductDetails = (props: ProductDetailsProps) => {
     }
   };
 
-  // const ActionButtons = ({
-  //   className = "",
-  //   isSticky = false,
-  // }: {
-  //   className?: string;
-  //   isSticky?: boolean;
-  // }) => (
-  //   <div className={cn("grid grid-cols-2 gap-x-4", className)}>
-  //     <Button
-  //       className="h-14 font-bold bg-black hover:bg-gray-800 text-white"
-  //       onClick={onHandleCart}
-  //       disabled={selectedVariant.stock <= 0 || !isProductAvailable}
-  //     >
-  //       <HiShoppingBag className="mr-2 h-5 w-5" />
-  //       ADD TO Cart
-  //     </Button>
-  //     <Button
-  //       variant="outline"
-  //       className="h-14 font-bold border-black text-black hover:bg-gray-50"
-  //       onClick={onHandleBuyNow}
-  //       disabled={selectedVariant.stock <= 0 || !isProductAvailable}
-  //     >
-  //       Buy Now
-  //     </Button>
-  //   </div>
-  // );
+  const isLightColor = (hexColor: any) => {
+    if (!hexColor) return false;
+
+    if (
+      hexColor === "white" ||
+      hexColor === "#fff" ||
+      hexColor === "#ffffff" ||
+      hexColor === "#f7f7f7" ||
+      hexColor === "#fdfcfc" ||
+      hexColor === "White"
+    )
+      return true;
+
+    const hex = hexColor.replace("#", "");
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness > 200; // Threshold for light colors
+  };
 
   return (
     <div ref={divRef}>
       <div ref={containerRef} className="text-black bg-white">
         <div className="container mx-auto md:px-4 px-0 py-3 md:py-3">
-          <div
+          {/* <div
             onClick={onOpen}
             className={`flex items-center justify-end cursor-pointer gap-1 ${
-              !data?.isNewArrival ? "pb-4" : "pb-0"
+              !product?.isNewArrival ? "pb-4" : "pb-0"
             }`}
           >
             <GoShareAndroid />
             <span className="text-sm">Share</span>
-          </div>
-          {data.isNewArrival && (
+          </div> */}
+          {product.isNewArrival && (
             <div className="text-black w-fit border border-[#434343] rounded-[16px] text-[12px] px-2 py-[2px] mb-3">
               New Arrival
             </div>
           )}
 
-          <h1 className="text-lg md:text-xl font-medium">{data.name}</h1>
+          <h1 className="text-lg md:text-xl font-medium">{variant.name}</h1>
           <Link
-            href={`/brand/${data?.brand?.slug}?page=1`}
+            href={`/brand/${product?.brand?.slug}?page=1`}
             className="text-sm text-blue-600 hover:text-blue-700 underline my-2"
           >
             Brand store
@@ -709,7 +906,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
                 <span className="text-xl md:text-2xl font-semibold">
                   {formatter.format(locationPrice.price)}
                 </span>
-                {locationPrice.mrp && (
+                {locationPrice.mrp > 0 && (
                   <>
                     <span className="text-gray-500 text-sm mr-2">
                       MRP{" "}
@@ -740,30 +937,23 @@ export const ProductDetails = (props: ProductDetailsProps) => {
             <div className="flex flex-col gap-y-1 mt-4 border-t border-b pt-[12px] pb-[12px] border-t-[#d9d9d9] border-b-[#d9d9d9]">
               {availableSizes.length > 0 && (
                 <div className="flex items-center justify-between mb-2">
-                  <div className="">
+                  <div>
                     <span className="font-bold text-sm text-[#262626]">
-                      Internal Storage
+                      Size
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-3">
-                    {availableSizes.map(({ id, size }) => {
-                      const isSelected = selectedSize === id;
-                      const isAvailable = selectedColor
-                        ? data.variants.some(
-                            (v) =>
-                              v.sizeId === id &&
-                              v.colorId === selectedColor &&
-                              v.stock > 0
-                          )
-                        : data.variants.some(
-                            (v) => v.sizeId === id && v.stock > 0
-                          );
+                    {availableSizes.map(({ id, name }) => {
+                      const isSelected = selectedSizeId === id;
+                      const isAvailable = allVariants.some(
+                        (v) => v.sizeId === id
+                      );
 
                       return (
                         <button
                           key={id}
                           onClick={() =>
-                            isAvailable && id && handleSizeChange(id)
+                            isAvailable && handleSizeChange(id as string)
                           }
                           disabled={!isAvailable}
                           className={cn(
@@ -775,7 +965,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
                               "opacity-50 cursor-not-allowed line-through"
                           )}
                         >
-                          {size?.value || "Unknown"}
+                          {name || "Unknown"}
                         </button>
                       );
                     })}
@@ -789,24 +979,13 @@ export const ProductDetails = (props: ProductDetailsProps) => {
                     <span className="font-bold text-sm text-[#262626]">
                       Color
                     </span>
-                    <span className="text-sm text-gray-900">
-                      {availableColors.find((c) => c.id === selectedColor)
-                        ?.color?.name || "Black"}
-                    </span>
                   </div>
                   <div className="flex flex-wrap gap-3">
-                    {availableColors.map(({ id, color }) => {
-                      const isSelected = selectedColor === id;
-                      const isAvailable = selectedSize
-                        ? data.variants.some(
-                            (v) =>
-                              v.colorId === id &&
-                              v.sizeId === selectedSize &&
-                              v.stock > 0
-                          )
-                        : data.variants.some(
-                            (v) => v.colorId === id && v.stock > 0
-                          );
+                    {availableColors.map(({ id, name, value }) => {
+                      const isSelected = selectedColorId === id;
+                      const isAvailable = allVariants.some(
+                        (v) => v.colorId === id
+                      );
 
                       return (
                         <div
@@ -816,7 +995,7 @@ export const ProductDetails = (props: ProductDetailsProps) => {
                             !isAvailable && "opacity-50 cursor-not-allowed"
                           )}
                           onClick={() =>
-                            isAvailable && id && handleColorChange(id)
+                            isAvailable && handleColorChange(id as string)
                           }
                         >
                           <div
@@ -824,11 +1003,13 @@ export const ProductDetails = (props: ProductDetailsProps) => {
                               "w-[30px] h-[30px] rounded-full border-1 transition-all duration-200",
                               isSelected
                                 ? "border-black ring-2 ring-black ring-offset-2"
-                                : "border-gray-300",
+                                : isLightColor(value)
+                                ? "border-2 border-gray-500" // Stronger border for light colors
+                                : "border-1 border-gray-300",
                               !isAvailable && "grayscale"
                             )}
                             style={{
-                              backgroundColor: color?.value || "#f3f4f6",
+                              backgroundColor: value || "#f3f4f6",
                             }}
                           />
                           {!isAvailable && (
@@ -961,9 +1142,9 @@ export const ProductDetails = (props: ProductDetailsProps) => {
             )}
           </div>
 
-          <ProductFeatures data={data} />
+          <ProductFeatures data={productData} />
 
-          {data.expressDelivery &&
+          {product.expressDelivery &&
             currentLocationGroupData?.isExpressDelivery && (
               <p className="font-bold text-orange-500 text-2xl pt-6">
                 {currentLocationGroupData.expressDeliveryText?.length > 0

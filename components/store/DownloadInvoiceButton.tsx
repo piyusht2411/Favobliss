@@ -74,7 +74,7 @@ export const DownloadInvoiceButton = ({
         }`}
       >
         <Download className="w-4 h-4 mr-2" />
-        {isLoading ? "Generating..." : "Download Invoice"}
+        {isLoading ? "Generating..." : "Invoice"}
       </Button>
       {invoiceData && (
         <div style={{ position: "absolute", left: "-9999px" }}>

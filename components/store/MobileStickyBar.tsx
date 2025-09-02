@@ -1,14 +1,14 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { Product, Variant } from "@/types";
+import { cn, formatter } from "@/lib/utils";
+import { Product, ProductApiResponse, Variant } from "@/types";
 import { ActionButtons } from "./ActionButton";
 
 interface MobileStickyActionBarProps {
   price: number;
   mrp?: number;
   show: boolean;
-  product: Product;
+  product: ProductApiResponse;
   selectedVariant: Variant;
   locationPrice: { price: number; mrp: number };
   selectedLocationGroupId: string | null;
@@ -45,7 +45,7 @@ export const MobileStickyActionBar = ({
       {/* Mobile Layout - unchanged */}
       <div className="flex items-center justify-between gap-4 md:hidden">
         <ActionButtons
-          product={product}
+          productData={product}
           selectedVariant={selectedVariant}
           locationPrice={locationPrice}
           selectedLocationGroupId={selectedLocationGroupId}
@@ -56,18 +56,18 @@ export const MobileStickyActionBar = ({
         />
       </div>
 
-      {/* Web/Desktop Layout - with price on left */}
       <div className="hidden md:flex items-center justify-between gap-6">
-        {/* Price section on left */}
         <div className="flex flex-col">
           <div className="flex items-center gap-3">
-            <span className="text-2xl font-bold text-black">₹{price}</span>
+            <span className="text-2xl font-bold text-black">
+              {formatter.format(price)}
+            </span>
             {mrp && mrp > price && (
               <>
                 <span className="text-lg text-gray-500 line-through">
-                  MRP ₹{mrp}
+                  MRP {formatter.format(mrp)}
                 </span>
-                <span className="text-sm font-medium text-green-600 bg-green-50 px-2 py-1 rounded">
+                <span className="text-sm font-medium text-white bg-orange-400 px-2 py-1 rounded-full">
                   {discountPercentage}% OFF
                 </span>
               </>
@@ -83,7 +83,7 @@ export const MobileStickyActionBar = ({
 
         {/* Action buttons on right */}
         <ActionButtons
-          product={product}
+          productData={product}
           selectedVariant={selectedVariant}
           locationPrice={locationPrice}
           selectedLocationGroupId={selectedLocationGroupId}

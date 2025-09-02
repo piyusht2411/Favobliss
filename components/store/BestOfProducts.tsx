@@ -209,14 +209,14 @@ const BestOfProduct = (props: Props) => {
                   <div
                     key={product.id}
                     className="w-full"
-                    onClick={() => productPage(product.slug)}
+                    onClick={() => productPage(product.variants[0].slug)}
                   >
                     <div className="bg-gray-100 rounded-xl p-3 hover:shadow-lg transition-shadow duration-200 h-full">
                       {/* Product Image */}
                       <div className="aspect-square mb-3 flex items-center justify-center bg-white rounded-lg">
                         <img
                           src={image}
-                          alt={product.name}
+                          alt={product.variants[0].name}
                           className="w-full h-full object-contain rounded-lg p-2"
                         />
                       </div>
@@ -224,7 +224,7 @@ const BestOfProduct = (props: Props) => {
                       {/* Product Details */}
                       <div className="space-y-2">
                         <h3 className="font-medium text-gray-900 text-xs leading-tight line-clamp-2 min-h-[2rem]">
-                          {product.name}
+                          {product.variants[0].name}
                         </h3>
 
                         {/* Rating */}
@@ -283,14 +283,14 @@ const BestOfProduct = (props: Props) => {
                       <div
                         key={product.id}
                         className="flex-shrink-0 w-64 product-card"
-                        onClick={() => productPage(product.slug)}
+                        onClick={() => productPage(product.variants[0].slug)}
                       >
                         <div className="bg-gray-100 rounded-2xl p-4 hover:shadow-lg transition-shadow duration-200 h-full">
                           {/* Product Image */}
                           <div className="aspect-square mb-4 flex items-center justify-center bg-white rounded-lg">
                             <img
                               src={image}
-                              alt={product.name}
+                              alt={product.variants[0].name}
                               className="w-full h-full object-contain rounded-lg p-2"
                             />
                           </div>
@@ -298,7 +298,7 @@ const BestOfProduct = (props: Props) => {
                           {/* Product Details */}
                           <div className="space-y-2">
                             <h3 className="font-medium text-gray-900 text-sm line-clamp-2 min-h-[2.5rem]">
-                              {product.name}
+                              {product.variants[0].name}
                             </h3>
 
                             {/* Rating */}

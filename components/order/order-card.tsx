@@ -234,7 +234,7 @@ export const OrderCard = ({
               >
                 <Download className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
                 <span className="hidden sm:inline">
-                  {isLoading ? "Generating..." : "Download Invoice"}
+                  {isLoading ? "Generating..." : "Invoice"}
                 </span>
                 <span className="sm:hidden">
                   {isLoading ? "..." : "Invoice"}

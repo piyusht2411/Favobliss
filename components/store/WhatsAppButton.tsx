@@ -1,10 +1,20 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import React from "react";
 
 const WhatsAppButton = () => {
+  const pathname = usePathname();
+
+  const isProductPage = pathname.startsWith("/product/");
   return (
     <a
       href="https://wa.me/+918077335703?text=Hello%20Favobliss%20Team!"
-      className="fixed bottom-24 right-4 sm:right-10 bg-green-500 text-white rounded-full p-2 sm:p-3 shadow-lg hover:bg-green-600 transition duration-300 z-50 flex items-center justify-center"
+      className={`fixed ${
+        isProductPage ? "bottom-[5.7rem]" : "bottom-[3rem]"
+      } right-4 sm:right-10 
+        bg-green-500 text-white rounded-full p-2 sm:p-3 shadow-lg 
+        hover:bg-green-600 transition duration-300 z-50 flex items-center justify-center`}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Contact Favobliss on WhatsApp"

@@ -1,4 +1,4 @@
-import { Product } from "@/types";
+import { Product, ProductApiResponse } from "@/types";
 import axios from "axios";
 
 const URL = `${process.env.NEXT_PUBLIC_API_URL}/products`;
@@ -8,7 +8,9 @@ export const getProductById = async (id: string): Promise<Product> => {
   return res.json();
 };
 
-export const getProductBySlug = async (slug: string): Promise<Product> => {
+export const getProductBySlug = async (
+  slug: string
+): Promise<ProductApiResponse> => {
   const res = await fetch(`${URL}?slug=${slug}`, { cache: "no-store" });
   if (!res.ok) {
     throw new Error("Product not found");

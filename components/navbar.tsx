@@ -1,23 +1,8 @@
-import Link from "next/link";
-import { Pacifico } from "next/font/google";
-
-import { Container } from "@/components/ui/container";
-import { MainNav } from "./main-nav";
 import { getCategories } from "@/actions/get-categories";
-import { NavbarActions } from "./navbar-actions";
-import { cn } from "@/lib/utils";
-import { getWishlistItems } from "@/actions/get-whishlist";
-import { MobileNavbar } from "./mobile-nav";
 import Header from "./store/header";
-import useMediaQuery from "@/hooks/use-mediaquery";
 import HeaderMobile from "./store/HeaderMobile";
 import { SkeletonHeader } from "./SkeletonHeader";
 import { SkeletonHeaderMobile } from "./SkeletonHeaderMobile";
-
-// const font = Pacifico({
-//   weight: ["400"],
-//   subsets: ["latin"],
-// });
 
 export const Navbar = async () => {
   const storeId =
@@ -35,7 +20,6 @@ export const Navbar = async () => {
     );
   }
   const data = await getCategories(storeId);
-  // const wishlistItems = await getWishlistItems();
 
   return (
     <header className="shadow-neutral-100 shadow-lg p-[15px] md:p-0">

@@ -5,29 +5,29 @@ import { HiShoppingBag } from "react-icons/hi";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/hooks/use-cart";
 import { useRouter } from "next/navigation";
-import { Product, Variant } from "@/types";
+import { Product, ProductApiResponse, Variant } from "@/types";
 import { IoBagHandle } from "react-icons/io5";
 
 interface ActionButtonsProps {
   className?: string;
   isSticky?: boolean;
-  product: Product;
+  productData: ProductApiResponse;
   selectedVariant: Variant;
   locationPrice: { price: number; mrp: number };
   selectedLocationGroupId: string | null;
   isProductAvailable: boolean;
-  locationPinCode: string | null;
   deliveryInfo: {
     location: string;
     estimatedDelivery: number;
     isCodAvailable: boolean;
   } | null;
+  locationPinCode: string | null;
 }
 
 export const ActionButtons = ({
   className = "",
   isSticky = false,
-  product,
+  productData,
   selectedVariant,
   locationPrice,
   selectedLocationGroupId,
@@ -35,6 +35,7 @@ export const ActionButtons = ({
   deliveryInfo,
   locationPinCode,
 }: ActionButtonsProps) => {
+  const { product, variant } = productData;
   const { addItem } = useCart();
   const router = useRouter();
 
@@ -46,8 +47,8 @@ export const ActionButtons = ({
       addItem({
         ...product,
         price: locationPrice.price,
-        mrp: locationPrice.mrp, // Added
-        slug: product.slug,
+        mrp: locationPrice.mrp,
+        slug: variant.slug,
         selectedVariant,
         checkOutQuantity: 1,
         pincode: itemPincode,
@@ -67,7 +68,8 @@ export const ActionButtons = ({
       addItem({
         ...product,
         price: locationPrice.price,
-        mrp: locationPrice.mrp, // Added
+        mrp: locationPrice.mrp,
+        slug: variant.slug,
         selectedVariant,
         checkOutQuantity: 1,
         pincode: itemPincode,

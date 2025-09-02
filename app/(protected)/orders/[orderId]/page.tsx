@@ -373,7 +373,7 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
                         <div className="flex-1">
                           <Link
                             href={`/product/${product.slug}`}
-                            className="text-lg font-semibold text-gray-900 mb-2 cursor-pointer hover:text-blue-600 block"
+                            className="text:sm md:text-lg font-semibold text-gray-900 mb-2 cursor-pointer hover:text-blue-600 block"
                           >
                             {product.name}
                           </Link>

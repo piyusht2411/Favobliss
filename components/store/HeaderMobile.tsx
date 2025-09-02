@@ -354,46 +354,40 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
                     {category.subCategories &&
                       category.subCategories.length > 0 && (
                         <div className="grid grid-cols-4 gap-3">
-                          {category.subCategories
-                            .slice(0, 8)
-                            .map((subCategory: any) => (
-                              <button
-                                key={subCategory.id}
-                                onClick={() => {
-                                  setSelectedCategory(subCategory.name);
-                                  setIsSearchDropdownOpen(false);
-                                  router.push(
-                                    `/category/${category.slug}?sub=${subCategory.slug}&page=1`
-                                  );
-                                }}
-                                className="flex flex-col items-center p-2 rounded-lg hover:bg-gray-50 transition-colors group"
-                              >
-                                {/* Subcategory Icon/Image */}
-                                <div className="w-12 h-12 mb-2 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
-                                  {subCategory.icon ? (
-                                    <img
-                                      src={subCategory.icon}
-                                      alt={subCategory.name}
-                                      className="w-full h-full object-cover"
-                                    />
-                                  ) : (
-                                    <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-orange-600 rounded-md flex items-center justify-center">
-                                      <span className="text-white text-xs font-bold">
-                                        {subCategory.name
-                                          .charAt(0)
-                                          .toUpperCase()}
-                                      </span>
-                                    </div>
-                                  )}
-                                </div>
-                                {/* Subcategory Name */}
-                                <span className="text-xs text-gray-700 text-center leading-tight group-hover:text-gray-900">
-                                  {subCategory.name}
-                                </span>
-                              </button>
-                            ))}
+                          {category.subCategories.map((subCategory: any) => (
+                            <button
+                              key={subCategory.id}
+                              onClick={() => {
+                                setSelectedCategory(subCategory.name);
+                                setIsSearchDropdownOpen(false);
+                                router.push(
+                                  `/category/${category.slug}?sub=${subCategory.slug}&page=1`
+                                );
+                              }}
+                              className="flex flex-col items-center p-2 rounded-lg hover:bg-gray-50 transition-colors group"
+                            >
+                              <div className="w-12 h-12 mb-2 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+                                {subCategory.icon ? (
+                                  <img
+                                    src={subCategory.icon}
+                                    alt={subCategory.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-orange-600 rounded-md flex items-center justify-center">
+                                    <span className="text-white text-xs font-bold">
+                                      {subCategory.name.charAt(0).toUpperCase()}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                              {/* Subcategory Name */}
+                              <span className="text-xs text-gray-700 text-center leading-tight group-hover:text-gray-900">
+                                {subCategory.name}
+                              </span>
+                            </button>
+                          ))}
 
-                          {/* Show more button if there are more than 8 subcategories */}
                           {category.subCategories.length > 8 && (
                             <button
                               onClick={() => {
@@ -422,11 +416,9 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
           </div>
         )}
 
-        {/* Search Results Dropdown */}
         {showSearchResults && (
           <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-96 overflow-y-auto mt-1">
             <div className="flex flex-col md:flex-row min-h-[300px] max-h-[400px]">
-              {/* Left Side - Suggestions */}
               <div className="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-gray-200">
                 <div className="p-3 bg-gray-50 border-b border-gray-200">
                   <h3 className="text-base font-semibold text-gray-900">
@@ -482,7 +474,6 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
                         </>
                       )}
 
-                      {/* Brands */}
                       {(searchResults?.brands ?? []).length > 0 && (
                         <>
                           {searchResults?.brands?.map((brand) => (
@@ -499,7 +490,6 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
                         </>
                       )}
 
-                      {/* No results message */}
                       {searchQuery &&
                         !isSearching &&
                         (searchResults?.categories ?? []).length === 0 &&
@@ -515,7 +505,6 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
                 </div>
               </div>
 
-              {/* Right Side - Products */}
               <div className="w-full md:w-1/2">
                 <div className="p-3 bg-gray-50 border-b border-gray-200">
                   <h3 className="text-base font-semibold text-gray-900">
@@ -566,7 +555,6 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
                         </>
                       ) : (
                         <>
-                          {/* No products message */}
                           {searchQuery &&
                             !isSearching &&
                             (searchResults?.products ?? []).length === 0 && (
@@ -584,7 +572,6 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
           </div>
         )}
 
-        {/* Click outside to close dropdown */}
         {(isSearchDropdownOpen || showSearchResults) && (
           <div
             className="fixed inset-0 z-40"
@@ -596,7 +583,6 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
         )}
       </div>
 
-      {/* Menu Sidebar */}
       <div
         className={`fixed inset-y-0 left-0 w-64 bg-black text-white transform ${
           isMenuOpen ? "translate-x-0" : "-translate-x-full"

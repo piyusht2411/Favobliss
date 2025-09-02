@@ -49,13 +49,13 @@ export const CartItem = ({ data, deliveryDays }: CartItemProps) => {
       mrp: data?.mrp || 0,
       quantity: data.checkOutQuantity,
       image: data.selectedVariant.images[0]?.url || "",
-      about: data.about,
-      name: data.name,
+      about: data.selectedVariant.about,
+      name: data.selectedVariant.name,
       size: data.selectedVariant.size?.value,
       color: data.selectedVariant.color?.name,
       selectedVariant: data.selectedVariant,
       locationId: data.locationId,
-      slug: data.slug,
+      slug: data.selectedVariant.slug,
     };
 
     if (isChecked) {
@@ -89,10 +89,10 @@ export const CartItem = ({ data, deliveryDays }: CartItemProps) => {
           {data.selectedVariant.images[0]?.url ? (
             <Image
               src={data.selectedVariant.images[0].url}
-              alt={data.name}
+              alt={data.selectedVariant.name}
               fill
               className="object-cover cursor-pointer"
-              onClick={() => handleProductAnchor(data.slug)}
+              onClick={() => handleProductAnchor(data.selectedVariant.slug)}
             />
           ) : (
             <div className="bg-gray-200 w-full h-full" />
@@ -102,9 +102,9 @@ export const CartItem = ({ data, deliveryDays }: CartItemProps) => {
         <div className="flex-1 min-w-0">
           <h3
             className="text-lg font-semibold text-gray-900 cursor-pointer hover:text-blue-600 line-clamp-2"
-            onClick={() => handleProductAnchor(data.slug)}
+            onClick={() => handleProductAnchor(data.selectedVariant.slug)}
           >
-            {data.name}
+            {data.selectedVariant.name}
           </h3>
 
           <div className="mt-1 space-y-1">

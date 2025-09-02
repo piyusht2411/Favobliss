@@ -22,7 +22,7 @@ const CheckoutAddressPage = () => {
   return (
     <Container>
       <div className="px-4 sm:px-6 lg:px-8 xl:px-24 h-full">
-        <PincodeValidator handleAddressCorrect={handleAddressCorrect} />
+        {/* <PincodeValidator handleAddressCorrect={handleAddressCorrect} /> */}
         <div className="my-12 lg:grid lg:grid-cols-12 lg:items-start gap-x-12">
           <div className="lg:col-span-7">
             {isLoading ? (

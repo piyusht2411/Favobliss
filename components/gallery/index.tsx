@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Product, Variant, VariantImage } from "@/types";
+import { Product, ProductApiResponse, Variant, VariantImage } from "@/types";
 import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import { GalleryTab } from "./gallery-tab";
 import { useShareModal } from "@/hooks/use-share-modal";
@@ -14,10 +14,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { GallerySkeleton } from "./gallery-skeleton";
 import { ActionButtons } from "../store/ActionButton";
 import { FaPlay, FaPause, FaVolumeMute, FaVolumeUp } from "react-icons/fa";
+import { PiShareFatFill } from "react-icons/pi";
 
 interface GalleryProps {
   images: VariantImage[];
-  product: Product;
+  product: ProductApiResponse;
   selectedVariant: Variant;
   locationPrice: {
     price: number;
@@ -370,7 +371,7 @@ export const Gallery = ({
             {images.map((media, index) => (
               <SwiperSlide key={media.id}>
                 <div
-                  className="relative w-full bg-white"
+                  className="relative w-full bg-[#f6f4f4]"
                   style={{ height: "400px", maxHeight: "500px" }}
                 >
                   {media.mediaType === "IMAGE" ? (
@@ -450,15 +451,23 @@ export const Gallery = ({
               className="relative overflow-hidden bg-[#f6f4f4] h-auto min-h-[500px] max-h-[600px]"
             >
               {media.mediaType === "IMAGE" ? (
-                <Image
-                  src={media.url}
-                  alt="Variant Image"
-                  width={600}
-                  height={600}
-                  className="w-full h-auto object-contain object-top max-h-full"
-                  onLoad={() => handleMediaLoad(media.id)}
-                  onError={() => handleMediaError(media.id)}
-                />
+                <>
+                  <Image
+                    src={media.url}
+                    alt="Variant Image"
+                    width={600}
+                    height={600}
+                    className="w-full h-auto object-contain object-top max-h-full"
+                    onLoad={() => handleMediaLoad(media.id)}
+                    onError={() => handleMediaError(media.id)}
+                  />
+                  <div
+                    className="absolute h-10 w-10 top-4 right-4 bg-white rounded-full flex items-center justify-center md:cursor-pointer"
+                    onClick={onOpen}
+                  >
+                    <PiShareFatFill className="text-zinc-700 h-6 w-6" />
+                  </div>
+                </>
               ) : (
                 <div
                   className="relative w-full h-full flex items-center justify-center bg-black min-h-[500px]"
@@ -491,6 +500,12 @@ export const Gallery = ({
                   />
 
                   <VideoControls mediaId={media.id} index={index} />
+                  <div
+                    className="absolute h-10 w-10 top-4 right-4 bg-white rounded-full flex items-center justify-center md:cursor-pointer"
+                    onClick={onOpen}
+                  >
+                    <PiShareFatFill className="text-zinc-700 h-6 w-6" />
+                  </div>
                 </div>
               )}
             </TabsContent>
@@ -499,7 +514,7 @@ export const Gallery = ({
       )}
       <div className="mt-4 max-w-sm mx-auto hidden md:block">
         <ActionButtons
-          product={product}
+          productData={product}
           selectedVariant={selectedVariant}
           locationPrice={locationPrice}
           selectedLocationGroupId={selectedLocationGroupId}

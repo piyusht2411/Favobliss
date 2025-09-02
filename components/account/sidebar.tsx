@@ -25,11 +25,11 @@ export const Sidebar = () => {
         active: pathname === "/orders",
         label: "Orders",
       },
-      {
-        url: "/wishlist",
-        active: pathname === "/wishlist",
-        label: "Wishlists",
-      },
+      // {
+      //   url: "/wishlist",
+      //   active: pathname === "/wishlist",
+      //   label: "Wishlists",
+      // },
       // {
       //     url : "#",
       //     active : pathname === "#",
