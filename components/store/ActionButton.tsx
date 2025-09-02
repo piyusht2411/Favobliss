@@ -90,7 +90,7 @@ export const ActionButtons = ({
         disabled={selectedVariant.stock <= 0 || !isProductAvailable}
       >
         <HiShoppingBag className="mr-2 h-5 w-5" />
-        ADD TO Cart
+        Add TO Cart
       </Button>
       <Button
         className="h-14 font-bold bg-black hover:bg-black text-white rounded-2xl"
