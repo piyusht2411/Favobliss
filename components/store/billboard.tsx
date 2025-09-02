@@ -61,6 +61,14 @@ const HeroSlider: React.FC = () => {
   const slides = [
     {
       id: 1,
+      src: "/assets/hero/hero-new.jpg",
+      srcSet: "/assets/hero/hero-new.jpg",
+      alt: "Best Television India",
+      width: 1000,
+      height: 340,
+    },
+    {
+      id: 2,
       src: "/assets/hero/banner-1.png",
       srcSet: "/assets/hero/banner-1.png",
       alt: "Best Television India",
@@ -68,7 +76,7 @@ const HeroSlider: React.FC = () => {
       height: 340,
     },
     {
-      id: 2,
+      id: 3,
       src: "https://www.favobliss.com/image/cache/catalog/lg%20-washingmachine-1000x340.png",
       srcSet:
         "https://www.favobliss.com/image/cache/catalog/lg%20-washingmachine-1000x340.png 1x, https://www.favobliss.com/image/cache/catalog/lg%20-washingmachine-2000x680.png 2x",
@@ -77,7 +85,7 @@ const HeroSlider: React.FC = () => {
       height: 340,
     },
     {
-      id: 3,
+      id: 4,
       src: "https://www.favobliss.com/image/cache/catalog/best-telivestion-india-1000x340.png",
       srcSet:
         "https://www.favobliss.com/image/cache/catalog/best-telivestion-india-1000x340.png 1x, https://www.favobliss.com/image/cache/catalog/best-telivestion-india-2000x680.png 2x",

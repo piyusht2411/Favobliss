@@ -1086,47 +1086,56 @@ export const ProductDetails = (props: ProductDetailsProps) => {
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={cn(
-                        "text-sm font-medium",
-                        isProductAvailable ? "text-gray-900" : "text-red-700"
-                      )}
-                    >
-                      {isProductAvailable
-                        ? `Deliver options ${deliveryInfo?.location}`
-                        : `Product not available at ${pincode.trim()}`}
-                    </span>
-                  </div>
-                  <button
-                    onClick={handleChangePincode}
-                    className="text-sm font-medium text-[#ee8c1d] hover:text-[#ee8c1d]"
-                  >
-                    Change
-                  </button>
-                </div>
-
-                {deliveryInfo && isProductAvailable && (
+                <div className="flex items-center justify-between gap-1">
                   <div>
-                    <div className="space-y-2">
-                      <div className="text-sm text-gray-800">
-                        <span className="font-medium">
-                          Express Delivery{" "}
-                          {formatDeliveryDate(deliveryInfo.estimatedDelivery)}
-                        </span>
-                      </div>
-
+                    <div className="flex items-center justify-between mb-[10px]">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm">
-                          {isCodAvailableForPincode
-                            ? "Cash on Delivery Available"
-                            : "Cash on Delivery Not Available"}
+                        <span
+                          className={cn(
+                            "text-sm font-medium",
+                            isProductAvailable
+                              ? "text-gray-900"
+                              : "text-red-700"
+                          )}
+                        >
+                          {isProductAvailable
+                            ? `Deliver options ${deliveryInfo?.location}`
+                            : `Product not available at ${pincode.trim()}`}
                         </span>
                       </div>
                     </div>
+
+                    {deliveryInfo && isProductAvailable && (
+                      <div>
+                        <div className="space-y-2">
+                          <div className="text-sm text-gray-800">
+                            <span className="font-medium">
+                              Express Delivery{" "}
+                              {formatDeliveryDate(
+                                deliveryInfo.estimatedDelivery
+                              )}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-2 font-medium">
+                            <span className="text-sm text-gray-800">
+                              {isCodAvailableForPincode
+                                ? "Cash on Delivery Available"
+                                : "Cash on Delivery Not Available"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
+                  <Button
+                    variant="outline"
+                    onClick={handleChangePincode}
+                    className="h-9 px-4 text-sm font-medium text-[#ee8c1d] border-[#ee8c1d] hover:bg-[#ee8c1d]"
+                  >
+                    Change
+                  </Button>
+                </div>
 
                 {!isProductAvailable && (
                   <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-2">

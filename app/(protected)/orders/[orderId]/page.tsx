@@ -373,7 +373,7 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
                         <div className="flex-1">
                           <Link
                             href={`/product/${product.slug}`}
-                            className="text:sm md:text-lg font-semibold text-gray-900 mb-2 cursor-pointer hover:text-blue-600 block"
+                            className="text-sm md:text-lg font-semibold text-gray-900 mb-2 cursor-pointer hover:text-blue-600 block"
                           >
                             {product.name}
                           </Link>
@@ -383,19 +383,23 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
                             </p>
                           )}
 
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <span className="text-gray-500">Size:</span>
-                              <span className="ml-2 font-medium text-gray-900">
-                                {product.size}
-                              </span>
-                            </div>
-                            <div>
-                              <span className="text-gray-500">Color:</span>
-                              <span className="ml-2 font-medium text-gray-900">
-                                {product.color}
-                              </span>
-                            </div>
+                          <div className="hidden md:grid grid-cols-2 gap-4 text-sm">
+                            {product.size && (
+                              <div>
+                                <span className="text-gray-500">Size:</span>
+                                <span className="ml-2 font-medium text-gray-900">
+                                  {product.size}
+                                </span>
+                              </div>
+                            )}
+                            {product.color && (
+                              <div>
+                                <span className="text-gray-500">Color:</span>
+                                <span className="ml-2 font-medium text-gray-900">
+                                  {product.color}
+                                </span>
+                              </div>
+                            )}
                             <div>
                               <span className="text-gray-500">Quantity:</span>
                               <span className="ml-2 font-medium text-gray-900">
@@ -427,6 +431,52 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
                               </span>
                             </div>
                           </div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 text-sm md:hidden">
+                        {product.size && (
+                          <div>
+                            <span className="text-gray-500">Size:</span>
+                            <span className="ml-2 font-medium text-gray-900">
+                              {product.size}
+                            </span>
+                          </div>
+                        )}
+                        {product.color && (
+                          <div>
+                            <span className="text-gray-500">Color:</span>
+                            <span className="ml-2 font-medium text-gray-900">
+                              {product.color}
+                            </span>
+                          </div>
+                        )}
+                        <div>
+                          <span className="text-gray-500">Quantity:</span>
+                          <span className="ml-2 font-medium text-gray-900">
+                            {product.quantity || 1}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Payment Method:</span>
+                          <span className="ml-2 font-medium text-gray-900">
+                            {orderProduct.paymentMethod === "cod"
+                              ? "Cash on Delivery"
+                              : "Online Payment"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">MRP:</span>
+                          <span className="ml-2 font-medium text-gray-900">
+                            {formatter.format(
+                              product.mrp || product.price || 0
+                            )}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Price:</span>
+                          <span className="ml-2 font-medium text-gray-900">
+                            {formatter.format(product.price || 0)}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -531,17 +581,16 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
                           key={step.status}
                           className="flex items-start gap-4"
                         >
-                          {/* Timeline Connector */}
                           <div className="flex flex-col items-center">
                             <div
                               className={cn(
                                 "w-10 h-10 rounded-full flex items-center justify-center",
                                 isCurrent || isCompleted
                                   ? step.bgColor
-                                  : "bg-gray-100",
+                                  : "bg-orange-100",
                                 isCurrent || isCompleted
                                   ? step.borderColor
-                                  : "border-gray-200",
+                                  : "border-orange-200",
                                 "border-2"
                               )}
                             >
@@ -550,7 +599,7 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
                                   "w-5 h-5",
                                   isCurrent || isCompleted
                                     ? step.color
-                                    : "text-gray-400"
+                                    : "text-orange-400"
                                 )}
                               />
                             </div>
@@ -560,7 +609,7 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
                                   "w-0.5 h-12 mt-2",
                                   isCompleted || isCurrent
                                     ? step.bgColor
-                                    : "bg-gray-200"
+                                    : "bg-orange-300"
                                 )}
                               />
                             )}

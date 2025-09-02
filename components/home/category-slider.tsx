@@ -67,8 +67,8 @@ export function CategorySlider(props: Props) {
         <div
           className="grid grid-rows-2 gap-y-4 overflow-x-auto pb-4"
           style={{
-            gridTemplateColumns: "repeat(11, minmax(60px, 1fr))", // 11 columns to show 5.5 items
-            width: "calc(100vw - 2rem)", // Full width minus padding
+            gridTemplateColumns: "repeat(11, minmax(100px, 1fr))", // Adjusted for 3.5 categories per row
+            width: "calc(100vw - 2rem)",
             scrollBehavior: "smooth",
             WebkitOverflowScrolling: "touch",
             scrollbarWidth: "none",
@@ -91,7 +91,7 @@ export function CategorySlider(props: Props) {
                     : index - Math.ceil(categories.length / 2) + 1,
                 }}
               >
-                <div className="relative w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-2 overflow-hidden transition-all duration-300 bg-gray-50 rounded-lg">
+                <div className="relative w-20 h-20 sm:w-20 sm:h-20 mx-auto mb-2 overflow-hidden transition-all duration-300 bg-gray-50 rounded-lg">
                   <Image
                     src={imageSrc}
                     alt={category.name}

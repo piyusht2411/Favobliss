@@ -409,7 +409,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
 
   return (
     <div className="bg-white">
-      <div className="max-w-[1480px] m-auto pt-[18px] pb-[4px]">
+      <div className="max-x-full px-4 md:px-6 m-auto pt-[18px] pb-[4px]">
         <header className="bg-black text-white py-2 px-6 flex items-center justify-between shadow-md border border-transparent rounded-2xl">
           <div className="flex items-center space-x-4">
             <Link href="/">

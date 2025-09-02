@@ -282,7 +282,7 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
       </div>
 
       {/* Search Bar with Category Grid Dropdown */}
-      <div className="mt-4 relative" ref={searchDropdownRef}>
+      <div className="mt-2 relative" ref={searchDropdownRef}>
         <div className="relative flex bg-white overflow-hidden rounded-[6px]">
           {/* Category Dropdown Button */}
           <div className="relative">

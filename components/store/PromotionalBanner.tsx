@@ -44,7 +44,7 @@ const PromotionalBanner = (props: Props) => {
              p-3 sm:p-4 lg:p-5 
              bg-[#f8cabb] md:bg-[url('http://res.cloudinary.com/dgcksrb1n/image/upload/v1754593480/w4gd7muiyubkbusexs2z.jpg')] md:bg-cover"
       >
-        <div className="w-full px-2 sm:px-3 lg:px-4">
+        <div className="w-full px-2 sm:px-3 lg:px-0">
           <div className="mb-4 sm:mb-6">
             <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 scrollbar-hide">
               {categories.map((category, index) => (
@@ -88,6 +88,7 @@ const PromotionalBanner = (props: Props) => {
               locationGroups={locationGroups}
               isBannerProduct={true}
               isSpaceTop={false}
+              className="min-w-[260px]"
             />
           )}
         </div>

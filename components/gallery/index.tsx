@@ -371,7 +371,7 @@ export const Gallery = ({
             {images.map((media, index) => (
               <SwiperSlide key={media.id}>
                 <div
-                  className="relative w-full bg-[#f6f4f4]"
+                  className="relative w-full bg-[#f6f4f4] rounded-2xl"
                   style={{ height: "400px", maxHeight: "500px" }}
                 >
                   {media.mediaType === "IMAGE" ? (
@@ -448,7 +448,7 @@ export const Gallery = ({
             <TabsContent
               key={media.id}
               value={media.id}
-              className="relative overflow-hidden bg-[#f6f4f4] h-auto min-h-[500px] max-h-[600px]"
+              className="relative overflow-hidden bg-[#f6f4f4] h-auto min-h-[500px] max-h-[600px] rounded-2xl"
             >
               {media.mediaType === "IMAGE" ? (
                 <>

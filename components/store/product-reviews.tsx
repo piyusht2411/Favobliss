@@ -34,18 +34,22 @@ const CircularProgress = ({
   size = 60,
   strokeWidth = 4,
   color = "#22c55e",
+  className = "",
 }: {
   value: number;
   size?: number;
   strokeWidth?: number;
   color?: string;
+  className?: string;
 }) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const offset = circumference - (value / 5) * circumference;
 
   return (
-    <div className="relative inline-flex items-center justify-center">
+    <div
+      className={`relative inline-flex items-center justify-center ${className}`}
+    >
       <svg width={size} height={size} className="transform -rotate-90">
         <circle
           cx={size / 2}
@@ -379,9 +383,9 @@ export const ProductReviews = (props: ProductReviewsProps) => {
                 />
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-gray-800 mb-1">
+                {/* <div className="text-2xl font-bold text-gray-800 mb-1">
                   {avgRating.toFixed(1)} ★
-                </div>
+                </div> */}
                 <div className="text-sm text-gray-500">
                   {totalReviews.toLocaleString()} Ratings &{" "}
                   {reviews.length.toLocaleString()} Reviews
@@ -389,7 +393,6 @@ export const ProductReviews = (props: ProductReviewsProps) => {
               </div>
             </div>
 
-            {/* Rating Distribution */}
             <div className="space-y-2">
               {[5, 4, 3, 2, 1].map((star) => {
                 const count = reviews.filter((r) => r.rating === star).length;
@@ -436,7 +439,8 @@ export const ProductReviews = (props: ProductReviewsProps) => {
                         <div className="mb-3">
                           <CircularProgress
                             value={cat.averageRating}
-                            size={80}
+                            size={60}
+                            className="md:w-[80px] md:h-[80px]"
                             strokeWidth={6}
                             color={color}
                           />

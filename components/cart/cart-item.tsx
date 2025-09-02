@@ -70,10 +70,6 @@ export const CartItem = ({ data, deliveryDays }: CartItemProps) => {
     removeItem(data.selectedVariant.id);
   };
 
-  const handleWishlist = () => {
-    setIsWishlisted(!isWishlisted);
-    // Add your wishlist logic here
-  };
   const discountPercentage = data.mrp
     ? Math.round(((data.mrp - data.price) / data.mrp) * 100)
     : 0;
@@ -101,13 +97,13 @@ export const CartItem = ({ data, deliveryDays }: CartItemProps) => {
 
         <div className="flex-1 min-w-0">
           <h3
-            className="text-lg font-semibold text-gray-900 cursor-pointer hover:text-blue-600 line-clamp-2"
+            className="text-sm md:text-lg font-semibold text-gray-900 cursor-pointer hover:text-blue-600 line-clamp-2"
             onClick={() => handleProductAnchor(data.selectedVariant.slug)}
           >
             {data.selectedVariant.name}
           </h3>
 
-          <div className="mt-1 space-y-1">
+          <div className="mt-1 space-y-1 hidden md:block">
             <p className="text-green-600 font-medium text-sm">In Stock</p>
             <p className="text-gray-700 text-sm">Free Shipping</p>
             <p className="text-gray-700 text-sm">

@@ -332,7 +332,7 @@ export const Summary = (props: Props) => {
               placeholder="Enter Coupon Code"
               value={couponCode}
               onChange={(e) => setCouponCode(e.target.value)}
-              className="flex-1 px-4 py-3 text-sm text-gray-700 placeholder-gray-400 outline-none border-0"
+              className="flex-1 px-4 py-3 text-sm text-gray-700 placeholder-gray-400 outline-none border-0 focus-visible:ring-white"
             />
             <Button
               onClick={handleApplyCoupon}

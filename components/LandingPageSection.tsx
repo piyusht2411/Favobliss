@@ -26,20 +26,22 @@ const LandingPageSection: React.FC<HomeAppliancesSectionProps> = ({
   handleCategoryChange,
 }) => {
   return (
-    <div className={`rounded-2xl p-6 w-full max-w-full ${className}`}>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+    <div className={`rounded-2xl p-3 md:p-6 w-full max-w-full ${className}`}>
+      <div className="flex justify-between items-center mb-3 md:mb-6">
+        <h2 className="text-base md:text-xl font-semibold text-gray-900">
+          {title}
+        </h2>
         {viewAllLink && (
           <Link
             href={viewAllLink}
-            className="text-sm text-gray-600 hover:text-gray-800 transition-colors"
+            className="text-sm md:text-sm text-gray-600 hover:text-gray-800 transition-colors"
           >
             View All
           </Link>
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6 bg-white p-3 rounded-xl">
         {items.map((item) => (
           <div key={item.id}>
             <ApplianceCard
@@ -61,7 +63,10 @@ interface ApplianceCardProps {
 const ApplianceCard: React.FC<ApplianceCardProps> = React.memo(
   ({ item, handleCategoryChange }) => {
     return (
-      <div onClick={() => handleCategoryChange(item.id)}>
+      <div
+        onClick={() => handleCategoryChange(item.id)}
+        className="bg-[#d9d9d9] rounded-xl p-3"
+      >
         <div className="group cursor-pointer">
           <div className="relative w-full aspect-square rounded-xl mb-3 overflow-hidden transition-transform group-hover:scale-105">
             <Image

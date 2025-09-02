@@ -22,14 +22,14 @@ const PremiumProductsSection: React.FC<PremiumProductsSectionProps> = ({
 }) => {
   return (
     <div
-      className={`rounded-3xl w-full max-w-full p-8 pt-[200px] ${className}`}
+      className={`rounded-3xl w-full max-w-full px-4 py-8 md:p-8 pt-[200px] ${className}`}
       style={{ backgroundColor }}
     >
-      <div className="flex overflow-x-auto space-x-6 pb-4 scrollbar-hide snap-x snap-mandatory justify-between">
+      <div className="flex overflow-x-auto space-x-6 pb-1 md:pb-4 scrollbar-hide snap-x snap-mandatory justify-between">
         {products.map((product) => (
           <div
             key={product.id}
-            className="flex-none w-[45vw] sm:w-[30vw] lg:w-[23%] snap-start"
+            className="flex-none w-[30vw] sm:w-[30vw] lg:w-[23%] snap-start"
           >
             <PremiumProductCard product={product} />
           </div>

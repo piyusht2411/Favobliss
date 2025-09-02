@@ -13,6 +13,7 @@ interface ProductListProps {
   isBannerProduct?: boolean;
   showViewAll?: boolean;
   link?: string;
+  className?: string;
 }
 
 export const ProductList = ({
@@ -23,12 +24,13 @@ export const ProductList = ({
   isBannerProduct = false,
   showViewAll = false,
   link = "/latest-launches?page=1",
+  className,
 }: ProductListProps) => {
   return (
     <div className="space-y-2 md:space-y-8">
       {title.length > 0 && (
         <div className="flex items-center justify-between">
-          <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-5">
+          <h3 className="text-xl md:text-3xl lg:text-4xl font-bold mb-0 md:mb-5">
             {title}
           </h3>
           {showViewAll && (
@@ -49,7 +51,7 @@ export const ProductList = ({
         {data.slice(0, 5).map((product) => (
           <div
             key={product.id}
-            className={`flex-none w-[45vw] sm:w-[30vw] md:w-[25vw] lg:w-[25vw] ${
+            className={`flex-none w-[45vw] sm:w-[30vw] md:w-[25vw] lg:w-[25vw] ${className} ${
               isBannerProduct ? "xl:w-[16vw]" : "xl:w-[17vw]"
             } snap-start`}
           >

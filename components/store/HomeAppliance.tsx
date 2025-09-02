@@ -12,10 +12,11 @@ interface Props {
   link: string;
   items: any;
   title: string;
+  className?:string;
 }
 
 const HomeAppliance = (props: Props) => {
-  const { categoryId, locationGroups, link, items, title } = props;
+  const { categoryId, locationGroups, link, items, title, className } = props;
   const [data, setData] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -51,7 +52,7 @@ const HomeAppliance = (props: Props) => {
         title={title || "Home Appliances"}
         items={items}
         viewAllLink={link}
-        className="mx-auto bg-[#d8d8d8]"
+        className={`mx-auto ${className}`}
         handleCategoryChange={handleCategoryChange}
       />
       {loading ? (

@@ -118,6 +118,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
               locationGroups={locationGroups}
               link="/category/home-appliances?page=1"
               items={applianceItems}
+              className="bg-[#e1e8d4]"
             />
             <HomeAppliance
               title="Kitchen Appliances"
@@ -125,6 +126,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
               locationGroups={locationGroups}
               link="/category/kitchen-appliances?page=1"
               items={kitchenAppliance}
+              className="bg-[#c5aa94]"
             />
             {/* <LandingPageSection
               title="Kitchen Appliances"
@@ -156,7 +158,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
             />
             <BrandList brands={Array.isArray(brands) ? brands : [brands]} />
             <HotDealBanner />
-            <LatestLaunches />
+            {/* <LatestLaunches /> */}
             <FeatureHighlights />
           </div>
         </div>
