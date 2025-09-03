@@ -11,7 +11,7 @@ interface ApplianceItem {
 }
 
 interface HomeAppliancesSectionProps {
-  title?: string;
+  title: string;
   items: ApplianceItem[];
   viewAllLink?: string;
   className?: string;
@@ -19,7 +19,7 @@ interface HomeAppliancesSectionProps {
 }
 
 const LandingPageSection: React.FC<HomeAppliancesSectionProps> = ({
-  title = "Home Appliances",
+  title,
   items,
   viewAllLink,
   className = "",
@@ -27,19 +27,21 @@ const LandingPageSection: React.FC<HomeAppliancesSectionProps> = ({
 }) => {
   return (
     <div className={`rounded-2xl p-3 md:p-6 w-full max-w-full ${className}`}>
-      <div className="flex justify-between items-center mb-3 md:mb-6">
-        <h2 className="text-base md:text-xl font-semibold text-gray-900">
-          {title}
-        </h2>
-        {viewAllLink && (
-          <Link
-            href={viewAllLink}
-            className="text-sm md:text-sm text-gray-600 hover:text-gray-800 transition-colors"
-          >
-            View All
-          </Link>
-        )}
-      </div>
+      {title?.length > 0 && (
+        <div className="flex justify-between items-center mb-3 md:mb-6">
+          <h2 className="text-base md:text-xl font-semibold text-gray-900">
+            {title}
+          </h2>
+          {viewAllLink && (
+            <Link
+              href={viewAllLink}
+              className="text-sm md:text-sm text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              View All
+            </Link>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6 bg-white p-3 rounded-xl">
         {items.map((item) => (

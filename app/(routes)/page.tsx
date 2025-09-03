@@ -18,6 +18,7 @@ import LandingPageSection from "@/components/LandingPageSection";
 import { AnyAaaaRecord } from "node:dns";
 import {
   applianceItems,
+  brandItems,
   kitchenAppliance,
   premiumProducts,
 } from "@/utils/constant";
@@ -30,6 +31,7 @@ import RecentlyViewed from "@/components/store/RecentlyViewed";
 import { getLocationGroups } from "@/actions/get-location-group";
 import HomeAppliance from "@/components/store/HomeAppliance";
 import BannerProductSection from "@/components/store/BannerProductSection";
+import BannerImage from "@/components/store/BannerImage";
 
 export const revalidate = 0;
 
@@ -72,7 +74,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
       <GalleryImage />
       <Container>
         <div className="space-y-10 pb-20 mt-8">
-          <div className="flex flex-col gap-y-8 md:gap-y-12 px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-y-4 md:gap-y-12 px-4 sm:px-6 lg:px-8">
             <BannerProductSection
               locationGroups={locationGroups}
               products={brandProducts}
@@ -126,6 +128,15 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
               locationGroups={locationGroups}
               link="/category/kitchen-appliances?page=1"
               items={kitchenAppliance}
+              className="bg-[#c5aa94]"
+            />
+            <BannerImage imageUrl="/assets/banner-boat.jpg" altText="banner" />
+            <HomeAppliance
+              title=""
+              categoryId="684321d4c338ba8cc9db1e75"
+              locationGroups={locationGroups}
+              link="/category/kitchen-appliances?page=1"
+              items={brandItems}
               className="bg-[#c5aa94]"
             />
             {/* <LandingPageSection

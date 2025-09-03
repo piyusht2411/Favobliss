@@ -156,6 +156,41 @@ export const applianceItems: any[] = [
   },
 ];
 
+export const brandItems: any[] = [
+  {
+    id: "68b820c05b97348b5d2f2c2c",
+    title: "Smart Watches",
+    image:
+      "https://img.freepik.com/premium-photo/watch-with-black-band-that-says-watch-face_1171594-38413.jpg?ga=GA1.1.357575914.1756896553&semt=ais_incoming&w=740&q=80",
+    link: "/category/home-appliances?sub=air-purifier?page=1",
+    backgroundColor: "#f8f9fa",
+  },
+  {
+    id: "68b81e52465a0b8c791ba767",
+    title: "Soundbar",
+    image:
+      "https://img.freepik.com/free-photo/rendering-smart-home-device_23-2151039348.jpg?ga=GA1.1.357575914.1756896553&semt=ais_incoming&w=740&q=80",
+    link: "/category/home-appliances?sub=dishwasher?page=1",
+    backgroundColor: "#fff5f5",
+  },
+  {
+    id: "68b81f5a465a0b8c791ba76a",
+    title: "Headphones",
+    image:
+      "https://img.freepik.com/free-photo/headphones-displayed-against-dark-background_157027-4466.jpg?ga=GA1.1.357575914.1756896553&semt=ais_incoming&w=740&q=80",
+    link: "/category/home-appliances?sub=refrigerators?page=1",
+    backgroundColor: "#f0fdf4",
+  },
+  {
+    id: "68b8200c465a0b8c791ba76b",
+    title: "Earbuds",
+    image:
+      "https://img.freepik.com/premium-photo/air-buds-bluetooth_761902-2567.jpg?ga=GA1.1.357575914.1756896553&semt=ais_incoming&w=740&q=80",
+    link: "/category/home-appliances?sub=fan?page=1",
+    backgroundColor: "#fefce8",
+  },
+];
+
 export const getSearchCategories = (categories: ApiCategory[]): string[] => {
   const categoryNames = categories.map((cat) => cat.name);
   const subcategoryNames = categories.flatMap((cat) =>

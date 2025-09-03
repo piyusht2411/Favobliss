@@ -12,7 +12,7 @@ interface Props {
   link: string;
   items: any;
   title: string;
-  className?:string;
+  className?: string;
 }
 
 const HomeAppliance = (props: Props) => {
@@ -49,7 +49,7 @@ const HomeAppliance = (props: Props) => {
   return (
     <div>
       <LandingPageSection
-        title={title || "Home Appliances"}
+        title={title}
         items={items}
         viewAllLink={link}
         className={`mx-auto ${className}`}
