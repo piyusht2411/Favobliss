@@ -45,7 +45,7 @@ export const MobileFilters = ({
           <DrawerTitle>Filters</DrawerTitle>
         </DrawerHeader>
         <div className="px-4 max-h-[60vh] overflow-y-auto">
-          <Filter valueKey="sizeId" name="Sizes" data={sizes} />
+          {/* <Filter valueKey="sizeId" name="Sizes" data={sizes} /> */}
           <Filter valueKey="colorId" name="Colors" data={colors} />
           <Filter valueKey="price" name="Price" data={priceRanges} />
           <Filter valueKey="brandId" name="Brands" data={brands} />

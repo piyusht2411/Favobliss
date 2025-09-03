@@ -1,7 +1,7 @@
 "use client";
 
 import qs from "query-string";
-import { Color, PriceRange, Size } from "@/types";
+import { Color, PriceRange, Size, Brand } from "@/types";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -11,7 +11,12 @@ import { useFilter } from "@/hooks/use-filter";
 interface FilterProps {
   valueKey: string;
   name: string;
-  data: (Size | Color | PriceRange)[];
+  data: (
+    | Size
+    | Color
+    | PriceRange
+    | { id: string; name: string; value: string }
+  )[];
 }
 
 export const Filter = ({ valueKey, name, data }: FilterProps) => {
@@ -62,11 +67,15 @@ export const Filter = ({ valueKey, name, data }: FilterProps) => {
             {valueKey === "colorId" && (
               <div
                 className="h-4 w-4 rounded-full"
+                //@ts-ignore
                 style={{ backgroundColor: filter.value }}
               />
             )}
             <Label htmlFor={filter.id} className="text-zinc-600">
-              {valueKey === "sizeId" ? filter.value : filter.name}
+              {valueKey === "sizeId"
+                ? //@ts-ignore
+                  filter.value
+                : filter.name}
             </Label>
           </div>
         ))}

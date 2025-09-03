@@ -168,11 +168,11 @@ const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
   const filteredSizes = sizes.filter((size) => validSizes.includes(size.name));
 
   const priceRange: PriceRange[] = [
-    { id: "0-500", name: "Rs. 0 to Rs. 500", value: "0-500" },
-    { id: "500-1500", name: "Rs. 500 to Rs. 1500", value: "500-1500" },
-    { id: "1500-3000", name: "Rs. 1500 to Rs. 3000", value: "1500-3000" },
-    { id: "3000-5000", name: "Rs. 3000 to Rs. 5000", value: "3000-5000" },
-    { id: "5000", name: "Above Rs. 5000", value: "5000" },
+    { id: "0-5000", name: "Rs. 0 to Rs. 5000", value: "0-5000" },
+    { id: "5000-10000", name: "Rs. 5000 to Rs. 10000", value: "5000-10000" },
+    { id: "10000-30000", name: "Rs. 10000 to Rs. 30000", value: "10000-30000" },
+    { id: "30000-80000", name: "Rs. 30000 to Rs. 80000", value: "30000-80000" },
+    { id: "80000", name: "Above Rs. 80000", value: "80000" },
   ];
 
   const ratingRanges = [
@@ -248,7 +248,7 @@ const CategoryPage = async ({ params, searchParams }: CategoryPageProps) => {
             />
             <div className="hidden lg:block lg:border-r">
               <h3 className="mb-5 text-lg font-bold">Filters</h3>
-              <Filter valueKey="sizeId" name="Sizes" data={filteredSizes} />
+              {/* <Filter valueKey="sizeId" name="Sizes" data={filteredSizes} /> */}
               <Filter valueKey="colorId" name="Colors" data={colors} />
               <Filter valueKey="price" name="Price" data={priceRange} />
               <Filter valueKey="brandId" name="Brands" data={brands} />
