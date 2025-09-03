@@ -88,7 +88,7 @@ const PromotionalBanner = (props: Props) => {
               locationGroups={locationGroups}
               isBannerProduct={true}
               isSpaceTop={false}
-              className="min-w-[260px]"
+              className="md:min-w-[260px]"
             />
           )}
         </div>
