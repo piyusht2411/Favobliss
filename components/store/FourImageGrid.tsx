@@ -43,6 +43,7 @@ const FourImageGrid = () => {
             src={images[0].src || "/placeholder.svg"}
             alt={images[0].alt}
             className="w-full h-full object-cover"
+            loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         </div>
@@ -52,6 +53,7 @@ const FourImageGrid = () => {
               src={images[1].src || "/placeholder.svg"}
               alt={images[1].alt}
               className="w-full h-full object-cover"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
           </div>
@@ -61,6 +63,7 @@ const FourImageGrid = () => {
               src={images[2].src || "/placeholder.svg"}
               alt={images[2].alt}
               className="w-full h-full object-cover"
+              loading="lazy"
             />
           </div>
         </div>
@@ -71,6 +74,7 @@ const FourImageGrid = () => {
             src={images[3].src || "/placeholder.svg"}
             alt={images[3].alt}
             className="w-full h-full object-cover"
+            loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
         </div>
@@ -94,6 +98,7 @@ const FourImageGrid = () => {
               src={image.src || "/placeholder.svg"}
               alt={image.alt}
               className={`w-full h-full object-cover`}
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             {/* <div
@@ -151,6 +156,7 @@ const FourImageGrid = () => {
                 }
                 alt={image.alt}
                 className="w-full h-full object-cotain md:object-cover"
+                loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             </div>
@@ -165,6 +171,7 @@ const FourImageGrid = () => {
             }
             alt={images[3].alt}
             className="w-full h-full object-contain md:object-cover"
+            loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         </div>
