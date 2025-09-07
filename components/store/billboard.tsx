@@ -242,7 +242,7 @@ const HeroSlider: React.FC = () => {
     },
     {
       id: 2,
-      src: "/assets/hero/banner-1.png",
+      src: "/assets/hero/banner-1.webp",
       alt: "Best Television India",
       width: 1000,
       height: 340,
