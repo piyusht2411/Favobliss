@@ -5,7 +5,7 @@ import Link from "next/link";
 export const HotDealBanner = () => {
   return (
     <div className="w-full flex items-center gap-6 md:gap-8 lg:gap-10 overflow-x-scroll scrollbar-hide">
-      <div className="w-[66.67vw] md:w-full aspect-[2/.9] bg-gradient-to-r from-[#C5A090] to-85% to-[#EEE3DF] rounded-lg md:rounded-xl grid grid-cols-5 min-w-fit">
+      <div className="w-[66.67vw] md:w-full aspect-[2/.9] bg-gradient-to-r from-[#C5A090] to-85% to-[#EEE3DF] rounded-lg md:rounded-xl grid grid-cols-5 min-w-fit md:min-w-[unset]">
         <div className="col-span-2 flex items-center">
           <div className="flex flex-col pl-4 sm:pl-12">
             <p className="text-white font-semibold">Hot Deal</p>

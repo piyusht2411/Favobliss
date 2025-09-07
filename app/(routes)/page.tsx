@@ -36,34 +36,56 @@ import BannerImage from "@/components/store/BannerImage";
 export const revalidate = 0;
 
 const LandingPage = async ({ params }: { params: { storeId: string } }) => {
-  const { products } = await getProducts();
-  const { products: homeApplicance } = await getProducts({
-    categoryId: "6843219ac338ba8cc9db1e72",
-  });
-  const brandCategory = await getSubCategories("6843219ac338ba8cc9db1e72");
-  const deals = await getHotDeals({
-    limit: "10",
-    timeFrame: "30 days",
-  });
+  // const { products } = await getProducts();
+  // const { products: homeApplicance } = await getProducts({
+  //   categoryId: "6843219ac338ba8cc9db1e72",
+  // });
+  // const brandCategory = await getSubCategories("6843219ac338ba8cc9db1e72");
+  // const deals = await getHotDeals({
+  //   limit: "10",
+  //   timeFrame: "30 days",
+  // });
 
-  const { products: favoblissChoice } = await getProducts({ isFeatured: true });
-  const categories = await getCategories();
-  const locationGroups = await getLocationGroups(params.storeId);
-  const brands = await getBrands();
-  const { products: brandProducts } = await getProducts({
-    brandId: "687247fbfefe791c5521f384",
-  });
+  // const { products: favoblissChoice } = await getProducts({ isFeatured: true });
+  // const categories = await getCategories();
+  // const locationGroups = await getLocationGroups(params.storeId);
+  // const brands = await getBrands();
+  // const { products: brandProducts } = await getProducts({
+  //   brandId: "687247fbfefe791c5521f384",
+  // });
 
-  const laptops = products.filter((product) => {
+  const [
+    { products: allProducts }, // From getProducts()
+    { products: homeAppliance }, // From getProducts({ categoryId })
+    brandCategory, // getSubCategories
+    deals, // getHotDeals
+    { products: featured }, // getProducts({ isFeatured: true })
+    categories, // getCategories
+    locationGroups, // getLocationGroups
+    brands, // getBrands
+    { products: brandProds }, // getProducts({ brandId })
+  ] = await Promise.all([
+    getProducts(),
+    getProducts({ categoryId: "6843219ac338ba8cc9db1e72" }),
+    getSubCategories("6843219ac338ba8cc9db1e72"),
+    getHotDeals({ limit: "10", timeFrame: "30 days" }),
+    getProducts({ isFeatured: true }),
+    getCategories(),
+    getLocationGroups(params.storeId),
+    getBrands(),
+    getProducts({ brandId: "687247fbfefe791c5521f384" }),
+  ]);
+
+  const laptops = allProducts.filter((product) => {
     const name = product.subCategory?.name?.toLowerCase();
     return name === "laptops" || name === "printers" || name === "desktop pcs";
   });
 
-  const washingMachines = products.filter(
+  const washingMachines = allProducts.filter(
     (product) => product.category?.name?.toLowerCase() === "washing machine"
   );
 
-  const kitchen = products.filter(
+  const kitchen = allProducts.filter(
     (product) => product.category?.name?.toLowerCase() === "kitchen appliances"
   );
 
@@ -77,19 +99,19 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
           <div className="flex flex-col gap-y-4 md:gap-y-12 px-4 sm:px-6 lg:px-8">
             <BannerProductSection
               locationGroups={locationGroups}
-              products={brandProducts}
+              products={brandProds}
               bannerImage="/assets/gaming.jpg"
             />
             <RecentlyViewed locationGroups={locationGroups} />
             <ProductList
               title="Latest Launches"
-              data={products}
+              data={allProducts}
               locationGroups={locationGroups}
               showViewAll={true}
               link="/latest-launches?page=1"
             />
             <PromotionalBanner
-              data={favoblissChoice}
+              data={featured}
               locationGroups={locationGroups}
               categories={brandCategory}
             />
@@ -162,7 +184,7 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
             />
             <ProductList
               title="Favobliss's Choice"
-              data={favoblissChoice || []}
+              data={featured || []}
               locationGroups={locationGroups}
               showViewAll={true}
               link="/favobliss-choice?page=1"
