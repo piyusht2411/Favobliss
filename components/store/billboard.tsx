@@ -238,7 +238,7 @@ const HeroSlider: React.FC = () => {
       alt: "Best Television India",
       width: 1000,
       height: 340,
-      priority: true, // For eager loading on first slide
+      priority: true, 
     },
     {
       id: 2,
@@ -247,20 +247,20 @@ const HeroSlider: React.FC = () => {
       width: 1000,
       height: 340,
     },
-    {
-      id: 3,
-      src: "https://www.favobliss.com/image/cache/catalog/lg%20-washingmachine-1000x340.png",
-      alt: "LG Washing Machine",
-      width: 1000,
-      height: 340,
-    },
-    {
-      id: 4,
-      src: "https://www.favobliss.com/image/cache/catalog/best-telivestion-india-1000x340.png",
-      alt: "Best Television India",
-      width: 1000,
-      height: 340,
-    },
+    // {
+    //   id: 3,
+    //   src: "https://www.favobliss.com/image/cache/catalog/lg%20-washingmachine-1000x340.png",
+    //   alt: "LG Washing Machine",
+    //   width: 1000,
+    //   height: 340,
+    // },
+    // {
+    //   id: 4,
+    //   src: "https://www.favobliss.com/image/cache/catalog/best-telivestion-india-1000x340.png",
+    //   alt: "Best Television India",
+    //   width: 1000,
+    //   height: 340,
+    // },
   ];
 
   return (

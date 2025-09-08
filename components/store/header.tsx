@@ -414,12 +414,13 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
           <div className="flex items-center space-x-4">
             <Link href="/">
               <img
-                src="https://www.favobliss.com/image/cache/catalog/logo/favobliss-full-logo-2503x938.jpg"
+                src="/assets/logo.jpg"
                 width="200"
                 height="60"
                 alt="Favobliss"
                 title="Favobliss"
                 className="max-w-full"
+                loading="lazy"
               />
             </Link>
           </div>

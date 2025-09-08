@@ -2,37 +2,37 @@ import Image from "next/image";
 
 const images = [
   {
-    href: "https://www.favobliss.com/mixer-juicer-grinder",
-    src: "https://www.favobliss.com/image/cache/catalog/carousel/mixer-grinder-juice-300x400.png",
+    href: "/",
+    src: "/assets/gallery/juice-small.jpg",
     srcSet:
-      "https://www.favobliss.com/image/cache/catalog/carousel/mixer-grinder-juice-300x400.png 1x, https://www.favobliss.com/image/cache/catalog/carousel/mixer-grinder-juice-600x800.png 2x",
+      "/assets/gallery/juice-small.jpg 1x, /assets/gallery/juice-mid.jpg 2x",
     alt: "Mixer Grinder",
     width: 300,
     height: 400,
   },
   {
-    href: "https://www.favobliss.com/Speakers",
-    src: "https://www.favobliss.com/image/cache/catalog/boat-spiker-600x600.jpg",
+    href: "/",
+    src: "/assets/gallery/boat-small.jpg",
     srcSet:
-      "https://www.favobliss.com/image/cache/catalog/boat-spiker-600x600.jpg 1x, https://www.favobliss.com/image/cache/catalog/boat-spiker-1200x1200.jpg 2x",
+      "/assets/gallery/boat-small.jpg 1x, /assets/gallery/boat-mid.jpg 2x",
     alt: "BoAt Speaker",
     width: 600,
     height: 600,
   },
   {
-    href: "https://www.favobliss.com/Latest-Trendy-Fashionable-Watches",
-    src: "https://www.favobliss.com/image/cache/catalog/carousel/favobliss-fastival-offer%20(7)-300x400w.jpg",
+    href: "/",
+    src: "/assets/gallery/cattle-small.jpg",
     srcSet:
-      "https://www.favobliss.com/image/cache/catalog/carousel/favobliss-fastival-offer%20(7)-300x400w.jpg 1x, https://www.favobliss.com/image/cache/catalog/carousel/favobliss-fastival-offer%20(7)-600x800w.jpg 2x",
+      "/assets/gallery/cattle-small.jpg 1x, /assets/gallery/cattle-mid.jpg 2x",
     alt: "Fashionable Watches",
     width: 300,
     height: 400,
   },
   {
-    href: "https://www.favobliss.com/mixer-juicer-grinder",
-    src: "https://www.favobliss.com/image/cache/catalog/carousel/mixer-grinder-juice-300x400.png",
+    href: "/",
+    src: "/assets/gallery/juice-small.jpg",
     srcSet:
-      "https://www.favobliss.com/image/cache/catalog/carousel/mixer-grinder-juice-300x400.png 1x, https://www.favobliss.com/image/cache/catalog/carousel/mixer-grinder-juice-600x800.png 2x",
+      "/assets/gallery/juice-small.jpg 1x, /assets/gallery/juice-mid.jpg 2x",
     alt: "Mixer Grinder",
     width: 300,
     height: 400,

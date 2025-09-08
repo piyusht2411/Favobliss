@@ -1,21 +1,13 @@
 import { getHotDeals, getProducts } from "@/actions/get-products";
 import HeroSlider from "@/components/store/billboard";
 import { HotDealBanner } from "@/components/store/hotDealBanner";
-import { LatestLaunches } from "@/components/store/latestLaunches";
 import { ProductList } from "@/components/store/product-list";
 import { Container } from "@/components/ui/container";
 import { CategorySlider } from "@/components/home/category-slider";
-import HotDealSlider from "@/components/store/hotDealSlider";
 import GalleryImage from "@/components/store/GalleryImage";
 import { getBrands } from "@/actions/get-brands";
 import BrandList from "@/components/store/BrandList";
-import BestOfProduct from "@/components/store/BestOfProducts";
-import backtoSchoolImage from "@/public/assets/back-to-school.png";
-import Image from "next/image";
-import OfferImage from "@/components/store/OfferImage";
 import { getCategories } from "@/actions/get-categories";
-import LandingPageSection from "@/components/LandingPageSection";
-import { AnyAaaaRecord } from "node:dns";
 import {
   applianceItems,
   brandItems,
@@ -56,9 +48,9 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
 
   const [
     { products: allProducts }, // From getProducts()
-    { products: homeAppliance }, // From getProducts({ categoryId })
+    // { products: homeAppliance }, // From getProducts({ categoryId })
     brandCategory, // getSubCategories
-    deals, // getHotDeals
+    // deals, // getHotDeals
     { products: featured }, // getProducts({ isFeatured: true })
     categories, // getCategories
     locationGroups, // getLocationGroups
@@ -66,9 +58,9 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
     { products: brandProds }, // getProducts({ brandId })
   ] = await Promise.all([
     getProducts(),
-    getProducts({ categoryId: "6843219ac338ba8cc9db1e72" }),
+    // getProducts({ categoryId: "6843219ac338ba8cc9db1e72" }),
     getSubCategories("6843219ac338ba8cc9db1e72"),
-    getHotDeals({ limit: "10", timeFrame: "30 days" }),
+    // getHotDeals({ limit: "10", timeFrame: "30 days" }),
     getProducts({ isFeatured: true }),
     getCategories(),
     getLocationGroups(params.storeId),
@@ -76,18 +68,18 @@ const LandingPage = async ({ params }: { params: { storeId: string } }) => {
     getProducts({ brandId: "687247fbfefe791c5521f384" }),
   ]);
 
-  const laptops = allProducts.filter((product) => {
-    const name = product.subCategory?.name?.toLowerCase();
-    return name === "laptops" || name === "printers" || name === "desktop pcs";
-  });
+  // const laptops = allProducts.filter((product) => {
+  //   const name = product.subCategory?.name?.toLowerCase();
+  //   return name === "laptops" || name === "printers" || name === "desktop pcs";
+  // });
 
-  const washingMachines = allProducts.filter(
-    (product) => product.category?.name?.toLowerCase() === "washing machine"
-  );
+  // const washingMachines = allProducts.filter(
+  //   (product) => product.category?.name?.toLowerCase() === "washing machine"
+  // );
 
-  const kitchen = allProducts.filter(
-    (product) => product.category?.name?.toLowerCase() === "kitchen appliances"
-  );
+  // const kitchen = allProducts.filter(
+  //   (product) => product.category?.name?.toLowerCase() === "kitchen appliances"
+  // );
 
   return (
     <div className="bg-[#f8f8f8]">
