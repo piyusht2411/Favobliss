@@ -4,15 +4,33 @@ import { useEffect, useState, useRef } from "react";
 import { Product, LocationGroup, ProductApiResponse, Variant } from "@/types";
 import { Gallery } from "@/components/gallery";
 import { ProductDetails } from "@/components/store/product-details";
-import { ProductList } from "@/components/store/product-list";
+import dynamic from "next/dynamic"; // Added for lazy loading
 import { Container } from "@/components/ui/container";
-import { ProductReviews } from "@/components/store/product-reviews";
-// import { ProductTabs } from "@/components/store/product-tabs";
 import Breadcrumb from "./Breadcrumbs";
 import { MobileStickyActionBar } from "./MobileStickyBar";
 import { addToRecentlyViewed } from "@/lib/utils";
 import { getLocationGroupById } from "@/actions/get-location-group";
 import { ProductTabs } from "./prodcutTabs";
+
+const ProductList = dynamic(
+  () =>
+    import("@/components/store/product-list").then((mod) => mod.ProductList),
+  {
+    loading: () => <div>Loading similar products...</div>,
+    ssr: false,
+  }
+);
+
+const ProductReviews = dynamic(
+  () =>
+    import("@/components/store/product-reviews").then(
+      (mod) => mod.ProductReviews
+    ),
+  {
+    loading: () => <div>Loading reviews...</div>,
+    ssr: false,
+  }
+);
 
 interface ProductPageContentProps {
   productData: ProductApiResponse;

@@ -382,6 +382,8 @@ export const Gallery = ({
                       className="object-contain"
                       onLoad={() => handleMediaLoad(media.id)}
                       onError={() => handleMediaError(media.id)}
+                      priority={index === 0}
+                      loading={index > 0 ? "lazy" : "eager"}
                     />
                   ) : (
                     <div
@@ -460,6 +462,8 @@ export const Gallery = ({
                     className="w-full h-auto object-contain object-top max-h-full"
                     onLoad={() => handleMediaLoad(media.id)}
                     onError={() => handleMediaError(media.id)}
+                    priority={index === 0}
+                    loading={index > 0 ? "lazy" : "eager"}
                   />
                   <div
                     className="absolute h-10 w-10 top-4 right-4 bg-white rounded-full flex items-center justify-center md:cursor-pointer"
