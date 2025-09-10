@@ -553,7 +553,7 @@ export default function DynamicHeader({ categories }: DynamicHeaderProps) {
                               )}
 
                               {/* Show more button if there are more than 8 subcategories */}
-                              {category.subCategories.length > 8 && (
+                              {category.subCategories.length > 0 && (
                                 <button
                                   onClick={() => {
                                     setSelectedCategory(category.name);

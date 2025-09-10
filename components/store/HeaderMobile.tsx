@@ -388,7 +388,7 @@ export default function HeaderMobile({ categories }: HeaderMobileProps) {
                             </button>
                           ))}
 
-                          {category.subCategories.length > 8 && (
+                          {category.subCategories.length > 0 && (
                             <button
                               onClick={() => {
                                 setSelectedCategory(category.name);
