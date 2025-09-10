@@ -1,57 +1,65 @@
+"use client";
+
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export const HotDealBanner = () => {
+  const route = useRouter();
+
+  const handleNavigation = (link: string) => {
+    route.push(`/${link}`);
+  };
+
   return (
-    <div className="w-full flex items-center gap-6 md:gap-8 lg:gap-10 overflow-x-scroll scrollbar-hide">
-      <div className="w-[66.67vw] md:w-full aspect-[2/.9] bg-gradient-to-r from-[#C5A090] to-85% to-[#EEE3DF] rounded-lg md:rounded-xl grid grid-cols-5 min-w-fit md:min-w-[unset]">
-        <div className="col-span-2 flex items-center">
-          <div className="flex flex-col pl-4 sm:pl-12">
-            <p className="text-white font-semibold">Hot Deal</p>
-            <p className="font-bold text-xl sm:text-3xl md:text-4xl text-white">
-              Air Conditioners
-            </p>
-            <Button
-              className="bg-white mt-4 text-zinc-800 font-semibold sm:text-base hover:bg-zinc-50 transition"
-              size="lg"
-              asChild
-            >
-              <Link href="/category/air-conditioners?page=1">View Offers</Link>
-            </Button>
-          </div>
-        </div>
-        <div className="p-4 relative col-span-3">
+    <div className="w-full">
+      <div className="hidden lg:flex items-center gap-6 max-w-full mx-auto">
+        <div
+          className="flex-1 aspect-[2/0.9] bg-gradient-to-r from-[#C5A090] to-85% to-[#EEE3DF] rounded-xl overflow-hidden relative cursor-pointer"
+          onClick={() => handleNavigation("category/air-conditioners?page=1")}
+        >
           <Image
-            src="/assets/ac.png"
-            alt="Image"
+            src="/assets/banner-ac.png"
+            alt="Air Conditioner Banner"
             fill
-            className="object-contain bg-blend-color-burn"
+            className="object-contain"
+            loading="lazy"
+          />
+        </div>
+        <div className="flex-1 aspect-[2/0.9] bg-gradient-to-r from-blue-400 to-85% to-sky-600 rounded-xl overflow-hidden relative cursor-pointer"
+         onClick={() => handleNavigation("category/mobile?page=1")}>
+          <Image
+            src="/assets/banner-mobile.png"
+            alt="iPhone Banner"
+            fill
+            className="object-contain"
+            loading="lazy"
           />
         </div>
       </div>
-      <div className="w-[66.67vw] md:w-full aspect-[2/.9] bg-gradient-to-r from-blue-400 to-85% to-sky-600 rounded-lg md:rounded-xl grid grid-cols-5 min-w-fit">
-        <div className="col-span-2 flex items-center">
-          <div className="flex flex-col pl-4 sm:pl-12">
-            <p className="text-white font-semibold">Hot Deal</p>
-            <p className="font-bold text-xl sm:text-3xl md:text-4xl text-white">
-              Apple Iphone
-            </p>
-            <Button
-              className="bg-white mt-4 text-rose-400 font-semibold sm:text-base hover:bg-zinc-50 transition"
-              size="lg"
-              asChild
-            >
-              <Link href="/brand/apple?page=1">Shop Now</Link>
-            </Button>
-          </div>
-        </div>
-        <div className="p-4 relative col-span-3">
+
+      <div
+        className="lg:hidden flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4"
+        role="region"
+        aria-label="Hot deal banners carousel"
+      >
+        <div className="w-[80vw] aspect-[2/0.9] bg-gradient-to-r from-[#C5A090] to-85% to-[#EEE3DF] rounded-lg overflow-hidden flex-shrink-0 snap-start relative cursor-pointer"
+        onClick={() => handleNavigation("category/air-conditioners?page=1")}>
           <Image
-            src="/assets/iphone.png"
-            alt="Image"
+            src="/assets/banner-ac.png"
+            alt="Air Conditioner Banner"
             fill
-            className="object-contain bg-blend-color-burn"
+            className="object-contain"
+            loading="lazy"
+          />
+        </div>
+        <div className="w-[80vw] aspect-[2/0.9] bg-gradient-to-r from-blue-400 to-85% to-sky-600 rounded-lg overflow-hidden flex-shrink-0 snap-start relative cursor-pointer"
+        onClick={() => handleNavigation("category/mobile?page=1")}>
+          <Image
+            src="/assets/banner-mobile.png"
+            alt="iPhone Banner"
+            fill
+            className="object-contain"
+            loading="lazy"
           />
         </div>
       </div>

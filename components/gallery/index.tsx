@@ -375,16 +375,24 @@ export const Gallery = ({
                   style={{ height: "400px", maxHeight: "500px" }}
                 >
                   {media.mediaType === "IMAGE" ? (
-                    <Image
-                      src={media.url}
-                      alt="Variant Image"
-                      fill
-                      className="object-contain"
-                      onLoad={() => handleMediaLoad(media.id)}
-                      onError={() => handleMediaError(media.id)}
-                      priority={index === 0}
-                      loading={index > 0 ? "lazy" : "eager"}
-                    />
+                    <>
+                      <Image
+                        src={media.url}
+                        alt="Variant Image"
+                        fill
+                        className="object-contain"
+                        onLoad={() => handleMediaLoad(media.id)}
+                        onError={() => handleMediaError(media.id)}
+                        priority={index === 0}
+                        loading={index > 0 ? "lazy" : "eager"}
+                      />
+                      <div
+                        className="absolute h-10 w-10 top-4 right-4 bg-white rounded-full flex items-center justify-center cursor-pointer"
+                        onClick={onOpen}
+                      >
+                        <PiShareFatFill className="text-zinc-700 h-6 w-6" />
+                      </div>
+                    </>
                   ) : (
                     <div
                       className="relative w-full h-full flex items-center justify-center bg-black"
@@ -421,6 +429,12 @@ export const Gallery = ({
                         index={index}
                         isMobile={true}
                       />
+                      <div
+                        className="absolute h-10 w-10 top-4 right-4 bg-white rounded-full flex items-center justify-center cursor-pointer"
+                        onClick={onOpen}
+                      >
+                        <PiShareFatFill className="text-zinc-700 h-6 w-6" />
+                      </div>
                     </div>
                   )}
                 </div>
